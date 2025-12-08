@@ -12,7 +12,7 @@ repository_schemas:
     module:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -22,7 +22,7 @@ repository_schemas:
     app:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
         - platform.yaml
       optional_schemas:
         - workspace.yaml
@@ -32,7 +32,7 @@ repository_schemas:
     lib:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -42,7 +42,7 @@ repository_schemas:
     infra:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
         - platform.yaml
       optional_schemas:
         - workspace.yaml
@@ -52,7 +52,7 @@ repository_schemas:
     site:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -62,7 +62,7 @@ repository_schemas:
     template:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -72,7 +72,7 @@ repository_schemas:
     tool:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -109,7 +109,7 @@ repository_schemas:
     monorepo:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
         - workspace.yaml
       optional_schemas:
         - platform.yaml
@@ -119,7 +119,7 @@ repository_schemas:
     example:
       required_schemas:
         - repository.yaml
-        - language.yaml
+        - languages.yaml
       optional_schemas:
         - workspace.yaml
         - platform.yaml
@@ -130,7 +130,7 @@ repository_schemas:
       required_schemas:
         - repository.yaml
       optional_schemas:
-        - language.yaml
+        - languages.yaml
         - workspace.yaml
         - platform.yaml
       description: "Experimental or proof-of-concept code"
@@ -145,7 +145,7 @@ validation:
     - "Platform-specific settings only apply if platform is declared in repository.yaml"
     
   schema_dependencies:
-    language.yaml: 
+    languages.yaml: 
       requires: ["languages field in repository.yaml"]
     platform.yaml:
       requires: ["platform field in repository.yaml"]
@@ -156,12 +156,12 @@ validation:
 examples:
   terraform_module:
     repository_type: "module"
-    schemas_used: ["repository.yaml", "language.yaml"]
+    schemas_used: ["repository.yaml", "languages.yaml"]
     description: "A Terraform module for AWS resources"
     
   python_web_app:
     repository_type: "app"
-    schemas_used: ["repository.yaml", "language.yaml", "platform.yaml", "workspace.yaml"]
+    schemas_used: ["repository.yaml", "languages.yaml", "platform.yaml", "workspace.yaml"]
     description: "A Python web application with GitHub Actions"
     
   documentation_site:

@@ -131,6 +131,7 @@ class WorkspaceGenerator:
             
             self._create_workspace_file(config)
             self._create_vscode_config(config)
+            self._create_omd_config(config)
             self._update_gitignore(config)
             self.generate_copilot_instructions(config)
             
@@ -171,6 +172,7 @@ class WorkspaceGenerator:
         # Generate workspace files
         self._create_workspace_file(config)
         self._create_vscode_config(config)
+        self._create_omd_config(config)
         self._update_gitignore(config)
         
         print(f"✅ Auto-setup completed for {config.repo_name}")
@@ -470,6 +472,24 @@ class WorkspaceGenerator:
                 print(f"  ✓ Generated .vscode/tasks.json (enhanced: {sources_str})")
             else:
                 print("  ✓ Generated .vscode/tasks.json (enhanced templates)")
+    
+    def _create_omd_config(self, config: RepositoryConfig) -> None:
+        """Create .omd configuration files using templates"""
+        omd_dir = config.repo_path / '.omd'
+        omd_dir.mkdir(exist_ok=True)
+        
+        # Generate languages.yaml from template for validation compatibility
+        try:
+            template = self.jinja_env.get_template('.omd/languages.yaml.j2')
+            content = template.render(metadata=config.metadata)
+            languages_file = omd_dir / 'languages.yaml'
+            with open(languages_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print("  ✓ Generated .omd/languages.yaml (validation compatibility)")
+        except TemplateNotFound:
+            print("  ⚠️  Template .omd/languages.yaml.j2 not found")
+        except Exception as e:
+            print(f"  ⚠️  Error generating languages.yaml: {e}")
     
     def _update_gitignore(self, config: RepositoryConfig) -> None:
         """Update .gitignore file"""

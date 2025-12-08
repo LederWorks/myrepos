@@ -1,0 +1,32 @@
+# Languages configuration for myrepos
+#
+# This file provides validation compatibility with the schema system.
+# Actual language configurations are applied from enhanced templates:
+# - markdown: templates/languages/markdown.yaml.j2
+# - python: templates/languages/python.yaml.j2
+# - yaml: templates/languages/yaml.yaml.j2
+#
+# Enhanced templates automatically configure:
+# • VS Code settings (.vscode/settings.json) - formatting, linting, editor behavior
+# • Extensions (.vscode/extensions.json) - required and recommended extensions  
+# • Tasks (.vscode/tasks.json) - build, test, format, lint commands
+# • Launch configs (.vscode/launch.json) - debugging configurations
+#
+# To customize language settings: edit the templates and re-run setup-repository.py
+
+languages:
+  markdown:
+    settings: {}
+    required_extensions: []
+    recommended_extensions: []
+    tasks: []
+  python:
+    settings: {}
+    required_extensions: []
+    recommended_extensions: []
+    tasks: []
+  yaml:
+    settings: {}
+    required_extensions: []
+    recommended_extensions: []
+    tasks: []

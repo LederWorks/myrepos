@@ -1,0 +1,24 @@
+# Languages configuration for {{ metadata.repo_name }}
+#
+# This file provides validation compatibility with the schema system.
+# Actual language configurations are applied from enhanced templates:
+{% for language in metadata.languages -%}
+# - {{ language }}: templates/languages/{{ language }}.yaml.j2
+{% endfor %}
+#
+# Enhanced templates automatically configure:
+# • VS Code settings (.vscode/settings.json) - formatting, linting, editor behavior
+# • Extensions (.vscode/extensions.json) - required and recommended extensions  
+# • Tasks (.vscode/tasks.json) - build, test, format, lint commands
+# • Launch configs (.vscode/launch.json) - debugging configurations
+#
+# To customize language settings: edit the templates and re-run setup-repository.py
+
+languages:
+{% for language in metadata.languages %}
+  {{ language }}:
+    settings: {}
+    required_extensions: []
+    recommended_extensions: []
+    tasks: []
+{% endfor %}
