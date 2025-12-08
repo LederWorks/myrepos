@@ -65,18 +65,13 @@ languages:
         group: "build"
     
     launch_configurations:
-      - name: "Shell: Execute Current File"
-        type: "node-terminal"
+      - name: "Shell: Launch Current File"
+        type: "node"
         request: "launch"
-        command: "bash ${file}"
-        cwd: "${workspaceFolder}"
-      
-      - name: "Shell: Execute with Bash"
-        type: "node-terminal"
-        request: "launch"
-        command: "bash"
+        program: "/bin/bash"
         args: ["${file}"]
         cwd: "${workspaceFolder}"
+        console: "integratedTerminal"
     
     linting:
       enabled: true

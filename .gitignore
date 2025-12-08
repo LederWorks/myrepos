@@ -1,3 +1,18 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
 # Python
 __pycache__/
 *.py[cod]
@@ -16,10 +31,11 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
+PIPFILE.lock
 
 # Virtual environments
 .env
@@ -30,33 +46,31 @@ ENV/
 env.bak/
 venv.bak/
 
-# IDE
-# .vscode/
+# PyCharm
 .idea/
-*.swp
-*.swo
-*~
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Logs
-*.log
-
-# Testing
+# pytest
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Temporary files
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+# Logs and temporary files
+*.log
 *.tmp
 *.temp
-.cache/
 
-*.code-workspace
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# System files
+.directory
+.fuse_hidden*

@@ -6,7 +6,6 @@
 			"type": "PowerShell",
 			"request": "launch",
 			"script": "${file}",
-			"console": "integratedTerminal",
 		},
 		{
 			"name": "PowerShell: Launch with Arguments",
@@ -14,10 +13,9 @@
 			"request": "launch",
 			"script": "${file}",
 			"args": [],
-			"console": "integratedTerminal",
 		},
 		{
-			"name": "Python: Current File",
+			"name": "Python: Launch Current File",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${file}",
@@ -25,19 +23,13 @@
 			"python": "./venv/bin/python",
 		},
 		{
-			"name": "Shell: Execute Current File",
-			"type": "node-terminal",
+			"name": "Shell: Launch Current File",
+			"type": "node",
 			"request": "launch",
-			"command": "bash ${file}",
-			"cwd": "${workspaceFolder}",
-		},
-		{
-			"name": "Shell: Execute with Bash",
-			"type": "node-terminal",
-			"request": "launch",
-			"command": "bash",
+			"program": "/bin/bash",
 			"args": ["${file}"],
 			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
 		},
 	]
 }

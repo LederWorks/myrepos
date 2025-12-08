@@ -559,22 +559,43 @@ class WorkspaceGenerator:
         """Update .gitignore file"""
         gitignore_file = config.repo_path / '.gitignore'
         
-        # Read existing .gitignore
-        if gitignore_file.exists():
-            with open(gitignore_file, 'r', encoding='utf-8') as f:
-                lines = f.read().splitlines()
+        if not gitignore_file.exists():
+            # Generate comprehensive .gitignore from template
+            try:
+                template = self.jinja_env.get_template('.gitignore.j2')
+                content = template.render(
+                    languages=config.metadata.get('languages', []),
+                    platform=config.metadata.get('platform', 'github'),
+                    types=config.metadata.get('types', []),
+                    metadata=config.metadata
+                )
+                
+                with open(gitignore_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                
+                print("  ✓ Generated .gitignore")
+            except Exception as e:
+                print(f"  ⚠ Failed to generate .gitignore from template: {e}")
+                # Fallback to simple version
+                with open(gitignore_file, 'w', encoding='utf-8') as f:
+                    f.write('*.code-workspace\n')
+                print("  ✓ Created simple .gitignore")
         else:
-            lines = []
-        
-        # Add workspace files to gitignore if not present
-        workspace_pattern = '*.code-workspace'
-        if workspace_pattern not in lines:
-            lines.append(workspace_pattern)
+            # Read existing .gitignore and add workspace pattern if missing
+            with open(gitignore_file, 'r', encoding='utf-8') as f:
+                content = f.read()
             
-            with open(gitignore_file, 'w', encoding='utf-8') as f:
-                f.write('\n'.join(lines) + '\n')
-            
-            print("  ✓ Updated .gitignore")
+            workspace_pattern = '*.code-workspace'
+            if workspace_pattern not in content:
+                # Add workspace pattern at the end
+                if not content.endswith('\n'):
+                    content += '\n'
+                content += workspace_pattern + '\n'
+                
+                with open(gitignore_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                
+                print("  ✓ Updated .gitignore")
     
     def generate_copilot_instructions(self, config: RepositoryConfig) -> None:
         """Generate GitHub Copilot instruction files if enabled"""
