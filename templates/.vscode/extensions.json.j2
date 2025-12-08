@@ -1,36 +1,45 @@
-{%- set languages = load_yaml('config/languages.yaml') -%}
-{%- set platforms = load_yaml('config/platforms.yaml') -%}
-{%- set clients = load_yaml('config/clients.yaml') -%}
 {%- set all_extensions = [] -%}
 
-{# Language extensions #}
+{# Language extensions from enhanced templates #}
 {%- for language in metadata.languages -%}
-  {%- if language in languages -%}
-    {%- for ext in languages[language].extensions -%}
-      {%- if ext not in all_extensions -%}
-        {%- set _ = all_extensions.append(ext) -%}
-      {%- endif -%}
-    {%- endfor -%}
+  {%- set enhanced_config = load_enhanced_language_config(language) -%}
+  {%- if enhanced_config and enhanced_config.languages and enhanced_config.languages[language] -%}
+    {%- set lang_config = enhanced_config.languages[language] -%}
+    {# Add required extensions #}
+    {%- if lang_config.required_extensions -%}
+      {%- for ext in lang_config.required_extensions -%}
+        {%- if ext not in all_extensions -%}
+          {%- set _ = all_extensions.append(ext) -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {# Add recommended extensions #}
+    {%- if lang_config.recommended_extensions -%}
+      {%- for ext in lang_config.recommended_extensions -%}
+        {%- if ext not in all_extensions -%}
+          {%- set _ = all_extensions.append(ext) -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
 
-{# Platform extensions #}
-{%- if metadata.platform in platforms -%}
-  {%- for ext in platforms[metadata.platform].extensions -%}
-    {%- if ext not in all_extensions -%}
-      {%- set _ = all_extensions.append(ext) -%}
-    {%- endif -%}
-  {%- endfor -%}
+{# Platform extensions (inline definitions) #}
+{%- if metadata.platform == 'github' -%}
+  {%- set platform_extensions = ['github.vscode-pull-request-github', 'github.copilot', 'github.copilot-chat'] -%}
+{%- elif metadata.platform == 'azuredevops' -%}
+  {%- set platform_extensions = ['ms-vsts.team'] -%}
+{%- else -%}
+  {%- set platform_extensions = [] -%}
 {%- endif -%}
 
-{# Client extensions #}
-{%- if metadata.client in clients -%}
-  {%- for ext in clients[metadata.client].extensions -%}
-    {%- if ext not in all_extensions -%}
-      {%- set _ = all_extensions.append(ext) -%}
-    {%- endif -%}
-  {%- endfor -%}
-{%- endif -%}
+{%- for ext in platform_extensions -%}
+  {%- if ext not in all_extensions -%}
+    {%- set _ = all_extensions.append(ext) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+
 
 {
 	"recommendations": [

@@ -37,6 +37,14 @@ fi
 echo "🔄 Activating virtual environment..."
 source venv/bin/activate
 
+# Check if activation was successful
+if [[ "$VIRTUAL_ENV" != "" ]]; then
+    echo "✅ Virtual environment activated: $(basename "$VIRTUAL_ENV")"
+else
+    echo "❌ Failed to activate virtual environment"
+    exit 1
+fi
+
 # Upgrade pip
 echo "⬆️  Upgrading pip..."
 python3 -m pip install --upgrade pip
@@ -46,11 +54,16 @@ echo "📥 Installing dependencies..."
 pip install PyYAML jsonschema jinja2
 
 echo ""
-echo "✅ Setup complete!"
+echo "✅ Setup complete! Virtual environment is active."
 echo ""
-echo "🚀 To use the tools:"
-echo "   source venv/bin/activate"
-echo "   python scripts/workspace/generator.py /path/to/your/repo"
+echo "🚀 You can now use the tools directly:"
+echo "   python scripts/setup-repository.py /path/to/your/repo          # Setup + validation (default)"
+echo "   python scripts/setup-repository.py --validate /path/to/your/repo       # Validation only"
+echo "   python scripts/setup-repository.py --quiet /path/to/your/repo         # Quiet mode"
 echo ""
-echo "💡 Remember to activate the virtual environment before using the tools:"
-echo "   source venv/bin/activate"
+echo "🔄 Virtual environment management:"
+echo "   • Currently active: $(basename "$VIRTUAL_ENV")"
+echo "   • To deactivate when done: deactivate"
+echo "   • To reactivate later: source venv/bin/activate"
+echo ""
+echo "💡 The virtual environment will remain active in this terminal session."

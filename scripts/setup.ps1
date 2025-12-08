@@ -51,9 +51,20 @@ if (-not (Test-Path "venv")) {
 Write-Host "🔄 Activating virtual environment..." -ForegroundColor Yellow
 if ($IsWindows -or $env:OS -eq "Windows_NT") {
     & "venv\Scripts\Activate.ps1"
+    $ActivateScript = "venv\Scripts\Activate.ps1"
 } else {
     # For PowerShell Core on Linux/macOS
     & "venv/bin/Activate.ps1"
+    $ActivateScript = "source venv/bin/activate"
+}
+
+# Check if activation was successful
+if ($env:VIRTUAL_ENV) {
+    $VenvName = Split-Path -Leaf $env:VIRTUAL_ENV
+    Write-Host "✅ Virtual environment activated: $VenvName" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to activate virtual environment" -ForegroundColor Red
+    exit 1
 }
 
 # Upgrade pip
@@ -65,20 +76,28 @@ Write-Host "📥 Installing dependencies..." -ForegroundColor Yellow
 pip install PyYAML jsonschema jinja2
 
 Write-Host ""
-Write-Host "✅ Setup complete!" -ForegroundColor Green
+Write-Host "✅ Setup complete! Virtual environment is active." -ForegroundColor Green
 Write-Host ""
-Write-Host "🚀 To use the tools:" -ForegroundColor Cyan
+Write-Host "🚀 You can now use the tools directly:" -ForegroundColor Cyan
 
 if ($IsWindows -or $env:OS -eq "Windows_NT") {
-    Write-Host "   venv\Scripts\Activate.ps1" -ForegroundColor White
-    Write-Host "   python scripts\workspace\generator.py C:\path\to\your\repo" -ForegroundColor White
-    Write-Host ""
-    Write-Host "💡 Remember to activate the virtual environment before using the tools:" -ForegroundColor Yellow
-    Write-Host "   venv\Scripts\Activate.ps1" -ForegroundColor White
+    Write-Host "   python scripts\setup-repository.py C:\path\to\your\repo          # Setup + validation (default)" -ForegroundColor White
+    Write-Host "   python scripts\setup-repository.py --validate C:\path\to\your\repo       # Validation only" -ForegroundColor White
+    Write-Host "   python scripts\setup-repository.py --quiet C:\path\to\your\repo         # Quiet mode" -ForegroundColor White
 } else {
-    Write-Host "   source venv/bin/activate" -ForegroundColor White  
-    Write-Host "   python scripts/workspace/generator.py /path/to/your/repo" -ForegroundColor White
-    Write-Host ""
-    Write-Host "💡 Remember to activate the virtual environment before using the tools:" -ForegroundColor Yellow
-    Write-Host "   source venv/bin/activate" -ForegroundColor White
+    Write-Host "   python scripts/setup-repository.py /path/to/your/repo          # Setup + validation (default)" -ForegroundColor White
+    Write-Host "   python scripts/setup-repository.py --validate /path/to/your/repo       # Validation only" -ForegroundColor White
+    Write-Host "   python scripts/setup-repository.py --quiet /path/to/your/repo         # Quiet mode" -ForegroundColor White
 }
+
+Write-Host ""
+Write-Host "🔄 Virtual environment management:" -ForegroundColor Cyan
+Write-Host "   • Currently active: $VenvName" -ForegroundColor White
+Write-Host "   • To deactivate when done: deactivate" -ForegroundColor White
+if ($IsWindows -or $env:OS -eq "Windows_NT") {
+    Write-Host "   • To reactivate later: venv\Scripts\Activate.ps1" -ForegroundColor White
+} else {
+    Write-Host "   • To reactivate later: source venv/bin/activate" -ForegroundColor White
+}
+Write-Host ""
+Write-Host "💡 The virtual environment will remain active in this terminal session." -ForegroundColor Yellow

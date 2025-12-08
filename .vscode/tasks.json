@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Markdown: Lint All Files",
+      "type": "shell",
+      "command": "markdownlint",
+      "args": [
+        "**/*.md",
+        "--fix"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Markdown: Generate Table of Contents",
+      "type": "shell",
+      "command": "markdown-toc",
+      "args": [
+        "-i",
+        "README.md"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Python: Run Tests",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "pytest"
+      ],
+      "group": "test"
+    },
+    {
+      "label": "Python: Format Code",
+      "type": "shell",
+      "command": "black",
+      "args": [
+        "."
+      ],
+      "group": "build"
+    }
+  ]
+}

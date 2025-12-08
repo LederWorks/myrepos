@@ -57,36 +57,10 @@ class RepositoryConfig:
         metadata['repo_name'] = self.repo_name
         metadata['repo_path'] = str(self.repo_path)
         
-        # Infer client from path: /Data/GIT/{CLIENT}/...
-        metadata['client'] = self._infer_client_from_path()
         
         return metadata
     
-    def _infer_client_from_path(self) -> str:
-        """Infer client from repository path"""
-        path_parts = self.repo_path.parts
-        try:
-            git_index = path_parts.index('GIT')
-            if git_index + 1 < len(path_parts):
-                return path_parts[git_index + 1]
-        except ValueError:
-            pass
-        return 'unknown'
-    
-    def get_extensions(self) -> List[str]:
-        """Get VS Code extensions for this repository (MINIMAL FALLBACK ONLY)"""
-        # Minimal fallback - templates should be used instead
-        return ['ms-vscode.vscode-json']
-    
-    def get_settings(self) -> Dict[str, Any]:
-        """Get VS Code settings for this repository (MINIMAL FALLBACK ONLY)"""
-        # Minimal fallback - templates should be used instead
-        return {
-            "files.exclude": {
-                "**/.git": True,
-                "**/.DS_Store": True
-            }
-        }
+
 
 
 class WorkspaceGenerator:
@@ -117,11 +91,38 @@ class WorkspaceGenerator:
                 return {}
         
         self.jinja_env.globals['load_yaml'] = load_yaml_func
+        
+        # Add enhanced language config function
+        def load_enhanced_language_config(language):
+            """Load detailed language configuration from languages/ templates"""
+            template_path = f'languages/{language}.yaml.j2'
+            try:
+                template = self.jinja_env.get_template(template_path)
+                # Render with current metadata context
+                rendered_content = template.render(
+                    language=language,
+                    languages=[language],  # For template compatibility
+                    platform=getattr(self, '_current_platform', 'github'),
+                    types=getattr(self, '_current_types', ['lib'])
+                )
+                return yaml.safe_load(rendered_content)
+            except TemplateNotFound:
+                return None
+            except Exception as e:
+                print(f"  ⚠️  Error loading enhanced config for {language}: {e}")
+                return None
+        
+        self.jinja_env.globals['load_enhanced_language_config'] = load_enhanced_language_config
     
     def setup_repository(self, repo_path: Path) -> None:
         """Setup VS Code workspace and configuration for a repository"""
         try:
             config = RepositoryConfig(repo_path)
+            
+            # Store current metadata for enhanced templates
+            self._current_platform = config.metadata.get('platform', 'github')
+            self._current_types = config.metadata.get('types', ['lib'])
+            
             print(f"🔍 Processing repository: {config.repo_name}")
             print("📊 Detected content:")
             print(f"        platform: {config.metadata['platform']}")
@@ -153,8 +154,7 @@ class WorkspaceGenerator:
             'languages': self._detect_languages(repo_path),
             'platform': self._detect_platform(repo_path),
             'types': self._detect_repository_types(repo_path),
-            'copilot_instructions': False,  # Default to disabled for auto-detected repos
-            'client': self._infer_client_from_path(repo_path)
+            'copilot_instructions': False  # Default to disabled for auto-detected repos
         }
         
         print("📊 Auto-detected content:")
@@ -295,17 +295,6 @@ class WorkspaceGenerator:
             # Path is not relative to repo_root
             return True
     
-    def _infer_client_from_path(self, repo_path: Path) -> str:
-        """Infer client from repository path"""
-        path_parts = repo_path.parts
-        try:
-            git_index = path_parts.index('GIT')
-            if git_index + 1 < len(path_parts):
-                return path_parts[git_index + 1]
-        except ValueError:
-            pass
-        return 'unknown'
-    
     def _save_detected_metadata(self, repo_path: Path, metadata: Dict[str, Any]) -> None:
         """Save auto-detected metadata to .omd/repository.yaml"""
         omd_dir = repo_path / '.omd'
@@ -315,7 +304,7 @@ class WorkspaceGenerator:
         
         # Remove computed fields before saving
         clean_metadata = {k: v for k, v in metadata.items() 
-                         if k not in ['repo_name', 'repo_path', 'client']}
+                         if k not in ['repo_name', 'repo_path']}
         
         with open(metadata_file, 'w', encoding='utf-8') as f:
             f.write("# Auto-detected repository configuration\n")
@@ -346,7 +335,11 @@ class WorkspaceGenerator:
             settings_content = template.render(metadata=config.metadata)
             with open(settings_file, 'w', encoding='utf-8') as f:
                 f.write(settings_content)
-            print("  ✓ Generated .vscode/settings.json (from template)")
+            
+            # Check which enhanced templates were used
+            enhanced_langs = self._analyze_enhanced_template_usage(config.metadata.get('languages', []))
+            usage_info = self._format_enhanced_template_usage(enhanced_langs)
+            print(f"  ✓ Generated .vscode/settings.json ({usage_info})")
         except TemplateNotFound:
             print("  ⚠️  Template .vscode/settings.json.j2 not found, using fallback")
             with open(settings_file, 'w', encoding='utf-8') as f:
@@ -365,7 +358,11 @@ class WorkspaceGenerator:
             extensions_content = template.render(metadata=config.metadata)
             with open(extensions_file, 'w', encoding='utf-8') as f:
                 f.write(extensions_content)
-            print("  ✓ Generated .vscode/extensions.json (from template)")
+            
+            # Check which enhanced templates were used
+            enhanced_langs = self._analyze_enhanced_template_usage(config.metadata.get('languages', []))
+            usage_info = self._format_enhanced_template_usage(enhanced_langs)
+            print(f"  ✓ Generated .vscode/extensions.json ({usage_info})")
         except TemplateNotFound:
             print("  ⚠️  Template .vscode/extensions.json.j2 not found, using fallback")
             extensions_data = {"recommendations": config.get_extensions()}
@@ -378,6 +375,101 @@ class WorkspaceGenerator:
             with open(extensions_file, 'w', encoding='utf-8') as f:
                 json.dump(extensions_data, f, indent=2)
             print("  ✓ Generated .vscode/extensions.json (fallback)")
+        
+        # Launch configuration using template (optional)
+        launch_file = vscode_dir / 'launch.json'
+        try:
+            template = self.jinja_env.get_template('.vscode/launch.json.j2')
+            launch_content = template.render(metadata=config.metadata)
+            with open(launch_file, 'w', encoding='utf-8') as f:
+                f.write(launch_content)
+            
+            # Check which languages have launch configurations
+            launch_langs = self._analyze_launch_language_usage(config.metadata.get('languages', []))
+            usage_info = self._format_enhanced_template_usage(launch_langs)
+            print(f"  ✓ Generated .vscode/launch.json ({usage_info})")
+        except TemplateNotFound:
+            # launch.json is optional, so we don't create a fallback
+            pass
+        except Exception as e:
+            print(f"  ⚠️  Error generating launch.json from template: {e}")
+        
+        # Tasks configuration using enhanced language templates
+        self._create_tasks_config(config, vscode_dir)
+    
+    def _analyze_enhanced_template_usage(self, languages: List[str]) -> List[str]:
+        """Get list of languages with enhanced templates"""
+        enhanced_langs = []
+        
+        for language in languages:
+            enhanced_config = self.jinja_env.globals['load_enhanced_language_config'](language)
+            if enhanced_config and 'languages' in enhanced_config:
+                enhanced_langs.append(language)
+        
+        return enhanced_langs
+    
+    def _analyze_launch_language_usage(self, languages: List[str]) -> List[str]:
+        """Get list of languages with launch configurations in enhanced templates"""
+        launch_langs = []
+        
+        for language in languages:
+            enhanced_config = self.jinja_env.globals['load_enhanced_language_config'](language)
+            has_launch_config = (enhanced_config and 'languages' in enhanced_config and 
+                               enhanced_config['languages'].get(language, {}).get('launch_configurations'))
+            
+            if has_launch_config:
+                launch_langs.append(language)
+        
+        return launch_langs
+    
+    def _get_task_contributing_languages(self, languages: List[str]) -> List[str]:
+        """Get list of languages that contribute tasks"""
+        task_sources = []
+        for language in languages:
+            enhanced_config = self.jinja_env.globals['load_enhanced_language_config'](language)
+            if enhanced_config and 'languages' in enhanced_config:
+                lang_config = enhanced_config['languages'].get(language, {})
+                if lang_config.get('tasks'):
+                    task_sources.append(language)
+        return task_sources
+    
+    def _format_enhanced_template_usage(self, enhanced_langs: List[str]) -> str:
+        """Format enhanced template usage information for logging"""
+        if enhanced_langs:
+            enhanced_str = ", ".join(enhanced_langs)
+            return f"enhanced: {enhanced_str}"
+        else:
+            return "no enhanced templates"
+    
+    def _create_tasks_config(self, config: RepositoryConfig, vscode_dir: Path) -> None:
+        """Generate tasks.json from enhanced language configurations"""
+        all_tasks = []
+        
+        # Collect tasks from each language's enhanced configuration
+        for language in config.metadata.get('languages', []):
+            enhanced_config = self.jinja_env.globals['load_enhanced_language_config'](language)
+            if enhanced_config and 'languages' in enhanced_config:
+                lang_config = enhanced_config['languages'].get(language, {})
+                tasks = lang_config.get('tasks', [])
+                all_tasks.extend(tasks)
+        
+        if all_tasks:
+            tasks_config = {
+                "version": "2.0.0",
+                "tasks": all_tasks
+            }
+            
+            tasks_file = vscode_dir / 'tasks.json'
+            with open(tasks_file, 'w', encoding='utf-8') as f:
+                json.dump(tasks_config, f, indent=2)
+            
+            # Show which languages contributed tasks  
+            task_sources = self._get_task_contributing_languages(config.metadata.get('languages', []))
+            if task_sources:
+                sources_str = ", ".join(task_sources)
+                print(f"  ✓ Generated .vscode/tasks.json (enhanced: {sources_str})")
+            else:
+                print("  ✓ Generated .vscode/tasks.json (enhanced templates)")
     
     def _update_gitignore(self, config: RepositoryConfig) -> None:
         """Update .gitignore file"""

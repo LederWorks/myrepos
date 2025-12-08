@@ -21,16 +21,22 @@ myrepos/
 │   │   └── generator.py              # Main workspace generator
 │   └── validation/
 │       └── validator.py              # Configuration validation
-├── templates/                        # Jinja2 templates and configuration
-│   ├── config/                       # YAML configuration files
-│   │   ├── languages.yaml            # Language-specific configurations
-│   │   ├── platforms.yaml            # Platform-specific configurations
-│   │   └── clients.yaml              # Client-specific configurations
-│   └── .vscode/                      # VS Code template files
-│       ├── settings.json.j2          # Settings template
-│       └── extensions.json.j2        # Extensions template
+├── templates/                        # Jinja2 templates (self-contained)
+│   ├── languages/                    # Language configuration templates (single source)
+│   │   ├── python.yaml.j2            # Complete Python configuration
+│   │   ├── markdown.yaml.j2          # Complete Markdown configuration
+│   │   ├── terraform.yaml.j2         # Complete Terraform configuration
+│   │   └── ...                       # Other language templates
+│   ├── .vscode/                      # VS Code template files
+│   │   ├── settings.json.j2          # Settings template (with inline platform configs)
+│   │   ├── extensions.json.j2        # Extensions template (with inline platform configs)
+│   │   ├── launch.json.j2            # Launch configurations template
+│   │   └── tasks.json.j2             # Tasks template
+│   ├── .omd/                         # Repository metadata templates
+│   └── .github/                      # GitHub templates (workflows, instructions)
 ├── docs/                             # Documentation
-│   └── TEMPLATE_SYSTEM.md            # Template system documentation
+│   ├── TEMPLATE_SYSTEM.md            # Template system documentation
+│   └── ENHANCED_LANGUAGE_SUPPORT.md  # Enhanced language features
 ├── venv/                             # Python virtual environment
 └── README.md                         # This file
 ```
@@ -147,14 +153,24 @@ types:
 - docs
 ```
 
-### Template-Driven Configuration
+### Self-Contained Template Configuration
 
-Configurations are managed through YAML files in `templates/config/`:
-- `languages.yaml`: Language-specific VS Code extensions and settings
-- `platforms.yaml`: Platform-specific extensions (GitHub, Azure DevOps, etc.)
-- `clients.yaml`: Client-specific customizations
+All configurations are embedded within Jinja2 templates - no external config files needed:
 
-These files are processed by Jinja2 templates to generate VS Code settings and extensions.
+**Language Configuration** (`templates/languages/`):
+- `{language}.yaml.j2`: Complete language templates with all features
+- Includes VS Code settings, extensions, tasks, debugging, linting, and workflow automation
+- Single source of truth for each language
+
+**Platform Configuration** (embedded in templates):
+- GitHub: Copilot, Pull Requests, Copilot Chat extensions
+- Azure DevOps: Team Services extension
+- Inline definitions within `.vscode/*.j2` templates
+
+**Template Processing**:
+- Fully self-contained templates with embedded configurations
+- No external dependencies or fallback files
+- Dynamic rendering with project context
 
 ## Integration with MyRepos
 

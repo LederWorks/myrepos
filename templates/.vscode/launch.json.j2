@@ -1,17 +1,25 @@
+{%- set all_launch_configs = [] -%}
+
+{# Collect launch configurations from enhanced language templates only #}
+{%- for language in metadata.languages -%}
+  {%- set enhanced_config = load_enhanced_language_config(language) -%}
+  {%- if enhanced_config and enhanced_config.languages and enhanced_config.languages[language] and enhanced_config.languages[language].launch_configurations -%}
+    {%- set _ = all_launch_configs.extend(enhanced_config.languages[language].launch_configurations) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if all_launch_configs -%}
 {
 	"version": "0.2.0",
 	"configurations": [
-		{%- for config in launch_configurations %}
+{%- for config in all_launch_configs %}
 		{
 			"name": "{{ config.name }}",
 			"type": "{{ config.type }}",
-			"request": "{{ config.request }}",
-			{%- for key, value in config.items() %}
-			{%- if key not in ['name', 'type', 'request'] %}
-			"{{ key }}": {{ value | tojson }},
-			{%- endif %}
-			{%- endfor %}
+			"request": "{{ config.request }}"{% for key, value in config.items() %}{% if key not in ['name', 'type', 'request'] %},
+			"{{ key }}": {{ value | tojson }}{% endif %}{% endfor %}
 		}{% if not loop.last %},{% endif %}
-		{%- endfor %}
+{%- endfor %}
 	]
 }
+{%- endif -%}

@@ -1,6 +1,3 @@
-{%- set languages_config = load_yaml('config/languages.yaml') -%}
-{%- set platforms_config = load_yaml('config/platforms.yaml') -%}
-{%- set clients_config = load_yaml('config/clients.yaml') -%}
 {%- set all_settings = {} -%}
 
 {# Base settings #}
@@ -16,22 +13,17 @@
   }
 }) -%}
 
-{# Merge language settings #}
+{# Merge language settings from enhanced templates #}
 {%- for language in metadata.languages -%}
-  {%- if language in languages_config and 'settings' in languages_config[language] -%}
-    {%- set _ = all_settings.update(languages_config[language].settings) -%}
+  {%- set enhanced_config = load_enhanced_language_config(language) -%}
+  {%- if enhanced_config and enhanced_config.languages and enhanced_config.languages[language] and enhanced_config.languages[language].settings -%}
+    {%- set _ = all_settings.update(enhanced_config.languages[language].settings) -%}
   {%- endif -%}
 {%- endfor -%}
 
-{# Merge platform settings #}
-{%- if platform in platforms_config and 'settings' in platforms_config[platform] -%}
-  {%- set _ = all_settings.update(platforms_config[platform].settings) -%}
-{%- endif -%}
+{# Platform settings (inline definitions) #}
+{# Currently no platform-specific settings needed #}
 
-{# Merge client settings #}
-{%- set client_key = client if client in clients_config else 'unknown' -%}
-{%- if 'settings' in clients_config[client_key] -%}
-  {%- set _ = all_settings.update(clients_config[client_key].settings) -%}
-{%- endif -%}
+
 
 {{ all_settings | tojson(indent=2) }}

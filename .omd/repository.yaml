@@ -3,9 +3,10 @@
 
 copilot_instructions: false
 languages:
-- markdown
-- python
-- yaml
+  - markdown
+  - python
+  - yaml
 platform: github
 types:
-- docs
+  - docs
+  - tool

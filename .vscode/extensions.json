@@ -1,14 +1,24 @@
 {
 	"recommendations": [
+		"bierner.markdown-emoji",
 		"bierner.markdown-mermaid",
 		"bierner.markdown-preview-github-styles",
 		"DavidAnson.vscode-markdownlint",
 		"github.copilot",
 		"github.copilot-chat",
 		"github.vscode-pull-request-github",
+		"ms-kubernetes-tools.vscode-kubernetes-tools",
+		"ms-python.black-formatter",
+		"ms-python.flake8",
 		"ms-python.isort",
+		"ms-python.mypy-type-checker",
+		"ms-python.pylint",
 		"ms-python.python",
 		"ms-python.vscode-pylance",
+		"ms-toolsai.jupyter",
+		"mushan.vscode-paste-image",
 		"redhat.vscode-yaml",
+		"shd101wyy.markdown-preview-enhanced",
+		"telesoho.vscode-markdown-paste-image",
 		"yzhang.markdown-all-in-one"	]
 }
