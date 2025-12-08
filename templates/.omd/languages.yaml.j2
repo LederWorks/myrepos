@@ -8,7 +8,7 @@ languages:
 {%- if lang_config and lang_config.languages and lang_config.languages[language] -%}
 {%- set config = lang_config.languages[language] %}
   {{ language }}:
-    # Source: templates/languages/{{ language }}.yaml.j2 ({{ config.settings | length if config.settings else 0 }} settings, {{ config.tasks | length if config.tasks else 0 }} tasks)
+    # Source: templates/languages/{{ language }}.yaml.j2 ({{ config.settings | length if config.settings else 0 }} settings, {{ config.tasks | length if config.tasks else 0 }} tasks, {{ config.required_extensions | length if config.required_extensions else 0 }} required ext, {{ config.recommended_extensions | length if config.recommended_extensions else 0 }} recommended ext)
     settings:
       {{ format_yaml_json(config.settings, 3) if config.settings else "{}" }}
     required_extensions:

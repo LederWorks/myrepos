@@ -29,6 +29,7 @@ properties:
         - yaml
         - json
         - markdown
+        - j2
 
   # CI/CD platform where this repository is hosted
   platform:
@@ -46,16 +47,16 @@ properties:
     items:
       type: string
       enum:
-        - app           # Application (web, mobile, desktop)
-        - lib           # Library/package/module
-        - infra         # Infrastructure as Code
-        - site          # Website/documentation site
-        - template      # Template or boilerplate
-        - tool          # Tool or utility
-        - config        # Configuration repository
-        - docs          # Documentation
-        - monorepo      # Multi-project repository
-        - example       # Example/demo code
+        - app # Application (web, mobile, desktop)
+        - lib # Library/package/module
+        - infra # Infrastructure as Code
+        - site # Website/documentation site
+        - template # Template or boilerplate
+        - tool # Tool or utility
+        - config # Configuration repository
+        - docs # Documentation
+        - monorepo # Multi-project repository
+        - example # Example/demo code
 
   # Optional: Generate GitHub Copilot instructions
   copilot_instructions:

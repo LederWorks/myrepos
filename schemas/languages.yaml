@@ -12,7 +12,7 @@ properties:
     type: object
     description: "Language-specific configurations"
     patternProperties:
-      "^(terraform|python|javascript|typescript|go|rust|java|csharp|cpp|c|php|ruby|swift|kotlin|scala|shell|powershell|sql|html|css|yaml|json|dockerfile|helm|ansible|markdown)$":
+      "^(terraform|python|javascript|typescript|go|rust|java|csharp|cpp|c|php|ruby|swift|kotlin|scala|shell|powershell|sql|html|css|yaml|json|dockerfile|helm|ansible|markdown|j2)$":
         type: object
         properties:
           # File associations for this language

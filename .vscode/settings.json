@@ -2,6 +2,17 @@
 
 
 {
+  "[fish]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[jinja]": {
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 100
+  },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",
     "editor.formatOnPaste": true,
@@ -16,12 +27,32 @@
     "editor.wordWrap": "on",
     "editor.wordWrapColumn": 100
   },
+  "[powershell]": {
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.rulers": [
+      80,
+      120
+    ],
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on"
+  },
   "[python]": {
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     },
     "editor.defaultFormatter": "ms-python.python",
     "editor.formatOnSave": true
+  },
+  "[shellscript]": {
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.rulers": [
+      80,
+      120
+    ],
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
   },
   "[yaml]": {
     "editor.formatOnSave": true,
@@ -37,6 +68,8 @@
     "**/.git/subtree-cache/**": true,
     "**/node_modules/*/**": true
   },
+  "jinja.format.enabled": true,
+  "jinja.lint.enabled": true,
   "markdown.extension.list.indentationSize": "adaptive",
   "markdown.extension.toc.orderedList": false,
   "markdown.extension.toc.updateOnSave": true,
@@ -48,9 +81,21 @@
     "MD033": false,
     "MD041": false
   },
+  "powershell.codeFormatting.newLineAfterOpenBrace": true,
+  "powershell.codeFormatting.openBraceOnSameLine": true,
+  "powershell.codeFormatting.preset": "OTBS",
+  "powershell.scriptAnalysis.enable": true,
+  "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
   "python.defaultInterpreterPath": "./venv/bin/python",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
+  "shellcheck.enable": true,
+  "shellcheck.executablePath": "shellcheck",
+  "shellformat.effectLanguages": [
+    "shellscript",
+    "fish"
+  ],
+  "shellformat.flag": "-i 2",
   "yaml.completion": true,
   "yaml.format.enable": true,
   "yaml.hover": true,

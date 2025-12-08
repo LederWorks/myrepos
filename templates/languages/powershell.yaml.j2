@@ -5,39 +5,75 @@ languages:
       "*.ps1": "powershell"
       "*.psm1": "powershell"
       "*.psd1": "powershell"
+      "*.ps1xml": "xml"
+      "*.pssc": "powershell"
+      "*.psrc": "powershell"
     
     settings:
       "[powershell]":
         editor.formatOnSave: true
         editor.tabSize: 4
         editor.insertSpaces: true
+        editor.wordWrap: "on"
+        editor.rulers: [80, 120]
       
       powershell.codeFormatting.preset: "OTBS"
+      powershell.codeFormatting.openBraceOnSameLine: true
+      powershell.codeFormatting.newLineAfterOpenBrace: true
       powershell.scriptAnalysis.enable: true
+      powershell.scriptAnalysis.settingsPath: "PSScriptAnalyzerSettings.psd1"
     
     required_extensions:
       - "ms-vscode.powershell"
+    
+    recommended_extensions:
+      - "ms-vscode.powershell-preview"
+      - "ms-vscode.vscode-json"
     
     tasks:
       - label: "PowerShell: Analyze"
         type: "shell"
         command: "pwsh"
-        args: ["-Command", "Invoke-ScriptAnalyzer", "-Path", ".", "-Recurse"]
+        args: ["-Command", "Invoke-ScriptAnalyzer", "-Path", ".", "-Recurse", "-ReportSummary"]
         group: "test"
+        problemMatcher: "$pester"
       
       - label: "PowerShell: Test"
         type: "shell"
         command: "pwsh"
-        args: ["-Command", "Invoke-Pester"]
+        args: ["-Command", "Invoke-Pester", "-Path", ".", "-Recurse"]
         group: "test"
+        problemMatcher: "$pester"
+      
+      - label: "PowerShell: Format"
+        type: "shell"
+        command: "pwsh"
+        args: ["-Command", "Invoke-Formatter", "-ScriptDefinition", "(Get-Content -Path '${file}' -Raw)"]
+        group: "build"
     
     launch_configurations:
       - name: "PowerShell: Launch Current File"
         type: "PowerShell"
         request: "launch"
         script: "${file}"
+        console: "integratedTerminal"
+      
+      - name: "PowerShell: Launch with Arguments"
+        type: "PowerShell"
+        request: "launch"
+        script: "${file}"
+        args: []
+        console: "integratedTerminal"
     
     linting:
       enabled: true
       tools:
         - "PSScriptAnalyzer"
+      config_files:
+        - "PSScriptAnalyzerSettings.psd1"
+    
+    package_management:
+      tool: "PowerShellGet"
+      config_files:
+        - "RequiredModules.psd1"
+        - "*.psd1"

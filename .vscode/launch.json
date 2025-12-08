@@ -2,12 +2,42 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "PowerShell: Launch Current File",
+			"type": "PowerShell",
+			"request": "launch",
+			"script": "${file}",
+			"console": "integratedTerminal",
+		},
+		{
+			"name": "PowerShell: Launch with Arguments",
+			"type": "PowerShell",
+			"request": "launch",
+			"script": "${file}",
+			"args": [],
+			"console": "integratedTerminal",
+		},
+		{
 			"name": "Python: Current File",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${file}",
 			"console": "integratedTerminal",
 			"python": "./venv/bin/python",
+		},
+		{
+			"name": "Shell: Execute Current File",
+			"type": "node-terminal",
+			"request": "launch",
+			"command": "bash ${file}",
+			"cwd": "${workspaceFolder}",
+		},
+		{
+			"name": "Shell: Execute with Bash",
+			"type": "node-terminal",
+			"request": "launch",
+			"command": "bash",
+			"args": ["${file}"],
+			"cwd": "${workspaceFolder}",
 		},
 	]
 }

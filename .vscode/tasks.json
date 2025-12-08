@@ -2,6 +2,26 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Jinja2: Render Template",
+      "type": "shell",
+      "command": "jinja2",
+      "args": [
+        "${file}",
+        "--format=yaml"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Jinja2: Validate Syntax",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-c",
+        "import jinja2; jinja2.Template(open('${file}').read())"
+      ],
+      "group": "test"
+    },
+    {
       "label": "Markdown: Lint All Files",
       "type": "shell",
       "command": "markdownlint",
@@ -22,6 +42,47 @@
       "group": "build"
     },
     {
+      "label": "PowerShell: Analyze",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-Command",
+        "Invoke-ScriptAnalyzer",
+        "-Path",
+        ".",
+        "-Recurse",
+        "-ReportSummary"
+      ],
+      "group": "test",
+      "problemMatcher": "$pester"
+    },
+    {
+      "label": "PowerShell: Test",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-Command",
+        "Invoke-Pester",
+        "-Path",
+        ".",
+        "-Recurse"
+      ],
+      "group": "test",
+      "problemMatcher": "$pester"
+    },
+    {
+      "label": "PowerShell: Format",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-Command",
+        "Invoke-Formatter",
+        "-ScriptDefinition",
+        "(Get-Content -Path '${file}' -Raw)"
+      ],
+      "group": "build"
+    },
+    {
       "label": "Python: Run Tests",
       "type": "shell",
       "command": "python",
@@ -37,6 +98,70 @@
       "command": "black",
       "args": [
         "."
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Shell: Check Syntax",
+      "type": "shell",
+      "command": "shellcheck",
+      "args": [
+        "${file}"
+      ],
+      "group": "test",
+      "problemMatcher": "$shellcheck"
+    },
+    {
+      "label": "Shell: Check All Scripts",
+      "type": "shell",
+      "command": "find",
+      "args": [
+        ".",
+        "-name",
+        "*.sh",
+        "-o",
+        "-name",
+        "*.bash",
+        "-o",
+        "-name",
+        "*.zsh"
+      ],
+      "group": "test",
+      "problemMatcher": "$shellcheck"
+    },
+    {
+      "label": "Shell: Format Current File",
+      "type": "shell",
+      "command": "shfmt",
+      "args": [
+        "-w",
+        "-i",
+        "2",
+        "${file}"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Shell: Format All Scripts",
+      "type": "shell",
+      "command": "find",
+      "args": [
+        ".",
+        "-name",
+        "*.sh",
+        "-o",
+        "-name",
+        "*.bash",
+        "-o",
+        "-name",
+        "*.zsh",
+        "-exec",
+        "shfmt",
+        "-w",
+        "-i",
+        "2",
+        "{}",
+        ";"
       ],
       "group": "build"
     }

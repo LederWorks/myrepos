@@ -218,7 +218,7 @@ class WorkspaceGenerator:
     def _detect_languages(self, repo_path: Path) -> List[str]:
         """Auto-detect languages from file extensions"""
         language_patterns = {
-            'terraform': ['.tf', '.tfvars', '.hcl'],
+            'terraform': ['.tf', '.tfvars', '.hcl', '.tftpl'],
             'python': ['.py', '.pyx', '.pyi'],
             'go': ['.go', 'go.mod', 'go.sum'],
             'markdown': ['.md', '.markdown', '.mdx'],
@@ -226,7 +226,8 @@ class WorkspaceGenerator:
             'json': ['.json', '.jsonc'],
             'shell': ['.sh', '.bash', '.zsh'],
             'powershell': ['.ps1', '.psm1', '.psd1'],
-            'sql': ['.sql']
+            'sql': ['.sql'],
+            'j2': ['.j2', '.jinja', '.jinja2']
         }
         
         detected_languages = set()
@@ -275,6 +276,7 @@ class WorkspaceGenerator:
         self._detect_nodejs_type(repo_path, detected_types)
         self._detect_docker_app_type(repo_path, detected_types)
         self._detect_docs_type(repo_path, detected_types)
+        self._detect_template_type(repo_path, detected_types)
         
         return sorted(detected_types) if detected_types else ['lib']
     
@@ -282,6 +284,11 @@ class WorkspaceGenerator:
         """Check for infrastructure repository patterns"""
         if (repo_path / 'main.tf').exists() or (repo_path / 'terraform').exists():
             detected_types.add('infra')
+        
+        # Check for .tftpl files which indicate terraform templates
+        if self._has_files_with_extensions(repo_path, ['.tftpl']):
+            detected_types.add('infra')
+            detected_types.add('template')
     
     def _detect_python_lib_type(self, repo_path: Path, detected_types: set) -> None:
         """Check for Python library patterns"""
@@ -317,6 +324,26 @@ class WorkspaceGenerator:
         if any((repo_path / f).exists() for f in doc_files):
             if not detected_types:
                 detected_types.add('docs')
+    
+    def _detect_template_type(self, repo_path: Path, detected_types: set) -> None:
+        """Check for template repository patterns"""
+        # Check for Jinja2 template files
+        if self._has_files_with_extensions(repo_path, ['.j2', '.jinja', '.jinja2']):
+            detected_types.add('template')
+        
+        # Check for common template indicators
+        template_indicators = ['cookiecutter.json', '.cookiecutter.json', 'template.yaml']
+        if any((repo_path / f).exists() for f in template_indicators):
+            detected_types.add('template')
+    
+    def _has_files_with_extensions(self, repo_path: Path, extensions: List[str]) -> bool:
+        """Check if repository contains files with specified extensions"""
+        for file_path in repo_path.rglob('*'):
+            if (file_path.is_file() and 
+                not self._is_ignored_path(file_path, repo_path) and
+                any(file_path.name.endswith(ext) for ext in extensions)):
+                return True
+        return False
     
     def _is_ignored_path(self, file_path: Path, repo_root: Path) -> bool:
         """Check if path should be ignored during detection"""

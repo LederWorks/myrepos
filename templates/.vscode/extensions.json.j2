@@ -1,4 +1,6 @@
-{%- set all_extensions = [] -%}
+{%- set required_extensions = [] -%}
+{%- set recommended_extensions = [] -%}
+{%- set all_extensions_seen = [] -%}
 
 {# Language extensions from enhanced templates #}
 {%- for language in metadata.languages -%}
@@ -8,42 +10,60 @@
     {# Add required extensions #}
     {%- if lang_config.required_extensions -%}
       {%- for ext in lang_config.required_extensions -%}
-        {%- if ext not in all_extensions -%}
-          {%- set _ = all_extensions.append(ext) -%}
+        {%- if ext not in all_extensions_seen -%}
+          {%- set _ = required_extensions.append(ext) -%}
+          {%- set _ = all_extensions_seen.append(ext) -%}
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}
     {# Add recommended extensions #}
     {%- if lang_config.recommended_extensions -%}
       {%- for ext in lang_config.recommended_extensions -%}
-        {%- if ext not in all_extensions -%}
-          {%- set _ = all_extensions.append(ext) -%}
+        {%- if ext not in all_extensions_seen -%}
+          {%- set _ = recommended_extensions.append(ext) -%}
+          {%- set _ = all_extensions_seen.append(ext) -%}
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
 
-{# Platform extensions (inline definitions) #}
+{# Platform extensions (treat as required for platform functionality) #}
 {%- if metadata.platform == 'github' -%}
-  {%- set platform_extensions = ['github.vscode-pull-request-github', 'github.copilot', 'github.copilot-chat'] -%}
+  {%- set platform_required = ['github.vscode-pull-request-github'] -%}
+  {%- set platform_recommended = ['github.copilot', 'github.copilot-chat'] -%}
 {%- elif metadata.platform == 'azuredevops' -%}
-  {%- set platform_extensions = ['ms-vsts.team'] -%}
+  {%- set platform_required = ['ms-vsts.team'] -%}
+  {%- set platform_recommended = [] -%}
 {%- else -%}
-  {%- set platform_extensions = [] -%}
+  {%- set platform_required = [] -%}
+  {%- set platform_recommended = [] -%}
 {%- endif -%}
 
-{%- for ext in platform_extensions -%}
-  {%- if ext not in all_extensions -%}
-    {%- set _ = all_extensions.append(ext) -%}
+{# Add platform extensions to appropriate arrays #}
+{%- for ext in platform_required -%}
+  {%- if ext not in all_extensions_seen -%}
+    {%- set _ = required_extensions.append(ext) -%}
+    {%- set _ = all_extensions_seen.append(ext) -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for ext in platform_recommended -%}
+  {%- if ext not in all_extensions_seen -%}
+    {%- set _ = recommended_extensions.append(ext) -%}
+    {%- set _ = all_extensions_seen.append(ext) -%}
   {%- endif -%}
 {%- endfor -%}
 
-
-
 {
 	"recommendations": [
-{% for ext in all_extensions | sort %}
+{%- if required_extensions %}
+
+		// Required extensions (essential for language functionality)
+{% for ext in required_extensions | sort %}
 		"{{ ext }}",
-{% endfor %}	]
+{% endfor %}{% endif %}{%- if recommended_extensions %}
+		// Recommended extensions (optional but helpful)
+{% for ext in recommended_extensions | sort %}
+		"{{ ext }}",
+{% endfor %}{% endif %}	]
 }
