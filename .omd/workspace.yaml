@@ -1,20 +1,21 @@
 # Workspace-specific configuration
 workspace:
   # Additional folders to include in the workspace
-  additional_folders: []
-  
+  additional_folders:
+    - "/Users/cuki/.mrconfig.d"
+
   # Custom workspace settings that override language defaults
   settings: {}
-  
+
   # Additional extension recommendations (beyond language defaults)
   recommended_extensions: []
-  
-  # Extensions that should not be recommended  
+
+  # Extensions that should not be recommended
   unwanted_extensions: []
-  
+
   # Custom tasks beyond language defaults
   tasks: []
-  
+
   # Debug launch configurations
   launch_configurations: []
 
@@ -22,9 +23,9 @@ workspace:
 copilot:
   # Custom instructions for this repository
   instructions: []
-  
-  # Rules specific to this repository  
+
+  # Rules specific to this repository
   rules: []
-  
+
   # Files to apply instructions to
   apply_to: "**"

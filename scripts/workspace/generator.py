@@ -77,7 +77,17 @@ class WorkspaceGenerator:
             lstrip_blocks=True
         )
         
-        # Add load_yaml function to templates
+        # Register custom functions
+        self._register_jinja_functions()
+    
+    def _register_jinja_functions(self) -> None:
+        """Register custom functions for Jinja2 templates"""
+        self.jinja_env.globals['load_yaml'] = self._create_load_yaml_func()
+        self.jinja_env.globals['load_enhanced_language_config'] = self._create_load_enhanced_config_func()
+        self.jinja_env.globals['format_yaml_json'] = self._format_yaml_json
+    
+    def _create_load_yaml_func(self):
+        """Create load_yaml function for templates"""
         def load_yaml_func(path):
             config_file = self.templates_dir / path
             if not config_file.exists():
@@ -89,10 +99,10 @@ class WorkspaceGenerator:
             except Exception as e:
                 print(f"  ⚠️  Error loading template config {path}: {e}")
                 return {}
-        
-        self.jinja_env.globals['load_yaml'] = load_yaml_func
-        
-        # Add enhanced language config function
+        return load_yaml_func
+    
+    def _create_load_enhanced_config_func(self):
+        """Create load_enhanced_language_config function for templates"""
         def load_enhanced_language_config(language):
             """Load detailed language configuration from languages/ templates"""
             template_path = f'languages/{language}.yaml.j2'
@@ -111,45 +121,48 @@ class WorkspaceGenerator:
             except Exception as e:
                 print(f"  ⚠️  Error loading enhanced config for {language}: {e}")
                 return None
-        
-        self.jinja_env.globals['load_enhanced_language_config'] = load_enhanced_language_config
-        
-        def format_yaml_json(obj, indent_level=0):
-            """Format JSON objects and arrays with YAML-style readability and trailing commas"""
-            if obj is None:
-                return "null"
-            elif isinstance(obj, bool):
-                return "true" if obj else "false"
-            elif isinstance(obj, str):
-                return json.dumps(obj)
-            elif isinstance(obj, (int, float)):
-                return str(obj)
-            elif isinstance(obj, list):
-                if not obj:
-                    return "[]"
-                # For lists, we need consistent indentation based on the base level
-                base_indent = "  " * indent_level
-                item_indent = "  " * (indent_level + 1)
-                items = []
-                for item in obj:
-                    formatted_item = format_yaml_json(item, indent_level + 1)
-                    items.append(f'{item_indent}{formatted_item},')
-                return "[\n" + "\n".join(items) + "\n" + base_indent + "]"
-            elif isinstance(obj, dict):
-                if not obj:
-                    return "{}"
-                # For objects, we need consistent indentation based on the base level
-                base_indent = "  " * indent_level
-                item_indent = "  " * (indent_level + 1)
-                items = []
-                for key, value in obj.items():
-                    formatted_value = format_yaml_json(value, indent_level + 1)
-                    items.append(f'{item_indent}{json.dumps(key)}: {formatted_value},')
-                return "{\n" + "\n".join(items) + "\n" + base_indent + "}"
-            else:
-                return json.dumps(obj)
-        
-        self.jinja_env.globals['format_yaml_json'] = format_yaml_json
+        return load_enhanced_language_config
+    
+    def _format_yaml_json(self, obj, indent_level=0):
+        """Format JSON objects and arrays with YAML-style readability and trailing commas"""
+        if obj is None:
+            return "null"
+        elif isinstance(obj, bool):
+            return "true" if obj else "false"
+        elif isinstance(obj, str):
+            return json.dumps(obj)
+        elif isinstance(obj, (int, float)):
+            return str(obj)
+        elif isinstance(obj, list):
+            return self._format_json_list(obj, indent_level)
+        elif isinstance(obj, dict):
+            return self._format_json_dict(obj, indent_level)
+        else:
+            return json.dumps(obj)
+    
+    def _format_json_list(self, obj, indent_level):
+        """Format JSON list with proper indentation"""
+        if not obj:
+            return "[]"
+        base_indent = "  " * indent_level
+        item_indent = "  " * (indent_level + 1)
+        items = []
+        for item in obj:
+            formatted_item = self._format_yaml_json(item, indent_level + 1)
+            items.append(f'{item_indent}{formatted_item},')
+        return "[\n" + "\n".join(items) + "\n" + base_indent + "]"
+    
+    def _format_json_dict(self, obj, indent_level):
+        """Format JSON dictionary with proper indentation"""
+        if not obj:
+            return "{}"
+        base_indent = "  " * indent_level
+        item_indent = "  " * (indent_level + 1)
+        items = []
+        for key, value in obj.items():
+            formatted_value = self._format_yaml_json(value, indent_level + 1)
+            items.append(f'{item_indent}{json.dumps(key)}: {formatted_value},')
+        return "{\n" + "\n".join(items) + "\n" + base_indent + "}"
     
     def setup_repository(self, repo_path: Path) -> None:
         """Setup VS Code workspace and configuration for a repository"""
@@ -168,7 +181,7 @@ class WorkspaceGenerator:
             
             self._create_workspace_file(config)
             self._create_vscode_config(config)
-            self._create_omd_config(config)
+            self._create_omd_files(config)
             self._update_gitignore(config)
             self.generate_copilot_instructions(config)
             
@@ -537,7 +550,7 @@ class WorkspaceGenerator:
             else:
                 print("  ✓ Generated .vscode/tasks.json (enhanced templates)")
     
-    def _create_omd_config(self, config: RepositoryConfig) -> None:
+    def _create_omd_files(self, config: RepositoryConfig) -> None:
         """Create .omd configuration files using templates"""
         omd_dir = config.repo_path / '.omd'
         omd_dir.mkdir(exist_ok=True)
@@ -554,6 +567,40 @@ class WorkspaceGenerator:
             print("  ⚠️  Template .omd/languages.yaml.j2 not found")
         except Exception as e:
             print(f"  ⚠️  Error generating languages.yaml: {e}")
+        
+        # Generate workspace.yaml from template for workspace configuration
+        try:
+            template = self.jinja_env.get_template('.omd/workspace.yaml.j2')
+            content = template.render(
+                languages=config.metadata.get('languages', []),
+                repository_types=config.metadata.get('repository_types', [])
+            )
+            workspace_file = omd_dir / 'workspace.yaml'
+            with open(workspace_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print("  ✓ Generated .omd/workspace.yaml (workspace configuration)")
+        except TemplateNotFound:
+            print("  ⚠️  Template .omd/workspace.yaml.j2 not found")
+        except Exception as e:
+            print(f"  ⚠️  Error generating workspace.yaml: {e}")
+        
+        # Generate platform.yaml from template for platform configuration
+        try:
+            template = self.jinja_env.get_template('.omd/platform.yaml.j2')
+            content = template.render(
+                platform=config.metadata.get('platform', 'github'),
+                languages=config.metadata.get('languages', []),
+                types=config.metadata.get('types', []),
+                metadata=config.metadata
+            )
+            platform_file = omd_dir / 'platform.yaml'
+            with open(platform_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print("  ✓ Generated .omd/platform.yaml (platform configuration)")
+        except TemplateNotFound:
+            print("  ⚠️  Template .omd/platform.yaml.j2 not found")
+        except Exception as e:
+            print(f"  ⚠️  Error generating platform.yaml: {e}")
     
     def _update_gitignore(self, config: RepositoryConfig) -> None:
         """Update .gitignore file"""

@@ -1,5 +1,4 @@
 # Platform-specific configuration
-{% if platform == 'github' -%}
 platforms:
   github:
     # GitHub Actions workflows
@@ -16,27 +15,10 @@ platforms:
       branch_protection:
         required_status_checks:
           strict: true
-          contexts: ["{{ workflow_name | default('CI') }}"]
+          contexts: ["CI"]
         enforce_admins: false
         required_pull_request_reviews:
           required_approving_review_count: 1
           dismiss_stale_reviews: true
       security_alerts: true
       automated_security_fixes: true
-{% elif platform == 'azuredevops' -%}
-platforms:
-  azuredevops:
-    # Azure DevOps Pipelines configuration
-    pipelines:
-      trigger:
-        branches:
-          include:
-            - {{ default_branch | default('main') }}
-      
-      pool:
-        vmImage: 'ubuntu-latest'
-    
-    # Work item configuration
-    work_items:
-      process_template: {{ process_template | default('Agile') }}
-{% endif %}

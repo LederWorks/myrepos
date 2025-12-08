@@ -74,3 +74,4 @@ dmypy.json
 # System files
 .directory
 .fuse_hidden*
+*.code-workspace
