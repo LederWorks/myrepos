@@ -44,8 +44,6 @@
 {
 	"recommendations": [
 {% for ext in all_extensions | sort %}
-		"{{ ext }}"{% if not loop.last %},
-{% endif %}
-{% endfor %}
-	]
+		"{{ ext }}",
+{% endfor %}	]
 }

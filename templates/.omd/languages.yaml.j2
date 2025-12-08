@@ -1,24 +1,29 @@
 # Languages configuration for {{ metadata.repo_name }}
-#
-# This file provides validation compatibility with the schema system.
-# Actual language configurations are applied from enhanced templates:
-{% for language in metadata.languages -%}
-# - {{ language }}: templates/languages/{{ language }}.yaml.j2
-{% endfor %}
-#
-# Enhanced templates automatically configure:
-# • VS Code settings (.vscode/settings.json) - formatting, linting, editor behavior
-# • Extensions (.vscode/extensions.json) - required and recommended extensions  
-# • Tasks (.vscode/tasks.json) - build, test, format, lint commands
-# • Launch configs (.vscode/launch.json) - debugging configurations
-#
-# To customize language settings: edit the templates and re-run setup-repository.py
+# Generated from enhanced templates - populated with actual configuration data
+# Full configuration is applied to .vscode/ files, this shows what was loaded
 
 languages:
-{% for language in metadata.languages %}
+{% for language in metadata.languages -%}
+{%- set lang_config = load_enhanced_language_config(language) -%}
+{%- if lang_config and lang_config.languages and lang_config.languages[language] -%}
+{%- set config = lang_config.languages[language] %}
   {{ language }}:
+    # Source: templates/languages/{{ language }}.yaml.j2 ({{ config.settings | length if config.settings else 0 }} settings, {{ config.tasks | length if config.tasks else 0 }} tasks)
+    settings:
+      {{ format_yaml_json(config.settings, 3) if config.settings else "{}" }}
+    required_extensions:
+      {{ format_yaml_json(config.required_extensions, 3) if config.required_extensions else "[]" }}
+    recommended_extensions:
+      {{ format_yaml_json(config.recommended_extensions, 3) if config.recommended_extensions else "[]" }}
+    tasks:
+      {{ format_yaml_json(config.tasks, 3) if config.tasks else "[]" }}
+{%- else %}
+  {{ language }}:
+    # No enhanced template found - using defaults
     settings: {}
     required_extensions: []
     recommended_extensions: []
     tasks: []
+{%- endif %}
+
 {% endfor %}

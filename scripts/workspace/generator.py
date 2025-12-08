@@ -113,6 +113,43 @@ class WorkspaceGenerator:
                 return None
         
         self.jinja_env.globals['load_enhanced_language_config'] = load_enhanced_language_config
+        
+        def format_yaml_json(obj, indent_level=0):
+            """Format JSON objects and arrays with YAML-style readability and trailing commas"""
+            if obj is None:
+                return "null"
+            elif isinstance(obj, bool):
+                return "true" if obj else "false"
+            elif isinstance(obj, str):
+                return json.dumps(obj)
+            elif isinstance(obj, (int, float)):
+                return str(obj)
+            elif isinstance(obj, list):
+                if not obj:
+                    return "[]"
+                # For lists, we need consistent indentation based on the base level
+                base_indent = "  " * indent_level
+                item_indent = "  " * (indent_level + 1)
+                items = []
+                for item in obj:
+                    formatted_item = format_yaml_json(item, indent_level + 1)
+                    items.append(f'{item_indent}{formatted_item},')
+                return "[\n" + "\n".join(items) + "\n" + base_indent + "]"
+            elif isinstance(obj, dict):
+                if not obj:
+                    return "{}"
+                # For objects, we need consistent indentation based on the base level
+                base_indent = "  " * indent_level
+                item_indent = "  " * (indent_level + 1)
+                items = []
+                for key, value in obj.items():
+                    formatted_value = format_yaml_json(value, indent_level + 1)
+                    items.append(f'{item_indent}{json.dumps(key)}: {formatted_value},')
+                return "{\n" + "\n".join(items) + "\n" + base_indent + "}"
+            else:
+                return json.dumps(obj)
+        
+        self.jinja_env.globals['format_yaml_json'] = format_yaml_json
     
     def setup_repository(self, repo_path: Path) -> None:
         """Setup VS Code workspace and configuration for a repository"""

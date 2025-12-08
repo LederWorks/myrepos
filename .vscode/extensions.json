@@ -20,5 +20,6 @@
 		"redhat.vscode-yaml",
 		"shd101wyy.markdown-preview-enhanced",
 		"telesoho.vscode-markdown-paste-image",
-		"yzhang.markdown-all-in-one"	]
+		"yzhang.markdown-all-in-one",
+	]
 }

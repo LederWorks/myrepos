@@ -1,32 +1,147 @@
 # Languages configuration for myrepos
-#
-# This file provides validation compatibility with the schema system.
-# Actual language configurations are applied from enhanced templates:
-# - markdown: templates/languages/markdown.yaml.j2
-# - python: templates/languages/python.yaml.j2
-# - yaml: templates/languages/yaml.yaml.j2
-#
-# Enhanced templates automatically configure:
-# • VS Code settings (.vscode/settings.json) - formatting, linting, editor behavior
-# • Extensions (.vscode/extensions.json) - required and recommended extensions  
-# • Tasks (.vscode/tasks.json) - build, test, format, lint commands
-# • Launch configs (.vscode/launch.json) - debugging configurations
-#
-# To customize language settings: edit the templates and re-run setup-repository.py
+# Generated from enhanced templates - populated with actual configuration data
+# Full configuration is applied to .vscode/ files, this shows what was loaded
 
 languages:
   markdown:
-    settings: {}
-    required_extensions: []
-    recommended_extensions: []
-    tasks: []
+    # Source: templates/languages/markdown.yaml.j2 (8 settings, 2 tasks)
+    settings:
+      {
+        "[markdown]": {
+          "editor.wordWrap": "on",
+          "editor.wordWrapColumn": 100,
+          "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off",
+          },
+          "editor.formatOnSave": true,
+          "editor.formatOnPaste": true,
+          "editor.tabSize": 2,
+          "editor.insertSpaces": true,
+          "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        },
+        "markdown.preview.breaks": true,
+        "markdown.preview.linkify": true,
+        "markdown.preview.typographer": true,
+        "markdown.extension.toc.updateOnSave": true,
+        "markdown.extension.toc.orderedList": false,
+        "markdown.extension.list.indentationSize": "adaptive",
+        "markdownlint.config": {
+          "MD013": false,
+          "MD033": false,
+          "MD041": false,
+        },
+      }
+    required_extensions:
+      [
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint",
+        "bierner.markdown-mermaid",
+        "bierner.markdown-preview-github-styles",
+      ]
+    recommended_extensions:
+      [
+        "bierner.markdown-emoji",
+        "shd101wyy.markdown-preview-enhanced",
+        "mushan.vscode-paste-image",
+        "telesoho.vscode-markdown-paste-image",
+      ]
+    tasks:
+      [
+        {
+          "label": "Markdown: Lint All Files",
+          "type": "shell",
+          "command": "markdownlint",
+          "args": [
+            "**/*.md",
+            "--fix",
+          ],
+          "group": "build",
+        },
+        {
+          "label": "Markdown: Generate Table of Contents",
+          "type": "shell",
+          "command": "markdown-toc",
+          "args": [
+            "-i",
+            "README.md",
+          ],
+          "group": "build",
+        },
+      ]
   python:
-    settings: {}
-    required_extensions: []
-    recommended_extensions: []
-    tasks: []
+    # Source: templates/languages/python.yaml.j2 (4 settings, 2 tasks)
+    settings:
+      {
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "ms-python.python",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+          },
+        },
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+      }
+    required_extensions:
+      [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.vscode-pylance",
+        "ms-python.isort",
+      ]
+    recommended_extensions:
+      [
+        "ms-python.flake8",
+        "ms-python.pylint",
+        "ms-python.mypy-type-checker",
+        "ms-toolsai.jupyter",
+      ]
+    tasks:
+      [
+        {
+          "label": "Python: Run Tests",
+          "type": "shell",
+          "command": "python",
+          "args": [
+            "-m",
+            "pytest",
+          ],
+          "group": "test",
+        },
+        {
+          "label": "Python: Format Code",
+          "type": "shell",
+          "command": "black",
+          "args": [
+            ".",
+          ],
+          "group": "build",
+        },
+      ]
   yaml:
-    settings: {}
-    required_extensions: []
-    recommended_extensions: []
-    tasks: []
+    # Source: templates/languages/yaml.yaml.j2 (5 settings, 0 tasks)
+    settings:
+      {
+        "[yaml]": {
+          "editor.formatOnSave": true,
+          "editor.tabSize": 2,
+          "editor.insertSpaces": true,
+        },
+        "yaml.format.enable": true,
+        "yaml.validate": true,
+        "yaml.hover": true,
+        "yaml.completion": true,
+      }
+    required_extensions:
+      [
+        "redhat.vscode-yaml",
+      ]
+    recommended_extensions:
+      [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+      ]
+    tasks:
+      []
