@@ -1,0 +1,128 @@
+# YAML Schema for repository.yaml
+# Defines the structure and validation rules for repository metadata
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "Repository Metadata Schema"
+description: "Schema for .omd/repository.yaml files"
+type: object
+
+required:
+  - languages
+  - platform
+  - repository_type
+
+properties:
+  # Programming languages used in this repository
+  languages:
+    type: array
+    description: "Programming languages and technologies used in this repository"
+    minItems: 1
+    items:
+      type: string
+      enum:
+        - terraform
+        - python
+        - javascript
+        - typescript
+        - go
+        - rust
+        - java
+        - csharp
+        - cpp
+        - c
+        - php
+        - ruby
+        - swift
+        - kotlin
+        - scala
+        - shell
+        - powershell
+        - sql
+        - html
+        - css
+        - yaml
+        - json
+        - dockerfile
+        - helm
+        - ansible
+        - markdown
+
+  # CI/CD platform where this repository is hosted
+  platform:
+    type: string
+    description: "Source control and CI/CD platform"
+    enum:
+      - github
+      - azuredevops
+      - gitlab
+      - bitbucket
+      - gitea
+      - codecommit
+
+  # Repository type/category for organizational purposes
+  repository_type:
+    type: string
+    description: "Primary purpose and type of this repository"
+    enum:
+      - module        # Reusable component/library/module
+      - app           # Application (web, mobile, desktop)
+      - lib           # Library/package
+      - infra         # Infrastructure as Code
+      - site          # Website/documentation site
+      - template      # Template or boilerplate
+      - tool          # Tool or utility
+      - config        # Configuration repository
+      - data          # Data repository
+      - docs          # Documentation only
+      - monorepo      # Multi-project repository
+      - example       # Example/demo code
+      - experiment    # Experimental/proof-of-concept
+
+  # Optional: Target environments or platforms
+  targets:
+    type: array
+    description: "Target environments, platforms, or services (optional)"
+    items:
+      type: string
+      examples:
+        - aws
+        - azure
+        - gcp
+        - kubernetes
+        - docker
+        - web
+        - mobile
+        - desktop
+        - serverless
+        - database
+        - api
+        - microservice
+        - cli
+        - library
+        - browser-extension
+        - vscode-extension
+
+  # Optional: Additional tags for flexible categorization
+  tags:
+    type: array
+    description: "Additional flexible tags for categorization (optional)"
+    items:
+      type: string
+    examples:
+      - frontend
+      - backend
+      - fullstack
+      - automation
+      - monitoring
+      - security
+      - testing
+      - ci-cd
+      - devops
+      - ml
+      - ai
+      - data-science
+      - analytics
+      - performance
+      - migration
+
+additionalProperties: false

@@ -1,0 +1,249 @@
+# Language Configuration Examples
+# Demonstrates how to configure language-specific settings in .omd/language.yaml
+
+# This file shows practical examples of language configurations
+# that can be used in repository .omd/language.yaml files
+
+languages:
+  # Markdown configuration for documentation-heavy repositories
+  markdown:
+    file_associations:
+      "*.md": "markdown"
+      "*.mdx": "markdown"
+      "*.markdown": "markdown"
+    
+    settings:
+      # Markdown-specific VS Code settings
+      "[markdown]":
+        editor.wordWrap: "on"
+        editor.wordWrapColumn: 100
+        editor.quickSuggestions: 
+          comments: "off"
+          strings: "off"
+          other: "off"
+        editor.formatOnSave: true
+        editor.formatOnPaste: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+        editor.defaultFormatter: "yzhang.markdown-all-in-one"
+      
+      # Markdown preview settings
+      markdown.preview.breaks: true
+      markdown.preview.linkify: true
+      markdown.preview.typographer: true
+      markdown.extension.toc.updateOnSave: true
+      markdown.extension.toc.orderedList: false
+      markdown.extension.list.indentationSize: "adaptive"
+      
+      # Markdown linting
+      markdownlint.config:
+        MD013: false  # Line length
+        MD033: false  # Allow inline HTML
+        MD041: false  # First line in file should be a top level header
+    
+    required_extensions:
+      - "yzhang.markdown-all-in-one"
+      - "DavidAnson.vscode-markdownlint"
+    
+    recommended_extensions:
+      - "bierner.markdown-mermaid"
+      - "bierner.markdown-emoji"
+      - "bierner.markdown-preview-github-styles"
+      - "shd101wyy.markdown-preview-enhanced"
+      - "mushan.vscode-paste-image"
+      - "telesoho.vscode-markdown-paste-image"
+    
+    tasks:
+      - label: "Markdown: Lint All Files"
+        type: "shell"
+        command: "markdownlint"
+        args: ["**/*.md", "--fix"]
+        group: "build"
+      
+      - label: "Markdown: Generate Table of Contents"
+        type: "shell"
+        command: "markdown-toc"
+        args: ["-i", "README.md"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "markdownlint"
+        - "remark-lint"
+      config_files:
+        - ".markdownlint.json"
+        - ".markdownlintrc"
+        - ".remarkrc"
+
+  # Python configuration example
+  python:
+    file_associations:
+      "*.py": "python"
+      "*.pyi": "python"
+      "*.pyx": "python"
+    
+    settings:
+      "[python]":
+        editor.formatOnSave: true
+        editor.defaultFormatter: "ms-python.black-formatter"
+        editor.codeActionsOnSave:
+          source.organizeImports: true
+        editor.tabSize: 4
+      
+      python.defaultInterpreterPath: "./venv/bin/python"
+      python.linting.enabled: true
+      python.linting.pylintEnabled: true
+      python.linting.flake8Enabled: true
+      python.formatting.provider: "black"
+      python.testing.pytestEnabled: true
+    
+    required_extensions:
+      - "ms-python.python"
+      - "ms-python.black-formatter"
+    
+    recommended_extensions:
+      - "ms-python.flake8"
+      - "ms-python.pylint"
+      - "ms-python.mypy-type-checker"
+      - "ms-toolsai.jupyter"
+    
+    tasks:
+      - label: "Python: Run Tests"
+        type: "shell"
+        command: "python"
+        args: ["-m", "pytest"]
+        group: "test"
+      
+      - label: "Python: Format Code"
+        type: "shell"
+        command: "black"
+        args: ["."]
+        group: "build"
+    
+    launch_configurations:
+      - name: "Python: Current File"
+        type: "python"
+        request: "launch"
+        program: "${file}"
+        console: "integratedTerminal"
+    
+    package_management:
+      tool: "pip"
+      config_files:
+        - "requirements.txt"
+        - "setup.py"
+        - "pyproject.toml"
+
+  # Terraform configuration example
+  terraform:
+    file_associations:
+      "*.tf": "terraform"
+      "*.tfvars": "terraform-vars"
+      "*.hcl": "terraform"
+    
+    settings:
+      "[terraform]":
+        editor.formatOnSave: true
+        editor.defaultFormatter: "hashicorp.terraform"
+        editor.tabSize: 2
+      
+      terraform.experimentalFeatures.validateOnSave: true
+      terraform.experimentalFeatures.prefillRequiredFields: true
+    
+    required_extensions:
+      - "hashicorp.terraform"
+    
+    recommended_extensions:
+      - "ms-azuretools.vscode-azureterraform"
+      - "4ops.terraform"
+    
+    tasks:
+      - label: "Terraform: Validate"
+        type: "shell"
+        command: "terraform"
+        args: ["validate"]
+        group: "test"
+      
+      - label: "Terraform: Format"
+        type: "shell"
+        command: "terraform"
+        args: ["fmt", "-recursive"]
+        group: "build"
+      
+      - label: "Terraform: Plan"
+        type: "shell"
+        command: "terraform"
+        args: ["plan"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "tflint"
+        - "tfsec"
+      config_files:
+        - ".tflint.hcl"
+
+  # JavaScript/TypeScript configuration
+  javascript:
+    file_associations:
+      "*.js": "javascript"
+      "*.jsx": "javascriptreact"
+      "*.mjs": "javascript"
+    
+    settings:
+      "[javascript]":
+        editor.formatOnSave: true
+        editor.defaultFormatter: "esbenp.prettier-vscode"
+        editor.codeActionsOnSave:
+          source.fixAll.eslint: true
+      
+      eslint.validate: ["javascript", "javascriptreact"]
+      prettier.singleQuote: true
+      prettier.semi: false
+    
+    required_extensions:
+      - "esbenp.prettier-vscode"
+      - "dbaeumer.vscode-eslint"
+    
+    recommended_extensions:
+      - "bradlc.vscode-tailwindcss"
+      - "formulahendry.auto-rename-tag"
+    
+    package_management:
+      tool: "npm"
+      config_files:
+        - "package.json"
+        - ".eslintrc.json"
+        - ".prettierrc"
+
+  # YAML configuration
+  yaml:
+    file_associations:
+      "*.yml": "yaml"
+      "*.yaml": "yaml"
+    
+    settings:
+      "[yaml]":
+        editor.formatOnSave: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+      
+      yaml.format.enable: true
+      yaml.validate: true
+      yaml.hover: true
+      yaml.completion: true
+    
+    required_extensions:
+      - "redhat.vscode-yaml"
+    
+    recommended_extensions:
+      - "ms-kubernetes-tools.vscode-kubernetes-tools"
+    
+    linting:
+      enabled: true
+      tools:
+        - "yamllint"
+      config_files:
+        - ".yamllint.yml"

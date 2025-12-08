@@ -1,0 +1,4 @@
+# Python requirements for myrepos tooling
+jinja2>=3.0.0
+pyyaml>=6.0.0
+jsonschema>=4.0.0

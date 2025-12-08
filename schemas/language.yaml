@@ -1,0 +1,137 @@
+# YAML Schema for language-specific configurations
+# Defines language-specific settings and tooling requirements
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "Language Configuration Schema"
+description: "Schema for language-specific configuration overrides"
+type: object
+
+properties:
+  # Language-specific settings
+  languages:
+    type: object
+    description: "Language-specific configurations"
+    patternProperties:
+      "^(terraform|python|javascript|typescript|go|rust|java|csharp|cpp|c|php|ruby|swift|kotlin|scala|shell|powershell|sql|html|css|yaml|json|dockerfile|helm|ansible|markdown)$":
+        type: object
+        properties:
+          # File associations for this language
+          file_associations:
+            type: object
+            description: "File extension to language mappings"
+            additionalProperties:
+              type: string
+
+          # Language-specific VS Code settings
+          settings:
+            type: object
+            description: "VS Code settings specific to this language"
+            additionalProperties: true
+
+          # Required extensions for this language
+          required_extensions:
+            type: array
+            description: "Extensions required for this language"
+            items:
+              type: string
+              pattern: "^[a-zA-Z0-9-_]+\\.[a-zA-Z0-9-_]+$"
+
+          # Recommended extensions for this language
+          recommended_extensions:
+            type: array
+            description: "Extensions recommended for this language"
+            items:
+              type: string
+              pattern: "^[a-zA-Z0-9-_]+\\.[a-zA-Z0-9-_]+$"
+
+          # Language-specific tasks
+          tasks:
+            type: array
+            description: "Build/test/run tasks for this language"
+            items:
+              type: object
+              required:
+                - label
+                - type
+              properties:
+                label:
+                  type: string
+                type:
+                  type: string
+                command:
+                  type: string
+                group:
+                  type: string
+                args:
+                  type: array
+                  items:
+                    type: string
+              additionalProperties: true
+
+          # Language-specific launch configurations
+          launch_configurations:
+            type: array
+            description: "Debug configurations for this language"
+            items:
+              type: object
+              required:
+                - name
+                - type
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                request:
+                  type: string
+                  enum: [launch, attach]
+              additionalProperties: true
+
+          # Language-specific folder structure
+          folder_structure:
+            type: array
+            description: "Expected folder structure for this language"
+            items:
+              type: string
+
+          # Linting and formatting configuration
+          linting:
+            type: object
+            properties:
+              enabled:
+                type: boolean
+                default: true
+              tools:
+                type: array
+                items:
+                  type: string
+              config_files:
+                type: array
+                items:
+                  type: string
+            additionalProperties: false
+
+          # Package management configuration
+          package_management:
+            type: object
+            properties:
+              tool:
+                type: string
+                examples:
+                  - npm
+                  - pip
+                  - go mod
+                  - cargo
+                  - maven
+                  - gradle
+              config_files:
+                type: array
+                items:
+                  type: string
+            additionalProperties: false
+
+        additionalProperties: false
+
+    additionalProperties: false
+
+additionalProperties: false

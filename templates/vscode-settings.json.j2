@@ -1,0 +1,76 @@
+{
+	"files.exclude": {
+		"**/.git": true,
+		"**/.DS_Store": true
+	},
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/node_modules/*/**": true
+	}
+	{%- if language == "terraform" %},
+	"terraform.experimentalFeatures.validateOnSave": true,
+	"terraform.experimentalFeatures.prefillRequiredFields": true,
+	"files.associations": {
+		"*.tf": "terraform",
+		"*.tfvars": "terraform",
+		"*.hcl": "terraform"
+	},
+	"[terraform]": {
+		"editor.defaultFormatter": "hashicorp.terraform",
+		"editor.formatOnSave": true
+	}
+	{%- elif language == "python" %},
+	"python.defaultInterpreterPath": "./venv/bin/python",
+	"python.linting.enabled": true,
+	"python.linting.pylintEnabled": true,
+	"python.formatting.provider": "black",
+	"[python]": {
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true
+		}
+	}
+	{%- elif language == "javascript" %},
+	"typescript.preferences.includePackageJsonAutoImports": "auto",
+	"javascript.preferences.includePackageJsonAutoImports": "auto",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	}
+	{%- elif language == "go" %},
+	"go.toolsManagement.checkForUpdates": "local",
+	"go.useLanguageServer": true,
+	"[go]": {
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true
+		}
+	}
+	{%- elif language == "rust" %},
+	"rust-analyzer.checkOnSave.command": "cargo check",
+	"[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust-analyzer",
+		"editor.formatOnSave": true
+	}
+	{%- endif %}
+	{%- if cloud_provider == "aws" %},
+	"aws.telemetry": false,
+	"aws.suppressPrompts": {
+		"regionAddAutomatically": true
+	}
+	{%- elif cloud_provider == "azure" %},
+	"azure.resourceGroups.groupBy": "resourceType",
+	"azureTerraform.terminal": "integrated"
+	{%- elif cloud_provider == "gcp" %},
+	"cloudcode.gke.trust": true,
+	"cloudcode.duetAI.inline.enable": false
+	{%- endif %}
+}

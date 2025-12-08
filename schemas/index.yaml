@@ -1,0 +1,170 @@
+# Schema Index for Repository Configuration
+# Maps repository types to their applicable schemas
+
+repository_schemas:
+  base_schema: "repository.yaml"
+  description: "All repositories must conform to the base repository schema"
+
+  # Schema combinations by repository type
+  type_specific_schemas:
+    
+    # Module repositories (reusable components)
+    module:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Reusable modules, libraries, or components"
+      
+    # Application repositories
+    app:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+        - platform.yaml
+      optional_schemas:
+        - workspace.yaml
+      description: "Complete applications (web, mobile, desktop)"
+      
+    # Library/package repositories
+    lib:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Libraries, packages, or SDKs"
+      
+    # Infrastructure repositories
+    infra:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+        - platform.yaml
+      optional_schemas:
+        - workspace.yaml
+      description: "Infrastructure as Code repositories"
+      
+    # Website repositories
+    site:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Websites, documentation sites, or static sites"
+      
+    # Template repositories
+    template:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Project templates or boilerplates"
+      
+    # Tool repositories
+    tool:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Tools, utilities, or CLI applications"
+      
+    # Configuration repositories
+    config:
+      required_schemas:
+        - repository.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Configuration-only repositories"
+      
+    # Data repositories
+    data:
+      required_schemas:
+        - repository.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Data sets, schemas, or data-focused repositories"
+      
+    # Documentation repositories
+    docs:
+      required_schemas:
+        - repository.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Documentation-only repositories"
+      
+    # Monorepo repositories
+    monorepo:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+        - workspace.yaml
+      optional_schemas:
+        - platform.yaml
+      description: "Multi-project repositories"
+      
+    # Example repositories
+    example:
+      required_schemas:
+        - repository.yaml
+        - language.yaml
+      optional_schemas:
+        - workspace.yaml
+        - platform.yaml
+      description: "Example code or demonstrations"
+      
+    # Experimental repositories
+    experiment:
+      required_schemas:
+        - repository.yaml
+      optional_schemas:
+        - language.yaml
+        - workspace.yaml
+        - platform.yaml
+      description: "Experimental or proof-of-concept code"
+
+# Validation rules
+validation:
+  rules:
+    - "All repositories must have a valid repository.yaml file"
+    - "Repository type must match one of the defined types"
+    - "Required schemas for the repository type must be present if referenced"
+    - "Language-specific settings only apply if language is declared in repository.yaml"
+    - "Platform-specific settings only apply if platform is declared in repository.yaml"
+    
+  schema_dependencies:
+    language.yaml: 
+      requires: ["languages field in repository.yaml"]
+    platform.yaml:
+      requires: ["platform field in repository.yaml"]
+    workspace.yaml:
+      requires: ["repository.yaml"]
+
+# Usage examples
+examples:
+  terraform_module:
+    repository_type: "module"
+    schemas_used: ["repository.yaml", "language.yaml"]
+    description: "A Terraform module for AWS resources"
+    
+  python_web_app:
+    repository_type: "app"
+    schemas_used: ["repository.yaml", "language.yaml", "platform.yaml", "workspace.yaml"]
+    description: "A Python web application with GitHub Actions"
+    
+  documentation_site:
+    repository_type: "site"
+    schemas_used: ["repository.yaml", "workspace.yaml"]
+    description: "A documentation website built with Jekyll"

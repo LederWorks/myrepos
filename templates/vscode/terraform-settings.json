@@ -1,0 +1,13 @@
+{
+	"terraform.experimentalFeatures.validateOnSave": true,
+	"terraform.experimentalFeatures.prefillRequiredFields": true,
+	"files.associations": {
+		"*.tf": "terraform",
+		"*.tfvars": "terraform",
+		"*.hcl": "terraform"
+	},
+	"[terraform]": {
+		"editor.defaultFormatter": "hashicorp.terraform",
+		"editor.formatOnSave": true
+	}
+}

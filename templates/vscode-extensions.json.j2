@@ -1,0 +1,38 @@
+[
+	{%- set extensions = [] %}
+	{%- if language == "terraform" %}
+		{%- set _ = extensions.extend(["hashicorp.terraform", "ms-vscode.terraform"]) %}
+	{%- elif language == "python" %}
+		{%- set _ = extensions.extend(["ms-python.python", "ms-python.pylint", "ms-python.black-formatter"]) %}
+	{%- elif language == "javascript" %}
+		{%- set _ = extensions.extend(["ms-vscode.vscode-typescript-next", "esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]) %}
+	{%- elif language == "go" %}
+		{%- set _ = extensions.extend(["golang.go"]) %}
+	{%- elif language == "rust" %}
+		{%- set _ = extensions.extend(["rust-lang.rust-analyzer"]) %}
+	{%- elif language == "java" %}
+		{%- set _ = extensions.extend(["redhat.java", "vscjava.vscode-java-pack"]) %}
+	{%- endif %}
+	
+	{%- if cloud_provider == "aws" %}
+		{%- set _ = extensions.append("amazonwebservices.aws-toolkit-vscode") %}
+	{%- elif cloud_provider == "azure" %}
+		{%- set _ = extensions.extend(["ms-vscode.azure-account", "ms-azuretools.vscode-azureresourcegroups"]) %}
+	{%- elif cloud_provider == "gcp" %}
+		{%- set _ = extensions.append("googlecloudtools.cloudcode") %}
+	{%- endif %}
+	
+	{%- if platform == "gh" %}
+		{%- set _ = extensions.extend(["github.vscode-pull-request-github", "github.copilot"]) %}
+	{%- elif platform == "ado" %}
+		{%- set _ = extensions.append("ms-vsts.team") %}
+	{%- endif %}
+	
+	{%- if client == "crayon" %}
+		{%- set _ = extensions.append("ms-vscode.vscode-json") %}
+	{%- endif %}
+	
+	{%- for ext in extensions %}
+	"{{ ext }}"{% if not loop.last %},{% endif %}
+	{%- endfor %}
+]
