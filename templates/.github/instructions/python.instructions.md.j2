@@ -1,0 +1,30 @@
+---
+description: Python coding standards and best practices
+applyTo: '**/*.py'
+---
+
+# Python Instructions for {{ repo_name }}
+
+## Code Style and Standards
+- Follow PEP 8 style guidelines
+- Use type hints for function parameters and return values
+- Write comprehensive docstrings for modules, classes, and functions
+- Use meaningful variable and function names
+- Keep functions small and focused on single responsibility
+
+## Best Practices  
+- Use virtual environments for dependency management
+- Include requirements.txt or pyproject.toml
+- Write unit tests with pytest
+- Use logging instead of print statements
+- Handle exceptions appropriately with try/except blocks
+- Use f-strings for string formatting
+
+## Project Structure
+- Organize code into logical modules and packages
+- Include __init__.py files for packages
+- Use main() function as entry point
+- Separate configuration from code
+
+## Repository Types: {{ types | join(', ') }}
+- Follow Python best practices for {{ types | join(', ') }} repositories

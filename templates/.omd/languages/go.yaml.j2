@@ -1,0 +1,52 @@
+# Go language configuration
+languages:
+  go:
+    file_associations:
+      "*.go": "go"
+      "go.mod": "go.mod"
+      "go.sum": "go.sum"
+    
+    settings:
+      "[go]":
+        editor.formatOnSave: true
+        editor.tabSize: 4
+        editor.insertSpaces: false  # Go uses tabs
+      
+      go.useLanguageServer: true
+      go.formatTool: "goimports"
+      go.lintTool: "golangci-lint"
+    
+    required_extensions:
+      - "golang.go"
+    
+    tasks:
+      - label: "Go: Build"
+        type: "shell"
+        command: "go"
+        args: ["build", "."]
+        group: "build"
+      
+      - label: "Go: Test"
+        type: "shell"
+        command: "go"
+        args: ["test", "./..."]
+        group: "test"
+      
+      - label: "Go: Run"
+        type: "shell"
+        command: "go"
+        args: ["run", "."]
+        group: "build"
+    
+    launch_configurations:
+      - name: "Go: Launch Package"
+        type: "go"
+        request: "launch"
+        mode: "auto"
+        program: "${workspaceFolder}"
+    
+    package_management:
+      tool: "go mod"
+      config_files:
+        - "go.mod"
+        - "go.sum"

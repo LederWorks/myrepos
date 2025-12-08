@@ -1,0 +1,11 @@
+# Auto-detected repository configuration
+# Edit as needed and re-run setup
+
+copilot_instructions: false
+languages:
+- markdown
+- python
+- yaml
+platform: github
+types:
+- docs

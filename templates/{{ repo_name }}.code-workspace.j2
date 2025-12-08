@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	]{% if extensions or settings %},
+	{% if settings %}"settings": {{ settings | tojson }}{% if extensions %},{% endif %}{% endif %}
+	{% if extensions %}"extensions": {
+		"recommendations": {{ extensions | tojson }}
+	}{% endif %}{% endif %}
+}

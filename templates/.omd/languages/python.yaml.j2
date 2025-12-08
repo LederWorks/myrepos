@@ -1,0 +1,59 @@
+# Python language configuration
+languages:
+  python:
+    file_associations:
+      "*.py": "python"
+      "*.pyi": "python"
+      "*.pyx": "python"
+    
+    settings:
+      "[python]":
+        editor.formatOnSave: true
+        editor.defaultFormatter: "ms-python.black-formatter"
+        editor.codeActionsOnSave:
+          source.organizeImports: true
+        editor.tabSize: 4
+      
+      python.defaultInterpreterPath: "./venv/bin/python"
+      python.linting.enabled: true
+      python.linting.pylintEnabled: true
+      python.linting.flake8Enabled: true
+      python.formatting.provider: "black"
+      python.testing.pytestEnabled: true
+    
+    required_extensions:
+      - "ms-python.python"
+      - "ms-python.black-formatter"
+    
+    recommended_extensions:
+      - "ms-python.flake8"
+      - "ms-python.pylint"
+      - "ms-python.mypy-type-checker"
+      - "ms-toolsai.jupyter"
+    
+    tasks:
+      - label: "Python: Run Tests"
+        type: "shell"
+        command: "python"
+        args: ["-m", "pytest"]
+        group: "test"
+      
+      - label: "Python: Format Code"
+        type: "shell"
+        command: "black"
+        args: ["."]
+        group: "build"
+    
+    launch_configurations:
+      - name: "Python: Current File"
+        type: "python"
+        request: "launch"
+        program: "${file}"
+        console: "integratedTerminal"
+    
+    package_management:
+      tool: "pip"
+      config_files:
+        - "requirements.txt"
+        - "setup.py"
+        - "pyproject.toml"

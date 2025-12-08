@@ -1,0 +1,17 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{%- for config in launch_configurations %}
+		{
+			"name": "{{ config.name }}",
+			"type": "{{ config.type }}",
+			"request": "{{ config.request }}",
+			{%- for key, value in config.items() %}
+			{%- if key not in ['name', 'type', 'request'] %}
+			"{{ key }}": {{ value | tojson }},
+			{%- endif %}
+			{%- endfor %}
+		}{% if not loop.last %},{% endif %}
+		{%- endfor %}
+	]
+}

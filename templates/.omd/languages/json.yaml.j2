@@ -1,0 +1,44 @@
+# JSON language configuration
+languages:
+  json:
+    file_associations:
+      "*.json": "json"
+      "*.jsonc": "jsonc"
+    
+    settings:
+      "[json]":
+        editor.formatOnSave: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+      
+      "[jsonc]":
+        editor.formatOnSave: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+      
+      json.schemas: []
+      json.format.keepLines: false
+    
+    required_extensions:
+      - "ms-vscode.json"
+    
+    recommended_extensions:
+      - "eriklynd.json-tools"
+    
+    tasks:
+      - label: "JSON: Validate"
+        type: "shell"
+        command: "jsonlint"
+        args: ["**/*.json"]
+        group: "test"
+      
+      - label: "JSON: Format"
+        type: "shell"
+        command: "prettier"
+        args: ["--write", "**/*.json"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "jsonlint"

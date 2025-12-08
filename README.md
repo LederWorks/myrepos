@@ -17,119 +17,144 @@ This toolkit provides Python-based tools to enhance the [myrepos](https://myrepo
 ```
 myrepos/
 ├── scripts/                          # Python setup and generation scripts
-│   ├── setup-workspace.py           # Main workspace generator
-│   ├── generate-copilot-instructions.py # Copilot instructions generator  
-│   ├── setup-repository.py          # Repository initialization
-│   └── validate-schemas.py          # Configuration validation
-├── schemas/                          # YAML schemas for configuration
-│   ├── repository.yaml              # Base repository metadata schema
-│   ├── language.yaml                # Language-specific configuration schema
-│   ├── platform.yaml                # CI/CD platform configuration schema
-│   ├── workspace.yaml               # VS Code workspace configuration schema
-│   ├── index.yaml                   # Schema relationships and validation rules
-│   └── README.md                    # Schema documentation
-├── templates/                        # Template files
-│   └── repository.yaml              # Default repository metadata template
-├── requirements.txt                  # Python dependencies
-└── README.md                        # This file
+│   ├── workspace/
+│   │   └── generator.py              # Main workspace generator
+│   └── validation/
+│       └── validator.py              # Configuration validation
+├── templates/                        # Jinja2 templates and configuration
+│   ├── config/                       # YAML configuration files
+│   │   ├── languages.yaml            # Language-specific configurations
+│   │   ├── platforms.yaml            # Platform-specific configurations
+│   │   └── clients.yaml              # Client-specific configurations
+│   └── .vscode/                      # VS Code template files
+│       ├── settings.json.j2          # Settings template
+│       └── extensions.json.j2        # Extensions template
+├── docs/                             # Documentation
+│   └── TEMPLATE_SYSTEM.md            # Template system documentation
+├── venv/                             # Python virtual environment
+└── README.md                         # This file
 ```
 
 ## Features
 
 ### 🏗️ Workspace Generation
 
-- **Language-aware configurations**: Automatic VS Code settings for 25+ programming languages
-- **Extension management**: Smart extension recommendations based on repository content
-- **Cross-platform compatibility**: Works on macOS, Linux, and Windows
-- **Metadata-driven**: Uses explicit `.omd/repository.yaml` files for configuration
+- **Template-driven configurations**: Jinja2 templates with YAML configuration files for flexible setup
+- **Language-aware settings**: Comprehensive VS Code settings for 9 programming languages
+- **Smart extension recommendations**: Auto-generated extension lists based on detected languages and platforms
+- **Auto-detection capabilities**: Automatically detects languages, platforms, and repository types
+- **Metadata-driven**: Uses `.omd/repository.yaml` files with auto-generation fallback
 
-### 📋 Schema System
+### 📋 Configuration System
 
-**Repository Types**: 13 flexible repository categories:
-- `module`, `app`, `lib`, `infra`, `site`, `template`, `tool`, `config`, `data`, `docs`, `monorepo`, `example`, `experiment`
+**Repository Types**: Flexible repository categories:
+- `app`, `lib`, `infra`, `site`, `docs`, and more
 
-**Language Support**: 25+ languages including:
-- Programming: Python, JavaScript, TypeScript, Go, Rust, Java, C#, etc.
-- Configuration: YAML, JSON, Terraform, Dockerfile
-- Documentation: Markdown with comprehensive formatting and linting
-- Scripting: Shell, PowerShell
+**Language Support**: 9 languages with comprehensive configurations:
+- **Programming**: Python, Go, SQL
+- **Configuration**: YAML, JSON, Terraform
+- **Documentation**: Markdown with advanced formatting and linting
+- **Scripting**: Shell, PowerShell
 
-**Platform Integration**: GitHub, Azure DevOps, GitLab, Bitbucket, etc.
+**Platform Integration**: GitHub, Azure DevOps with automatic CI/CD detection
+
+**Template-Driven Architecture**: All configurations managed via YAML files and Jinja2 templates
 
 ### 🤖 Copilot Instructions
 
-Automatically generates repository-specific GitHub Copilot instructions:
+Generates repository-specific GitHub Copilot instructions when enabled:
 - Language-specific coding standards and best practices
 - Documentation writing guidelines for Markdown
 - Platform-specific workflow instructions
 - Repository type-appropriate development patterns
 
+**Note**: Copilot instruction generation is optional and controlled by the `copilot_instructions` flag in repository metadata.
+
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Set Up Python Virtual Environment
 
+**Quick Setup (Automated):**
 ```bash
-pip install -r requirements.txt
+# Use the setup script (recommended)
+./scripts/setup.sh
+
+# Or on Windows
+.\scripts\setup.ps1
 ```
 
-### 2. Initialize a Repository
+**Manual Setup:**
+```bash
+# Navigate to the myrepos directory
+cd /Users/cuki/Data/Tools/myrepos
+
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate
+
+# Upgrade pip to the latest version
+python3 -m pip install --upgrade pip
+
+# Install required dependencies
+pip install PyYAML jsonschema jinja2
+```
+
+**Troubleshooting:**
+```bash
+# If you get "ModuleNotFoundError: No module named 'jinja2'"
+source venv/bin/activate
+pip install jinja2
+
+# Always activate the virtual environment before using the tools
+source venv/bin/activate
+```
+
+### 2. Generate Workspace Configuration
 
 ```bash
-# Create repository metadata
+# Complete repository setup with auto-detection
+# This will auto-detect languages, platform, and repository types
 python scripts/setup-repository.py /path/to/your/repo
 
-# Edit the generated .omd/repository.yaml file to match your repository
+# Works with both new repositories and existing .omd/repository.yaml metadata
+python scripts/setup-repository.py /path/to/your/repo
 ```
 
-### 3. Generate Workspace Configuration
-
-```bash
-# Generate VS Code workspace and settings
-python scripts/setup-workspace.py /path/to/your/repo
-
-# Generate Copilot instructions
-python scripts/generate-copilot-instructions.py /path/to/your/repo
-```
-
-### 4. Validate Configuration
+### 3. Validate Configuration (Optional)
 
 ```bash
 # Validate repository configuration against schemas
-python scripts/validate-schemas.py --repository /path/to/your/repo
+python scripts/validation/validator.py --repository /path/to/your/repo
 ```
 
 ## Repository Configuration
 
-### Basic Repository Metadata (`.omd/repository.yaml`)
+### Auto-Generated Repository Metadata (`.omd/repository.yaml`)
 
 ```yaml
+# Auto-detected repository configuration
+# Edit as needed and re-run setup
+
+copilot_instructions: false
 languages:
-  - python
-  - markdown
-  - yaml
+- markdown
+- python
+- yaml
 platform: github
-repository_type: app
-targets:
-  - web
-  - api
-tags:
-  - backend
-  - microservice
+types:
+- docs
 ```
 
-### Language-Specific Configuration (`.omd/language.yaml`)
+### Template-Driven Configuration
 
-```yaml
-languages:
-  python:
-    settings:
-      "[python]":
-        editor.formatOnSave: true
-        editor.defaultFormatter: "ms-python.black-formatter"
-    required_extensions:
-      - "ms-python.python"
-      - "ms-python.black-formatter"
-```
+Configurations are managed through YAML files in `templates/config/`:
+- `languages.yaml`: Language-specific VS Code extensions and settings
+- `platforms.yaml`: Platform-specific extensions (GitHub, Azure DevOps, etc.)
+- `clients.yaml`: Client-specific customizations
+
+These files are processed by Jinja2 templates to generate VS Code settings and extensions.
 
 ## Integration with MyRepos
 
@@ -137,65 +162,65 @@ Add to your `.mrconfig`:
 
 ```ini
 [DEFAULT]
+# Complete repository setup (with auto-detection and validation)
 setup = python ~/Data/Tools/myrepos/scripts/setup-repository.py "$MR_REPO"
-workspace = python ~/Data/Tools/myrepos/scripts/setup-workspace.py "$MR_REPO"
-copilot = python ~/Data/Tools/myrepos/scripts/generate-copilot-instructions.py "$MR_REPO"
-validate = python ~/Data/Tools/myrepos/scripts/validate-schemas.py --repository "$MR_REPO"
+
+# Validate repository configuration only
+validate = python ~/Data/Tools/myrepos/scripts/validation/validator.py --repository "$MR_REPO"
 ```
 
 Then use with myrepos:
 
 ```bash
-# Set up all repositories
+# Setup all repositories (with auto-detection and validation)
 mr -j4 run setup
 
-# Generate workspaces for all repositories  
-mr -j4 run workspace
-
-# Generate Copilot instructions
-mr -j4 run copilot
-
-# Validate all configurations
+# Validate all configurations only
 mr -j4 run validate
 ```
 
-## Schema Validation
+## Configuration Validation
 
-The schema system ensures consistency across repositories:
+The validation system ensures repository configurations are correct:
 
 ```bash
 # Validate a single repository
-python scripts/validate-schemas.py --repository /path/to/repo
+python scripts/validation/validator.py --repository /path/to/repo
 
 # JSON output for automation
-python scripts/validate-schemas.py --repository /path/to/repo --json-output
+python scripts/validation/validator.py --repository /path/to/repo --json-output
+
+# Use with myrepos for all repositories
+mr run validate
 ```
 
 ## Language-Specific Features
 
 ### Markdown Support
-- Comprehensive documentation standards and formatting
-- Automatic table of contents generation
-- Linting with configurable rules
-- GitHub Flavored Markdown preview
+- Comprehensive formatting with yzhang.markdown-all-in-one
+- Linting with DavidAnson.vscode-markdownlint
+- Mermaid diagram support
+- GitHub preview styles
+- Configurable word wrap and formatting
 
 ### Python Support
-- Virtual environment detection
-- Black formatting and import sorting
-- Testing framework integration
-- Type hint validation
+- Black formatting (ms-python.black-formatter)
+- Import sorting with isort
+- Pylint integration
+- Virtual environment path configuration
+- Code actions on save
 
 ### Terraform Support
-- HCL formatting and validation
-- Provider version constraints
-- Cloud provider best practices
-- Security scanning integration
+- HashiCorp Terraform extension
+- Auto-formatting on save
+- Validation on save
+- HCL file associations
 
-### JavaScript/TypeScript Support
-- ESLint and Prettier integration
-- Package.json dependency management
-- Testing framework setup
-- Modern ES6+ standards
+### YAML Support
+- RedHat YAML extension
+- Format on save
+- Validation and hover support
+- Proper indentation (2 spaces)
 
 ## Development
 
@@ -211,11 +236,14 @@ python scripts/validate-schemas.py --repository /path/to/repo --json-output
 ### Testing
 
 ```bash
-# Run schema validation tests
-python scripts/validate-schemas.py --schemas-dir schemas --repository ./test-repos/sample
+# Test complete setup on myrepos itself
+python scripts/setup-repository.py /Users/cuki/Data/Tools/myrepos
 
-# Test workspace generation
-python scripts/setup-workspace.py ./test-repos/sample
+# Test validation only
+python scripts/validation/validator.py --repository /Users/cuki/Data/Tools/myrepos
+
+# Test with a sample repository
+python scripts/setup-repository.py /path/to/test/repo
 ```
 
 ## Requirements
@@ -227,6 +255,15 @@ python scripts/setup-workspace.py ./test-repos/sample
 - VS Code (for workspace features)
 - Git
 - myrepos (optional, for batch operations)
+
+### Python Virtual Environment
+
+This project uses a Python virtual environment to manage dependencies. The virtual environment isolates the project dependencies from your system Python installation.
+
+**Dependencies installed:**
+- `PyYAML 6.0.3` - YAML parsing and generation
+- `jsonschema 4.25.1` - JSON schema validation
+- `jinja2 3.0+` - Template engine for generating configuration files
 
 ## License
 

@@ -1,0 +1,39 @@
+# SQL language configuration
+languages:
+  sql:
+    file_associations:
+      "*.sql": "sql"
+    
+    settings:
+      "[sql]":
+        editor.formatOnSave: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+      
+      sql.format.keywordCase: "upper"
+      sql.format.identifierCase: "lower"
+    
+    required_extensions:
+      - "ms-mssql.mssql"
+    
+    recommended_extensions:
+      - "ms-mssql.sql-database-projects-vscode"
+      - "mtxr.sqltools"
+    
+    tasks:
+      - label: "SQL: Format"
+        type: "shell"
+        command: "sqlfluff"
+        args: ["format", "**/*.sql"]
+        group: "build"
+      
+      - label: "SQL: Lint"
+        type: "shell"
+        command: "sqlfluff"
+        args: ["lint", "**/*.sql"]
+        group: "test"
+    
+    linting:
+      enabled: true
+      tools:
+        - "sqlfluff"

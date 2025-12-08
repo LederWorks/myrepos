@@ -1,0 +1,18 @@
+# Platform-specific VS Code extensions and settings
+
+github:
+  extensions:
+    - github.vscode-pull-request-github
+    - github.copilot
+    - github.copilot-chat
+  settings: {}
+
+azuredevops:
+  extensions:
+    - ms-vsts.team
+  settings: {}
+
+gitlab:
+  extensions:
+    - gitlab.gitlab-workflow
+  settings: {}

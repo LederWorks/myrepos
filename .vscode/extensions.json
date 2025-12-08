@@ -1,0 +1,14 @@
+{
+	"recommendations": [
+		"bierner.markdown-mermaid",
+		"bierner.markdown-preview-github-styles",
+		"DavidAnson.vscode-markdownlint",
+		"github.copilot",
+		"github.copilot-chat",
+		"github.vscode-pull-request-github",
+		"ms-python.isort",
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"redhat.vscode-yaml",
+		"yzhang.markdown-all-in-one"	]
+}

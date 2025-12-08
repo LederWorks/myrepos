@@ -1,0 +1,23 @@
+# Repository metadata configuration
+# Programming languages and technologies used in this repository
+languages:
+{%- for lang in languages %}
+  - {{ lang }}
+{%- endfor %}
+
+# CI/CD platform where this repository is hosted
+platform: {{ platform }}
+
+# Repository types (array format supports multiple purposes)
+types:
+{%- for type in types %}
+  - {{ type }}
+{%- endfor %}
+
+{%- if tags %}
+# Optional: Additional tags for categorization
+tags:
+{%- for tag in tags %}
+  - {{ tag }}
+{%- endfor %}
+{%- endif %}

@@ -1,0 +1,71 @@
+# Markdown language configuration
+languages:
+  markdown:
+    file_associations:
+      "*.md": "markdown"
+      "*.mdx": "markdown"
+      "*.markdown": "markdown"
+    
+    settings:
+      # Markdown-specific VS Code settings
+      "[markdown]":
+        editor.wordWrap: "on"
+        editor.wordWrapColumn: 100
+        editor.quickSuggestions: 
+          comments: "off"
+          strings: "off"
+          other: "off"
+        editor.formatOnSave: true
+        editor.formatOnPaste: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+        editor.defaultFormatter: "yzhang.markdown-all-in-one"
+      
+      # Markdown preview settings
+      markdown.preview.breaks: true
+      markdown.preview.linkify: true
+      markdown.preview.typographer: true
+      markdown.extension.toc.updateOnSave: true
+      markdown.extension.toc.orderedList: false
+      markdown.extension.list.indentationSize: "adaptive"
+      
+      # Markdown linting
+      markdownlint.config:
+        MD013: false  # Line length
+        MD033: false  # Allow inline HTML
+        MD041: false  # First line in file should be a top level header
+    
+    required_extensions:
+      - "yzhang.markdown-all-in-one"
+      - "DavidAnson.vscode-markdownlint"
+    
+    recommended_extensions:
+      - "bierner.markdown-mermaid"
+      - "bierner.markdown-emoji"
+      - "bierner.markdown-preview-github-styles"
+      - "shd101wyy.markdown-preview-enhanced"
+      - "mushan.vscode-paste-image"
+      - "telesoho.vscode-markdown-paste-image"
+    
+    tasks:
+      - label: "Markdown: Lint All Files"
+        type: "shell"
+        command: "markdownlint"
+        args: ["**/*.md", "--fix"]
+        group: "build"
+      
+      - label: "Markdown: Generate Table of Contents"
+        type: "shell"
+        command: "markdown-toc"
+        args: ["-i", "README.md"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "markdownlint"
+        - "remark-lint"
+      config_files:
+        - ".markdownlint.json"
+        - ".markdownlintrc"
+        - ".remarkrc"

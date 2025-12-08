@@ -1,0 +1,21 @@
+---
+description: SQL coding standards and best practices
+applyTo: '**/*.sql'
+---
+
+# SQL Instructions for {{ repo_name }}
+
+## SQL Standards
+- Use UPPER CASE for SQL keywords (SELECT, FROM, WHERE, etc.)
+- Use snake_case for table and column names
+- Always use semicolons to terminate statements
+- Use meaningful table and column names
+
+## Best Practices
+- Use explicit JOIN syntax instead of implicit joins
+- Always specify column names in INSERT statements
+- Use parameterized queries to prevent SQL injection
+- Include appropriate indexes for performance
+
+## Repository Types: {{ types | join(', ') }}
+- Follow SQL best practices for {{ types | join(', ') }} repositories

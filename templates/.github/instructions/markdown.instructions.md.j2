@@ -1,0 +1,27 @@
+---
+description: Markdown documentation standards and best practices
+applyTo: '**/*.md'
+---
+
+# Markdown Instructions for {{ repo_name }}
+
+## Writing Standards
+- Use clear, concise language appropriate for technical documentation
+- Write in present tense and active voice when possible
+- Use consistent terminology throughout documentation
+- Structure content with logical heading hierarchy (H1 → H2 → H3)
+
+## Formatting Rules
+- Use ATX-style headers (# ## ###) instead of underlined headers
+- Maintain consistent spacing: one blank line before headers, none after
+- Use fenced code blocks with language specification: ```bash, ```python, ```yaml
+- Use tables for structured data comparison
+
+## Content Organization
+- Start each document with a brief overview or introduction
+- Include relevant examples and code snippets
+- Add "See also" sections for related documentation
+- Document prerequisites and dependencies clearly
+
+## Repository Types: {{ types | join(', ') }}
+- Follow documentation standards appropriate for {{ types | join(', ') }} repositories

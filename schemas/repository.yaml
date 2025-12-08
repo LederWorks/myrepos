@@ -9,7 +9,7 @@ type: object
 required:
   - languages
   - platform
-  - repository_type
+  - types
 
 properties:
   # Programming languages used in this repository
@@ -22,29 +22,12 @@ properties:
       enum:
         - terraform
         - python
-        - javascript
-        - typescript
         - go
-        - rust
-        - java
-        - csharp
-        - cpp
-        - c
-        - php
-        - ruby
-        - swift
-        - kotlin
-        - scala
         - shell
         - powershell
         - sql
-        - html
-        - css
         - yaml
         - json
-        - dockerfile
-        - helm
-        - ansible
         - markdown
 
   # CI/CD platform where this repository is hosted
@@ -54,53 +37,31 @@ properties:
     enum:
       - github
       - azuredevops
-      - gitlab
-      - bitbucket
-      - gitea
-      - codecommit
 
-  # Repository type/category for organizational purposes
-  repository_type:
-    type: string
-    description: "Primary purpose and type of this repository"
-    enum:
-      - module        # Reusable component/library/module
-      - app           # Application (web, mobile, desktop)
-      - lib           # Library/package
-      - infra         # Infrastructure as Code
-      - site          # Website/documentation site
-      - template      # Template or boilerplate
-      - tool          # Tool or utility
-      - config        # Configuration repository
-      - data          # Data repository
-      - docs          # Documentation only
-      - monorepo      # Multi-project repository
-      - example       # Example/demo code
-      - experiment    # Experimental/proof-of-concept
-
-  # Optional: Target environments or platforms
-  targets:
+  # Repository types for organizational purposes
+  types:
     type: array
-    description: "Target environments, platforms, or services (optional)"
+    description: "Purpose and types of this repository (supports multiple types)"
+    minItems: 1
     items:
       type: string
-      examples:
-        - aws
-        - azure
-        - gcp
-        - kubernetes
-        - docker
-        - web
-        - mobile
-        - desktop
-        - serverless
-        - database
-        - api
-        - microservice
-        - cli
-        - library
-        - browser-extension
-        - vscode-extension
+      enum:
+        - app           # Application (web, mobile, desktop)
+        - lib           # Library/package/module
+        - infra         # Infrastructure as Code
+        - site          # Website/documentation site
+        - template      # Template or boilerplate
+        - tool          # Tool or utility
+        - config        # Configuration repository
+        - docs          # Documentation
+        - monorepo      # Multi-project repository
+        - example       # Example/demo code
+
+  # Optional: Generate GitHub Copilot instructions
+  copilot_instructions:
+    type: boolean
+    description: "Whether to generate GitHub Copilot instruction files"
+    default: false
 
   # Optional: Additional tags for flexible categorization
   tags:

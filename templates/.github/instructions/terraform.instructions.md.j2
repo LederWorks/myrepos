@@ -1,0 +1,25 @@
+---
+description: Terraform coding standards and best practices
+applyTo: '**/*.tf'
+---
+
+# Terraform Instructions for {{ repo_name }}
+
+## Code Style and Standards
+- Use consistent naming conventions: snake_case for resources and variables
+- Always include descriptions for variables and outputs
+- Use data sources instead of hardcoded values when possible
+- Follow the standard module structure: main.tf, variables.tf, outputs.tf
+- Use locals for computed values and complex expressions
+
+## Best Practices
+- Always include version constraints for providers
+- Use terraform fmt before committing
+- Include validation rules for variables when appropriate
+- Use meaningful resource names that reflect their purpose
+- Add tags to all resources that support them
+
+## Repository Types: {{ types | join(', ') }}
+- Follow Terraform best practices for {{ types | join(', ') }} repositories
+- Use provider-specific data sources for dynamic values
+- Implement proper IAM policies with least privilege principle

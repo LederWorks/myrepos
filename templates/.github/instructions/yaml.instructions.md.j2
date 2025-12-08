@@ -1,0 +1,21 @@
+---
+description: YAML configuration standards and best practices
+applyTo: '**/*.yml'
+---
+
+# YAML Instructions for {{ repo_name }}
+
+## Structure and Format
+- Use consistent indentation (2 spaces, no tabs)
+- Quote strings that contain special characters or start with numbers
+- Use explicit document start (---) and end (...) markers when needed
+- Keep lines under 120 characters when possible
+
+## Best Practices
+- Use descriptive keys that clearly indicate their purpose
+- Group related configuration items logically
+- Include comments for complex configurations
+- Validate YAML syntax before committing
+
+## Repository Types: {{ types | join(', ') }}
+- Follow YAML conventions appropriate for {{ types | join(', ') }} types

@@ -1,0 +1,37 @@
+# Workspace-specific configuration
+workspace:
+  # Additional folders to include in the workspace
+  additional_folders: []
+  
+  # Custom workspace settings that override language defaults
+  custom_settings: {}
+  
+  # Additional extension recommendations
+  additional_extensions: []
+  
+  # Exclude patterns from file explorer
+  exclude_patterns:
+    "**/.git": true
+    "**/.DS_Store": true
+    {%- if 'python' in languages %}
+    "**/__pycache__": true
+    "**/*.pyc": true
+    "**/venv": true
+    "**/env": true
+    {%- endif %}
+    {%- if 'javascript' in languages %}
+    "**/node_modules": true
+    "**/dist": true
+    "**/build": true
+    {%- endif %}
+    {%- if 'terraform' in languages %}
+    "**/.terraform": true
+    "**/*.tfstate": true
+    "**/*.tfstate.backup": true
+    {%- endif %}
+  
+  # Custom tasks beyond language defaults
+  custom_tasks: []
+  
+  # Debug configurations
+  debug_configurations: []

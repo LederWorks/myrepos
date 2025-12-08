@@ -1,0 +1,42 @@
+{%- set languages = load_yaml('config/languages.yaml') -%}
+{%- set platforms = load_yaml('config/platforms.yaml') -%}
+{%- set clients = load_yaml('config/clients.yaml') -%}
+{%- set all_extensions = [] -%}
+
+{# Language extensions #}
+{%- for language in metadata.languages -%}
+  {%- if language in languages -%}
+    {%- for ext in languages[language].extensions -%}
+      {%- if ext not in all_extensions -%}
+        {%- set _ = all_extensions.append(ext) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{# Platform extensions #}
+{%- if metadata.platform in platforms -%}
+  {%- for ext in platforms[metadata.platform].extensions -%}
+    {%- if ext not in all_extensions -%}
+      {%- set _ = all_extensions.append(ext) -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{# Client extensions #}
+{%- if metadata.client in clients -%}
+  {%- for ext in clients[metadata.client].extensions -%}
+    {%- if ext not in all_extensions -%}
+      {%- set _ = all_extensions.append(ext) -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{
+	"recommendations": [
+{% for ext in all_extensions | sort %}
+		"{{ ext }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+	]
+}

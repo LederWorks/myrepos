@@ -1,0 +1,39 @@
+# Shell language configuration
+languages:
+  shell:
+    file_associations:
+      "*.sh": "shellscript"
+      "*.bash": "shellscript"
+      "*.zsh": "shellscript"
+    
+    settings:
+      "[shellscript]":
+        editor.formatOnSave: true
+        editor.tabSize: 4
+        editor.insertSpaces: true
+      
+      shellcheck.enable: true
+      shellformat.effectLanguages: ["shellscript"]
+    
+    required_extensions:
+      - "timonwong.shellcheck"
+      - "foxundermoon.shell-format"
+    
+    tasks:
+      - label: "Shell: Check Syntax"
+        type: "shell"
+        command: "shellcheck"
+        args: ["**/*.sh"]
+        group: "test"
+      
+      - label: "Shell: Format"
+        type: "shell"
+        command: "shfmt"
+        args: ["-w", "**/*.sh"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "shellcheck"
+        - "shfmt"

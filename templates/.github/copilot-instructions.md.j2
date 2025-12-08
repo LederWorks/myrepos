@@ -1,0 +1,75 @@
+---
+description: Coding standards and conventions for {{ repo_name }}
+applyTo: '**'
+---
+
+# {{ repo_name | title }} - Coding Standards
+
+## Repository Overview
+
+**Repository Type:** {{ types | join(', ') }}
+**Languages:** {{ languages | join(', ') }}
+**Platform:** {{ platform }}
+
+## General Guidelines
+
+- Follow established coding standards for each language
+- Write clear, self-documenting code
+- Include comprehensive tests for new functionality
+- Use meaningful commit messages following conventional commits
+- Keep functions and classes focused and single-purpose
+
+## Code Quality Standards
+
+- Code must pass all linting and formatting checks
+- Maintain consistent code style across the entire repository
+- Write comprehensive documentation for public APIs
+- Include error handling and logging where appropriate
+- Follow security best practices for the technology stack
+
+## Testing Requirements
+
+- Write unit tests for all new functions and methods
+- Ensure test coverage meets project standards
+- Include integration tests for critical workflows
+- All tests must pass before merging changes
+
+## Language-Specific Guidelines
+
+{%- for language in languages %}
+- See [{{ language }}.instructions.md](instructions/{{ language }}.instructions.md) for {{ language | title }} specific guidelines
+{%- endfor %}
+
+## Repository Type: {{ types | join(', ') | title }}
+
+{%- if 'lib' in types %}
+### Library Development
+- Follow semantic versioning for releases
+- Maintain backward compatibility when possible
+- Provide clear API documentation
+- Include usage examples in documentation
+{%- endif %}
+
+{%- if 'app' in types %}
+### Application Development
+- Follow established architectural patterns
+- Implement proper error handling and logging
+- Include configuration management
+- Ensure scalability and performance considerations
+{%- endif %}
+
+{%- if 'infra' in types %}
+### Infrastructure as Code
+- Use consistent resource naming conventions
+- Include proper resource tagging
+- Implement least privilege security principles
+- Document infrastructure dependencies
+{%- endif %}
+
+{%- if 'tool' in types %}
+### Tool Development
+- Provide comprehensive CLI help and documentation
+- Include usage examples and common scenarios
+- Implement proper error messages and exit codes
+- Support standard input/output patterns
+{%- endif %}

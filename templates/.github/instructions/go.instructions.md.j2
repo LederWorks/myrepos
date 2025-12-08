@@ -1,0 +1,29 @@
+---
+description: Go coding standards and best practices
+applyTo: '**/*.go'
+---
+
+# Go Instructions for {{ repo_name }}
+
+## Code Style and Standards
+- Follow Go conventions and use gofmt
+- Use meaningful package and variable names
+- Write comprehensive comments for public functions and types
+- Use interfaces to define behavior contracts
+- Keep functions small and focused
+
+## Best Practices
+- Use go mod for dependency management
+- Write unit tests using the testing package
+- Handle errors explicitly - don't ignore them
+- Use context.Context for cancellation and timeouts
+- Follow the "accept interfaces, return structs" principle
+
+## Project Structure
+- Organize code into logical packages
+- Use main package only for entry points
+- Keep internal packages truly internal
+- Use cmd/ directory for executables
+
+## Repository Types: {{ types | join(', ') }}
+- Follow Go best practices for {{ types | join(', ') }} repositories

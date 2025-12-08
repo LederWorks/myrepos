@@ -1,0 +1,21 @@
+---
+description: JSON configuration standards and best practices
+applyTo: '**/*.json'
+---
+
+# JSON Instructions for {{ repo_name }}
+
+## Format Standards
+- Use consistent indentation (2 spaces)
+- Always use double quotes for strings
+- No trailing commas (invalid JSON)
+- Use meaningful key names that are self-documenting
+
+## Best Practices
+- Validate JSON syntax before committing
+- Use schema validation where applicable (JSON Schema)
+- Keep nested objects shallow when possible
+- Use arrays for ordered data, objects for key-value pairs
+
+## Repository Types: {{ types | join(', ') }}
+- Follow JSON conventions appropriate for {{ types | join(', ') }} repositories

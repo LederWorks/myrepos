@@ -1,0 +1,138 @@
+# {{ repo_name | title }}
+
+{{ description | default('Brief description of this repository.') }}
+
+## Overview
+
+<!-- Provide a more detailed description of what this repository contains and its purpose -->
+
+## Technologies
+
+{%- if languages %}
+This project uses the following technologies:
+
+{%- for lang in languages %}
+- {{ lang | title }}
+{%- endfor %}
+{%- endif %}
+
+{%- if 'terraform' in languages %}
+
+## Prerequisites
+
+- [Terraform](https://www.terraform.io/downloads.html) >= {{ terraform_version | default('1.0') }}
+{%- if targets and 'aws' in targets %}
+- AWS CLI configured with appropriate credentials
+{%- endif %}
+{%- if targets and 'azure' in targets %}
+- Azure CLI configured with appropriate credentials
+{%- endif %}
+{%- if targets and 'gcp' in targets %}
+- Google Cloud SDK configured with appropriate credentials
+{%- endif %}
+
+## Usage
+
+```bash
+# Initialize Terraform
+terraform init
+
+# Review the execution plan
+terraform plan
+
+# Apply the configuration
+terraform apply
+```
+{%- endif %}
+
+{%- if 'python' in languages %}
+
+## Installation
+
+1. Clone this repository:
+   ```bash
+   git clone {{ repo_url | default('<repository-url>') }}
+   cd {{ repo_name }}
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+
+```python
+# Add usage examples here
+```
+
+## Development
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest
+
+# Run linting
+flake8 .
+
+# Format code
+black .
+```
+{%- endif %}
+
+{%- if 'javascript' in languages %}
+
+## Installation
+
+```bash
+# Clone the repository
+git clone {{ repo_url | default('<repository-url>') }}
+cd {{ repo_name }}
+
+# Install dependencies
+{{ package_manager | default('npm') }} install
+```
+
+## Usage
+
+```bash
+# Start development server
+{{ package_manager | default('npm') }} run dev
+
+# Build for production
+{{ package_manager | default('npm') }} run build
+
+# Run tests
+{{ package_manager | default('npm') }} test
+```
+{%- endif %}
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+{{ license | default('This project is licensed under the MIT License - see the LICENSE file for details.') }}
+
+{%- if maintainers %}
+
+## Maintainers
+
+{%- for maintainer in maintainers %}
+- {{ maintainer }}
+{%- endfor %}
+{%- endif %}

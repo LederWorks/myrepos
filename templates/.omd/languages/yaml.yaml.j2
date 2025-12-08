@@ -1,0 +1,30 @@
+# YAML language configuration
+languages:
+  yaml:
+    file_associations:
+      "*.yml": "yaml"
+      "*.yaml": "yaml"
+    
+    settings:
+      "[yaml]":
+        editor.formatOnSave: true
+        editor.tabSize: 2
+        editor.insertSpaces: true
+      
+      yaml.format.enable: true
+      yaml.validate: true
+      yaml.hover: true
+      yaml.completion: true
+    
+    required_extensions:
+      - "redhat.vscode-yaml"
+    
+    recommended_extensions:
+      - "ms-kubernetes-tools.vscode-kubernetes-tools"
+    
+    linting:
+      enabled: true
+      tools:
+        - "yamllint"
+      config_files:
+        - ".yamllint.yml"

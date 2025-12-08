@@ -1,0 +1,21 @@
+---
+description: PowerShell coding standards and best practices
+applyTo: '**/*.ps1'
+---
+
+# PowerShell Instructions for {{ repo_name }}
+
+## PowerShell Standards
+- Use approved verbs for function names (Get-, Set-, New-, etc.)
+- Follow PascalCase for function and parameter names
+- Use Write-Verbose, Write-Warning, Write-Error for output
+- Support -WhatIf and -Confirm parameters for destructive operations
+
+## Best Practices
+- Include comprehensive help using comment-based help
+- Use structured error handling with try/catch/finally
+- Validate input parameters with [ValidateSet], [ValidateRange], etc.
+- Use pipeline input and output where appropriate
+
+## Repository Types: {{ types | join(', ') }}
+- Follow PowerShell best practices for {{ types | join(', ') }} repositories

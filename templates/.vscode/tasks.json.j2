@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{%- for task in tasks %}
+		{
+			"label": "{{ task.label }}",
+			"type": "{{ task.type }}",
+			"command": "{{ task.command }}",
+			{%- if task.args %}
+			"args": {{ task.args | tojson }},
+			{%- endif %}
+			"group": "{{ task.group | default('build') }}"
+		}{% if not loop.last %},{% endif %}
+		{%- endfor %}
+	]
+}

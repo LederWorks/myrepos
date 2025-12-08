@@ -1,0 +1,30 @@
+---
+description: Shell scripting standards and best practices
+applyTo: '**/*.sh'
+---
+
+# Shell Script Instructions for {{ repo_name }}
+
+## Shell Standards
+- Use #!/bin/bash or #!/bin/sh shebang appropriately
+- Set strict error handling: set -euo pipefail
+- Use [[ ]] for conditional tests instead of [ ]
+- Quote variables to prevent word splitting: "$variable"
+- Use ${variable} for parameter expansion
+
+## Best Practices
+- Include usage information and help text
+- Validate input parameters and provide meaningful error messages
+- Use functions to organize code and avoid repetition
+- Handle signals appropriately (trap)
+- Make scripts idempotent when possible
+
+## Documentation
+- Include header comments explaining script purpose
+- Document required parameters and environment variables
+- Provide usage examples
+- Include exit codes documentation
+- Add inline comments for complex logic
+
+## Repository Types: {{ types | join(', ') }}
+- Follow shell scripting best practices for {{ types | join(', ') }} repositories

@@ -1,0 +1,50 @@
+# Terraform language configuration
+languages:
+  terraform:
+    file_associations:
+      "*.tf": "terraform"
+      "*.tfvars": "terraform-vars"
+      "*.hcl": "terraform"
+    
+    settings:
+      "[terraform]":
+        editor.formatOnSave: true
+        editor.defaultFormatter: "hashicorp.terraform"
+        editor.tabSize: 2
+      
+      terraform.experimentalFeatures.validateOnSave: true
+      terraform.experimentalFeatures.prefillRequiredFields: true
+    
+    required_extensions:
+      - "hashicorp.terraform"
+    
+    recommended_extensions:
+      - "ms-azuretools.vscode-azureterraform"
+      - "4ops.terraform"
+    
+    tasks:
+      - label: "Terraform: Validate"
+        type: "shell"
+        command: "terraform"
+        args: ["validate"]
+        group: "test"
+      
+      - label: "Terraform: Format"
+        type: "shell"
+        command: "terraform"
+        args: ["fmt", "-recursive"]
+        group: "build"
+      
+      - label: "Terraform: Plan"
+        type: "shell"
+        command: "terraform"
+        args: ["plan"]
+        group: "build"
+    
+    linting:
+      enabled: true
+      tools:
+        - "tflint"
+        - "tfsec"
+      config_files:
+        - ".tflint.hcl"

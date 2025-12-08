@@ -1,0 +1,10 @@
+# Client-specific VS Code extensions and settings
+
+crayon:
+  extensions:
+    - ms-vscode.vscode-json
+  settings: {}
+
+unknown:
+  extensions: []
+  settings: {}
