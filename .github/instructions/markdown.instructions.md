@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ markdown_patterns | join(',') }}"
+applyTo: "**/*.md,**/*.MD,**/*.markdown,/*.md,/*.MD,/*.markdown"
 ---
 
 # Markdown Writing Standards and Guidelines
 
-This document defines markdown writing standards, formatting conventions, and best practices for maintaining consistent, high-quality documentation across {{ repository.name }}.
+This document defines markdown writing standards, formatting conventions, and best practices for maintaining consistent, high-quality documentation across the repository.
 
 ## Document Structure Standards
 
@@ -146,30 +146,6 @@ Click [here](examples/01-organization/README.md) for examples.
 - **CHANGELOG.md**: Version history and change documentation
 - **Strategy Documents**: Architecture and implementation guidance
 
-{% if repository.has_frontend %}
-### Frontend Documentation
-- **Component Documentation**: Document React/Vue/Angular components with examples
-- **API Integration**: Document frontend API integration patterns
-- **Build Process**: Document frontend build and deployment processes
-- **Testing**: Document frontend testing strategies and patterns
-{% endif %}
-
-{% if repository.has_backend %}
-### Backend Documentation
-- **API Documentation**: Document REST/GraphQL API endpoints
-- **Database Schema**: Document database design and migrations
-- **Service Architecture**: Document microservice interactions and dependencies
-- **Configuration**: Document environment variables and configuration options
-{% endif %}
-
-{% if repository.has_infra %}
-### Infrastructure Documentation
-- **Deployment Guides**: Document infrastructure deployment procedures
-- **Configuration Management**: Document Terraform/CloudFormation templates
-- **Monitoring**: Document logging, metrics, and alerting configurations
-- **Security**: Document security practices and compliance requirements
-{% endif %}
-
 ### Technical Content Guidelines
 - **Resource Names**: Use backticks for resource types and names
 - **Variable References**: Clearly indicate variable usage patterns
@@ -264,13 +240,3 @@ For documentation in subdirectories:
 - Maintain context-appropriate detail levels
 - Follow parent directory naming conventions
 - Include navigation aids for complex structures
-
-{% if detected_instructions %}
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'markdown.instructions.md' %}
-- **{{ instruction.display_name }}**: See [{{ instruction.filename }}]({{ instruction.filename }}) for {{ instruction.purpose | lower }}
-{% endif %}
-{% endfor %}
-{% endif %}

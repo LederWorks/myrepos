@@ -1,0 +1,639 @@
+{# 
+  Template: AWS Development Instructions
+  Purpose: Generate AWS-specific development guidelines based on repository context
+  Output: .github/instructions/aws.instructions.md
+#}
+---
+applyTo: "**/*"
+---
+
+# AWS Development Standards and Guidelines
+
+This document provides comprehensive guidelines for developing applications and infrastructure on Amazon Web Services (AWS), covering resource organization, security, identity management, and operational best practices{% if repository %} for {{ repository.name }}{% endif %}.
+
+{% if repository and repository.types %}
+{% if 'infra' in repository.types %}
+## Infrastructure-Focused AWS Guidelines
+
+This repository contains infrastructure code. The following AWS guidelines are particularly relevant for infrastructure as code development and cloud resource management.
+{% endif %}
+
+{% if 'api' in repository.types %}
+## API Development on AWS
+
+This repository contains API code. Focus on serverless architecture, API Gateway integration, and scalable compute services for optimal API performance on AWS.
+{% endif %}
+
+{% if 'web' in repository.types %}
+## Web Application AWS Architecture
+
+This repository contains web application code. Consider CloudFront CDN, S3 hosting, and scalable compute options for optimal web application performance.
+{% endif %}
+{% endif %}
+
+## AWS Resource Organization
+
+### Account Structure
+- Follow AWS multi-account strategy with AWS Organizations for enterprise environments
+- Implement proper account hierarchy: Root Organization → Organizational Units → Member Accounts
+- Use separate accounts for different environments (development, staging, production)
+- Design modules to work across account boundaries where appropriate
+- Support both single-account and multi-account deployments
+
+### Resource Naming
+- Follow AWS naming conventions and constraints for each service
+- Use consistent naming patterns across all AWS resources
+- Implement standardized naming conventions using tags and resource naming
+- Generate names for both standalone resources and collections
+- Consider AWS service-specific naming limitations and requirements
+
+{% if repository and repository.name %}
+**Project-Specific Naming Convention for {{ repository.name }}:**
+```
+# Resource naming pattern
+{{ repository.name | lower }}-{environment}-{service}-{resource-type}
+# Example: {{ repository.name | lower }}-prod-api-lambda
+```
+{% endif %}
+
+### Resource Tagging Strategy
+- Implement comprehensive tagging strategy for cost allocation and management
+- Use consistent tag keys across all resources (Environment, Project, Owner, CostCenter)
+- Automate tag application through Infrastructure as Code
+- Enforce tagging policies using AWS Config and Service Control Policies
+- Design for tag-based access control and billing allocation
+
+{% if repository %}
+**Recommended Tags for {{ repository.name }}:**
+```json
+{
+  "Project": "{{ repository.name }}",
+  "Repository": "{{ repository.platform }}/{{ repository.name }}",
+{% if repository.types %}
+  "Type": "{{ repository.types | join(',') }}",
+{% endif %}
+  "ManagedBy": "{{ repository.platform }}"
+}
+```
+{% endif %}
+
+## Identity and Access Management (IAM)
+
+### AWS IAM Best Practices
+- Follow principle of least privilege for all IAM policies
+- Use IAM roles instead of IAM users for programmatic access
+- Implement proper IAM policy structure with explicit permissions
+- Avoid using AWS root account for day-to-day operations
+- Enable MFA for all IAM users with console access
+
+### Role-Based Access Control
+- Use AWS managed policies when they provide appropriate permissions
+- Create custom policies only when managed policies are insufficient
+- Document custom policy permissions clearly with business justification
+- Implement role assumption patterns for cross-account access
+- Use IAM policy conditions for fine-grained access control
+
+### Service-Linked Roles and Service Roles
+- Use service-linked roles for AWS services when available
+- Implement service roles for EC2 instances, Lambda functions, and other compute resources
+- Avoid embedding credentials in application code or configuration
+- Use AWS Systems Manager Parameter Store or AWS Secrets Manager for secrets
+- Implement proper credential rotation strategies
+
+### Cross-Account Access
+- Design IAM roles for secure cross-account resource access
+- Use external IDs for enhanced security in cross-account scenarios
+- Implement proper trust policies with condition constraints
+- Document cross-account access patterns and dependencies
+- Monitor and audit cross-account role usage
+
+## Security Best Practices
+
+### Network Security
+- Implement Virtual Private Cloud (VPC) with proper subnet design
+- Use Security Groups and Network ACLs for defense in depth
+- Configure appropriate routing tables and internet gateways
+- Implement AWS WAF and Shield for application protection
+- Use VPC Endpoints for secure service communication
+
+### Data Protection
+- Classify data sensitivity and apply appropriate protection measures
+- Implement encryption at rest using AWS KMS or customer-managed keys
+- Use encryption in transit for all data communication (TLS/SSL)
+- Follow data residency and compliance requirements
+- Implement data loss prevention and monitoring strategies
+
+### Key Management Service (KMS)
+- Use AWS KMS for centralized key management
+- Implement proper key policies and IAM permissions
+- Use customer-managed keys for sensitive data encryption
+- Implement key rotation policies and automated rotation
+- Monitor and audit key usage through CloudTrail
+
+### Secrets Management
+- Use AWS Secrets Manager for database credentials and API keys
+- Implement automatic secret rotation where possible
+- Use Systems Manager Parameter Store for configuration parameters
+- Avoid hardcoding secrets in application code or infrastructure templates
+- Implement proper secret access logging and monitoring
+
+{% if repository and 'api' in repository.types %}
+**API Security on AWS:**
+```yaml
+# API Gateway security configuration
+api_security:
+  authentication: "AWS_IAM"  # or "COGNITO_USER_POOLS"
+  cors_enabled: true
+  throttling:
+    burst_limit: 5000
+    rate_limit: 10000
+  waf_enabled: true
+```
+{% endif %}
+
+## AWS Service Management
+
+### Compute Services
+- Choose appropriate compute services (EC2, ECS, EKS, Lambda, Fargate)
+- Implement proper instance sizing and auto-scaling strategies
+- Use multiple Availability Zones for high availability
+- Configure backup strategies for EC2 instances and EBS volumes
+- Implement proper monitoring and alerting for compute resources
+
+{% if repository and repository.languages %}
+{% if 'python' in repository.languages %}
+**Python on AWS:**
+- Use AWS Lambda for serverless Python applications
+- Consider AWS Batch for long-running Python workloads
+- Implement proper Python packaging for Lambda deployments
+- Use Amazon ECS/EKS for containerized Python applications
+{% endif %}
+
+{% if 'go' in repository.languages %}
+**Go on AWS:**
+- Leverage Go's performance for high-throughput Lambda functions
+- Use AWS SDK for Go v2 for better performance and features
+- Consider Amazon ECS/EKS for Go microservices
+- Implement proper error handling with AWS service integrations
+{% endif %}
+
+{% if 'typescript' in repository.languages or 'javascript' in repository.languages %}
+**Node.js/TypeScript on AWS:**
+- Use AWS Lambda for serverless Node.js applications
+- Leverage AWS CDK for TypeScript infrastructure definitions
+- Consider AWS AppSync for GraphQL APIs
+- Use Amazon ECS/EKS for Node.js microservices
+{% endif %}
+{% endif %}
+
+### Storage Services
+- Select appropriate storage services (S3, EBS, EFS, FSx)
+- Implement proper S3 bucket policies and access controls
+- Configure appropriate storage classes and lifecycle policies
+- Use S3 Cross-Region Replication for disaster recovery
+- Monitor storage costs and optimize usage patterns
+
+{% if repository and 'web' in repository.types %}
+**Web Application Storage:**
+```yaml
+# S3 configuration for web assets
+s3_web_hosting:
+  static_hosting: true
+  cloudfront_integration: true
+  ssl_certificate: true
+  compression: true
+```
+{% endif %}
+
+### Database Services
+- Choose appropriate database services (RDS, DynamoDB, DocumentDB, Aurora)
+- Implement Multi-AZ deployments for high availability
+- Configure automated backups and point-in-time recovery
+- Use read replicas for read scaling and disaster recovery
+- Monitor database performance and implement optimization strategies
+
+### Networking Services
+- Design proper network architecture with VPC peering or Transit Gateway
+- Implement load balancing with Application Load Balancer and Network Load Balancer
+- Configure DNS services with Route 53 for high availability
+- Use Direct Connect or VPN for hybrid connectivity
+- Monitor network performance and implement optimization strategies
+
+## Infrastructure as Code (IaC)
+
+{% if repository and repository.languages and 'terraform' in repository.languages %}
+### Terraform on AWS
+- Use the AWS Provider for Terraform deployments
+- Implement proper state management with S3 and DynamoDB
+- Use Terraform modules for reusable infrastructure patterns
+- Follow Terraform best practices for AWS resource management
+- Implement proper authentication using IAM roles
+
+**Terraform AWS Provider Configuration:**
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+  
+  default_tags {
+    tags = {
+      Project    = "{{ repository.name if repository else 'myproject' }}"
+      ManagedBy  = "Terraform"
+      Repository = "{{ repository.platform + '/' + repository.name if repository else 'unknown' }}"
+    }
+  }
+}
+```
+{% endif %}
+
+### AWS CloudFormation
+- Use CloudFormation for consistent resource deployment
+- Implement proper template organization with nested stacks
+- Use CloudFormation parameters and mappings effectively
+- Follow CloudFormation best practices for security and performance
+- Implement proper rollback and error handling strategies
+
+### AWS CDK Development
+- Use AWS CDK for programmatic infrastructure definition
+- Implement reusable CDK constructs and patterns
+- Follow CDK best practices for maintainability and testing
+- Use CDK context and feature flags appropriately
+- Integrate CDK with CI/CD pipelines for automated deployment
+
+## DevOps and CI/CD
+
+### AWS DevOps Services
+- Use AWS CodeCommit for source control (or integrate with GitHub)
+- Implement CodePipeline for CI/CD automation
+- Use CodeBuild for build and test automation
+- Configure CodeDeploy for application deployment strategies
+- Integrate with AWS X-Ray for distributed tracing
+
+{% if repository and repository.platform == 'github' %}
+### GitHub Actions Integration with AWS
+```yaml
+# GitHub Actions workflow for AWS deployment
+name: Deploy to AWS
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: {% raw %}${{ secrets.AWS_ROLE_ARN }}{% endraw %}
+          aws-region: {% raw %}${{ vars.AWS_REGION }}{% endraw %}
+          
+      - name: Deploy to AWS
+        run: |
+          # Your deployment commands here
+          echo "Deploying {{ repository.name }} to AWS"
+```
+{% elif repository and repository.platform == 'azuredevops' %}
+### Azure DevOps Integration with AWS
+```yaml
+# Azure DevOps pipeline for AWS deployment
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  AWS_REGION: 'us-east-1'
+
+steps:
+  - task: AWSShellScript@1
+    displayName: 'Deploy to AWS'
+    inputs:
+      awsCredentials: 'AWS-ServiceConnection'
+      regionName: '$(AWS_REGION)'
+      scriptType: 'inline'
+      inlineScript: |
+        echo "Deploying {{ repository.name }} to AWS"
+        # Your deployment commands here
+```
+{% endif %}
+
+### CI/CD Pipeline Design
+- Implement multi-stage pipelines with proper approval gates
+- Use blue-green deployments for zero-downtime updates
+- Configure canary deployments for gradual rollouts
+- Implement automated testing at multiple pipeline stages
+- Use AWS Systems Manager for deployment automation
+
+### Container Orchestration
+- Use Amazon ECS or EKS for container workloads
+- Implement proper task definitions and service configurations
+- Configure auto-scaling for containerized applications
+- Use AWS Fargate for serverless container execution
+- Implement proper logging and monitoring for containers
+
+## Cost Management and Optimization
+
+### Cost Monitoring
+- Use AWS Cost Explorer and Cost and Usage Reports
+- Implement cost allocation tags for detailed billing analysis
+- Set up billing alerts and budgets for proactive cost management
+- Monitor and analyze Reserved Instance and Savings Plans utilization
+- Implement automated cost optimization strategies
+
+{% if repository %}
+**Cost Monitoring for {{ repository.name }}:**
+```json
+{
+  "budget_name": "{{ repository.name }}-monthly-budget",
+  "budget_limit": 1000,
+  "cost_filters": {
+    "TagKey": "Project",
+    "TagValue": "{{ repository.name }}"
+  }
+}
+```
+{% endif %}
+
+### Resource Optimization
+- Right-size EC2 instances using AWS Compute Optimizer
+- Use Spot Instances for fault-tolerant and flexible workloads
+- Implement auto-scaling for variable workloads
+- Optimize storage costs with appropriate S3 storage classes
+- Use AWS Trusted Advisor for cost optimization recommendations
+
+### Governance and Compliance
+- Implement AWS Config for resource compliance monitoring
+- Use Service Control Policies (SCPs) for organizational governance
+- Configure AWS CloudTrail for audit logging and compliance
+- Implement resource tagging policies for cost allocation
+- Monitor compliance with AWS Security Hub and AWS Well-Architected Tool
+
+## High Availability and Disaster Recovery
+
+### Multi-AZ Deployments
+- Design applications across multiple Availability Zones
+- Use Elastic Load Balancing for traffic distribution
+- Implement database Multi-AZ deployments for automatic failover
+- Design stateless applications for better scalability
+- Use Auto Scaling Groups for automatic instance replacement
+
+### Backup and Recovery
+- Implement automated backup strategies for all critical data
+- Use AWS Backup for centralized backup management
+- Configure cross-region backup replication for disaster recovery
+- Test backup and restore procedures regularly
+- Document Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO)
+
+### Cross-Region Architecture
+- Design applications for multi-region deployment where required
+- Use Route 53 health checks for DNS failover
+- Implement data replication strategies across regions
+- Configure cross-region disaster recovery procedures
+- Monitor application health across all regions
+
+## Monitoring and Observability
+
+### CloudWatch Integration
+- Use CloudWatch metrics for comprehensive resource monitoring
+- Implement custom metrics for application-specific monitoring
+- Configure CloudWatch alarms for proactive alerting
+- Use CloudWatch Logs for centralized log management
+- Implement CloudWatch Insights for log analysis and troubleshooting
+
+{% if repository and repository.languages %}
+{% if 'python' in repository.languages %}
+**Python Application Monitoring:**
+```python
+import boto3
+import json
+
+cloudwatch = boto3.client('cloudwatch')
+
+def put_custom_metric(metric_name, value, unit='Count'):
+    """Send custom metrics to CloudWatch"""
+    cloudwatch.put_metric_data(
+        Namespace='{{ repository.name }}/Application',
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': value,
+                'Unit': unit,
+                'Dimensions': [
+                    {
+                        'Name': 'Environment',
+                        'Value': os.environ.get('ENVIRONMENT', 'development')
+                    }
+                ]
+            }
+        ]
+    )
+```
+{% endif %}
+
+{% if 'go' in repository.languages %}
+**Go Application Monitoring:**
+```go
+package monitoring
+
+import (
+    "github.com/aws/aws-sdk-go/aws"
+    "github.com/aws/aws-sdk-go/service/cloudwatch"
+)
+
+func PutCustomMetric(svc *cloudwatch.CloudWatch, metricName string, value float64) error {
+    input := &cloudwatch.PutMetricDataInput{
+        Namespace: aws.String("{{ repository.name }}/Application"),
+        MetricData: []*cloudwatch.MetricDatum{
+            {
+                MetricName: aws.String(metricName),
+                Value:      aws.Float64(value),
+                Unit:       aws.String("Count"),
+                Dimensions: []*cloudwatch.Dimension{
+                    {
+                        Name:  aws.String("Environment"),
+                        Value: aws.String(os.Getenv("ENVIRONMENT")),
+                    },
+                },
+            },
+        },
+    }
+    
+    _, err := svc.PutMetricData(input)
+    return err
+}
+```
+{% endif %}
+{% endif %}
+
+### Application Performance Monitoring
+- Use AWS X-Ray for distributed application tracing
+- Implement Application Insights and custom instrumentation
+- Monitor application performance metrics and user experience
+- Configure performance alerting and automated remediation
+- Use AWS Personal Health Dashboard for service issue notifications
+
+### Security Monitoring
+- Enable AWS CloudTrail for all API activity logging
+- Use AWS Config for resource configuration monitoring
+- Implement AWS Security Hub for centralized security findings
+- Configure Amazon GuardDuty for threat detection
+- Monitor and respond to security alerts promptly
+
+## Serverless Architecture
+
+{% if repository and ('api' in repository.types or 'web' in repository.types) %}
+### Serverless Architecture for {{ repository.name }}
+
+Given the {{ repository.types | join(' and ') }} nature of this repository, serverless architecture provides significant benefits:
+
+- **Cost Efficiency**: Pay only for actual usage
+- **Automatic Scaling**: Handle traffic spikes seamlessly
+- **Reduced Operations**: Minimal server management overhead
+- **High Availability**: Built-in redundancy across availability zones
+{% endif %}
+
+### AWS Lambda Best Practices
+- Design functions for single responsibility and statelessness
+- Implement proper error handling and retry logic
+- Use appropriate memory and timeout configurations
+- Implement Lambda layers for shared code and dependencies
+- Monitor Lambda performance and cost optimization
+
+### Event-Driven Architecture
+- Use Amazon EventBridge for event routing and processing
+- Implement proper event schema design and versioning
+- Use SQS and SNS for reliable message processing
+- Design for eventual consistency in distributed systems
+- Implement proper dead letter queue handling
+
+### API Gateway Integration
+- Use API Gateway for RESTful API management
+- Implement proper authentication and authorization
+- Configure request/response transformation and validation
+- Use API Gateway caching for performance optimization
+- Monitor API usage and implement rate limiting
+
+## Database Design and Management
+
+### Relational Databases (RDS/Aurora)
+- Choose appropriate database engine based on requirements
+- Implement proper database security with encryption and access controls
+- Use Parameter Groups for database configuration management
+- Implement read replicas for read scaling and disaster recovery
+- Monitor database performance with Performance Insights
+
+### NoSQL Databases (DynamoDB)
+- Design appropriate partition key and sort key strategies
+- Implement proper access patterns and query optimization
+- Use DynamoDB Streams for real-time data processing
+- Configure appropriate read/write capacity and auto-scaling
+- Monitor DynamoDB performance and cost optimization
+
+### Data Warehousing and Analytics
+- Use Amazon Redshift for data warehousing requirements
+- Implement proper data lake architecture with S3 and Lake Formation
+- Use Amazon Athena for serverless query processing
+- Configure appropriate data lifecycle and archiving strategies
+- Monitor query performance and cost optimization
+
+## Compliance and Regulatory Requirements
+
+### Data Governance
+- Implement data classification and protection strategies
+- Use AWS Macie for sensitive data discovery and protection
+- Configure data retention and deletion policies
+- Implement data lineage tracking and audit capabilities
+- Support regulatory compliance requirements (GDPR, HIPAA, PCI DSS)
+
+### Security Compliance Frameworks
+- Implement AWS security best practices and benchmarks
+- Use AWS Security Hub for compliance posture management
+- Configure compliance monitoring with AWS Config Rules
+- Perform regular security assessments and penetration testing
+- Maintain security documentation and incident response procedures
+
+### Audit and Reporting
+- Enable comprehensive audit logging with CloudTrail and Config
+- Implement centralized log management and retention
+- Configure compliance reporting and dashboards
+- Perform regular compliance assessments and remediation
+- Maintain audit trails for regulatory requirements
+
+## Performance Optimization
+
+### Application Performance
+- Use CloudFront CDN for global content delivery and caching
+- Implement ElastiCache for in-memory caching strategies
+- Optimize database queries and indexing strategies
+- Use connection pooling and connection management best practices
+- Monitor and optimize application response times
+
+### Network Performance
+- Design network architecture for optimal performance and cost
+- Use placement groups for high-performance computing workloads
+- Configure appropriate instance types for network-intensive applications
+- Monitor network latency and throughput across regions
+- Implement network optimization strategies
+
+### Storage Performance
+- Choose appropriate EBS volume types based on performance requirements
+- Use S3 Transfer Acceleration for global data uploads
+- Implement proper S3 multipart upload strategies
+- Monitor storage performance metrics and optimize accordingly
+- Use appropriate storage classes for cost and performance balance
+
+## Troubleshooting and Support
+
+### Common Issues Resolution
+- Network connectivity troubleshooting across VPCs and regions
+- IAM permissions and policy troubleshooting
+- Performance bottleneck identification and resolution
+- Cost anomaly investigation and optimization
+- Service-specific troubleshooting procedures
+
+### AWS Support Integration
+- Choose appropriate AWS Support plan based on business requirements
+- Leverage AWS Trusted Advisor recommendations
+- Use AWS Personal Health Dashboard for proactive issue identification
+- Implement proper escalation procedures for critical issues
+- Document common issues and resolution procedures
+
+### Operational Excellence
+- Implement AWS Well-Architected Framework principles
+- Use AWS Systems Manager for operational automation
+- Configure comprehensive monitoring and alerting strategies
+- Maintain operational runbooks and procedures
+- Implement continuous improvement processes
+
+{% if detected_instructions %}
+## Related Documentation
+
+For comprehensive development guidance, also refer to:
+{% for instruction in detected_instructions %}
+{% if instruction.filename != 'aws.instructions.md' %}
+- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }}) - {{ instruction.purpose }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+---
+
+This comprehensive guide ensures consistent, secure, and efficient AWS development practices while following Amazon's Well-Architected Framework principles and industry best practices{% if repository %} for {{ repository.name }}{% endif %}.

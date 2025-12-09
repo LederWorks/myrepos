@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ sql_patterns | join(',') }}"
+applyTo: "**/*.sql,**/migrations/*.sql,**/schema/*.sql,**/seeds/*.sql,**/procedures/*.sql,**/functions/*.sql,**/triggers/*.sql,**/views/*.sql"
 ---
 
 # SQL Development Standards and Guidelines
 
-This document provides comprehensive guidelines for SQL development in {{ repository.name }}, covering database design, query optimization, security, migrations, and best practices for building robust, maintainable database systems.
+This document provides comprehensive guidelines for SQL development, covering database design, query optimization, security, migrations, and best practices for building robust, maintainable database systems.
 
 ## Database Design Standards
 
@@ -1044,31 +1044,9 @@ SELECT * FROM tests.performance_test_user_orders();
 
 ### Environment Management
 
-{% if repository.has_backend %}
-#### Database Integration with {{ repository.name }} Backend
-
-```sql
--- Backend-specific database configuration
--- Ensure proper connection pooling for {{ repository.name }} API server
--- Configure read replicas for high-traffic read operations
--- Set up monitoring for query performance in production environment
-```
-{% endif %}
-
-{% if repository.has_migrations %}
-#### Migration Management for {{ repository.name }}
-
-```sql
--- Project-specific migration patterns for {{ repository.name }}
--- Follow established versioning scheme: YYYYMMDD_HHmm_description.sql
--- Ensure all migrations are tested in staging environment
--- Document breaking changes and rollback procedures
-```
-{% endif %}
-
 #### Development Database Setup
 ```sql
--- Development database initialization script for {{ repository.name }}
+-- Development database initialization script
 -- dev_setup.sql
 
 -- Create development-specific extensions
@@ -1078,12 +1056,12 @@ CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Create development roles
 CREATE ROLE dev_read_write;
-GRANT CONNECT ON DATABASE {{ repository.name }}_dev TO dev_read_write;
+GRANT CONNECT ON DATABASE myapp_dev TO dev_read_write;
 GRANT USAGE ON SCHEMA public TO dev_read_write;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dev_read_write;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dev_read_write;
 
--- Create test data generator for {{ repository.name }}
+-- Create test data generator
 CREATE OR REPLACE FUNCTION generate_test_data(num_users INTEGER DEFAULT 100)
 RETURNS TEXT AS $$
 DECLARE
@@ -1118,7 +1096,7 @@ $$ LANGUAGE plpgsql;
 
 #### Function and Procedure Documentation
 ```sql
--- Well-documented function example for {{ repository.name }}
+-- Well-documented function example
 /**
  * Calculates the monthly recurring revenue (MRR) for a given time period
  * 
@@ -1134,7 +1112,7 @@ $$ LANGUAGE plpgsql;
  * @note This function only includes completed and active subscriptions
  * @note Trial subscriptions are excluded by default to provide accurate revenue figures
  * 
- * @author {{ repository.name }} Development Team
+ * @author Development Team
  * @created 2024-01-15
  * @modified 2024-02-01 - Added trial subscription parameter
  */
@@ -1147,12 +1125,4 @@ CREATE OR REPLACE FUNCTION calculate_mrr(
 $$ LANGUAGE plpgsql;
 ```
 
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'sql.instructions.md' %}
-- **{{ instruction.display_name }}**: {{ instruction.purpose }}
-{% endif %}
-{% endfor %}
-
-This comprehensive SQL instruction file provides world-class database development standards covering schema design, query optimization, security, migrations, stored procedures, monitoring, and testing practices for building robust, scalable database systems in {{ repository.name }}.
+This comprehensive SQL instruction file provides world-class database development standards covering schema design, query optimization, security, migrations, stored procedures, monitoring, and testing practices for building robust, scalable database systems.

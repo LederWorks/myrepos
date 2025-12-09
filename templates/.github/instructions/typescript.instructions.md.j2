@@ -1,0 +1,935 @@
+{#
+  Template: TypeScript Frontend Development Instructions
+  Purpose: Generate TypeScript/React development standards based on repository analysis
+  Output: .github/instructions/typescript.instructions.md
+#}
+---
+applyTo: "{{ typescript_patterns | join(',') }}"
+---
+
+# TypeScript Frontend Development Instructions
+
+This document provides comprehensive guidelines for developing modern frontend applications using React, TypeScript, and current web development practices{% if repository.has_mvc %} following MVC architecture patterns{% endif %}.
+
+{% if repository.has_frontend or repository.has_react %}
+## Architecture Guidelines
+
+### MVC Pattern Implementation
+
+Follow the Model-View-Controller pattern with clean separation of concerns:
+
+#### Controllers (`src/controllers/`)
+Frontend controllers manage application state and business logic:
+
+```typescript
+interface EntityController {
+    createEntity(entity: CreateEntityRequest): Promise<Entity>;
+    updateEntity(id: string, updates: Partial<Entity>): Promise<Entity>;
+    deleteEntity(id: string): Promise<void>;
+    listEntities(filters?: EntityFilters): Promise<Entity[]>;
+    searchEntities(query: string, filters?: SearchFilters): Promise<Entity[]>;
+}
+
+class {{ repository.name | title }}ControllerImpl implements {{ repository.name | title }}Controller {
+    constructor(
+        private {{ repository.name }}Service: {{ repository.name | title }}Service,
+        private notificationService: NotificationService
+    ) {}
+
+    async create{{ repository.name | title }}({{ repository.name }}: Create{{ repository.name | title }}Request): Promise<{{ repository.name | title }}> {
+        try {
+            const new{{ repository.name | title }} = await this.{{ repository.name }}Service.create{{ repository.name | title }}({{ repository.name }});
+            this.notificationService.showSuccess('{{ repository.name | title }} created successfully');
+            return new{{ repository.name | title }};
+        } catch (error) {
+            this.notificationService.showError('Failed to create {{ repository.name }}');
+            throw error;
+        }
+    }
+
+    async list{{ repository.name | title }}s(filters?: {{ repository.name | title }}Filters): Promise<{{ repository.name | title }}[]> {
+        try {
+            return await this.{{ repository.name }}Service.list{{ repository.name | title }}s(filters);
+        } catch (error) {
+            this.notificationService.showError('Failed to load {{ repository.name }}s');
+            throw error;
+        }
+    }
+}
+```
+
+#### Models (`src/models/`)
+Frontend models define TypeScript interfaces and validation:
+
+```typescript
+interface Entity {
+    id: string;
+    type: string;
+    name: string;
+    data: Record<string, any>;
+    metadata: EntityMetadata;
+    parentId?: string;
+    createdAt: string;
+    modifiedAt: string;
+}
+
+interface EntityMetadata {
+    createdBy: string;
+    modifiedBy: string;
+    tags?: Record<string, string>;
+    category?: string;
+{% if repository.has_environments %}
+    environment?: string;
+{% endif %}
+    custom?: Record<string, any>;
+}
+
+class EntityValidator {
+    static validate(entity: Partial<Entity>): ValidationResult {
+        const errors: string[] = [];
+        
+        if (!entity.id?.trim()) {
+            errors.push('Entity ID is required');
+        }
+        
+        if (!entity.type?.trim()) {
+            errors.push('Entity type is required');
+        }
+        
+        if (!entity.name?.trim()) {
+            errors.push('Entity name is required');
+        }
+        
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
+    }
+}
+
+interface ValidationResult {
+    isValid: boolean;
+    errors: string[];
+}
+```
+
+#### Views (`src/components/`)
+React components handle UI presentation:
+
+```tsx
+interface {{ repository.name | title }}ListProps {
+    {{ repository.name }}s: {{ repository.name | title }}[];
+    onEdit: ({{ repository.name }}: {{ repository.name | title }}) => void;
+    onDelete: ({{ repository.name }}Id: string) => void;
+    loading?: boolean;
+    error?: string;
+}
+
+export const {{ repository.name | title }}List: React.FC<{{ repository.name | title }}ListProps> = ({
+    {{ repository.name }}s,
+    onEdit,
+    onDelete,
+    loading = false,
+    error
+}) => {
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    if (error) {
+        return <ErrorMessage message={error} />;
+    }
+
+    return (
+        <div className="{{ repository.name }}-list">
+            {{{ repository.name }}s.map({{ repository.name }} => (
+                <{{ repository.name | title }}Card
+                    key={{ repository.name }}.id}
+                    {{ repository.name }}={{ repository.name }}
+                    onEdit={() => onEdit({{ repository.name }})}
+                    onDelete={() => onDelete({{ repository.name }}.id)}
+                />
+            ))}
+        </div>
+    );
+};
+```
+
+## Component Architecture
+
+### Functional Components with Hooks
+```tsx
+// Use functional components with hooks
+interface {{ repository.name | title }}CardProps {
+    {{ repository.name }}: {{ repository.name | title }};
+    onEdit: ({{ repository.name }}: {{ repository.name | title }}) => void;
+    onDelete: ({{ repository.name }}Id: string) => void;
+    className?: string;
+}
+
+export const {{ repository.name | title }}Card: React.FC<{{ repository.name | title }}CardProps> = ({ 
+    {{ repository.name }}, 
+    onEdit, 
+    onDelete,
+    className = ''
+}) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
+
+    const handleEdit = useCallback(() => {
+        onEdit({{ repository.name }});
+    }, [{{ repository.name }}, onEdit]);
+
+    const handleDelete = useCallback(async () => {
+        if (window.confirm('Are you sure you want to delete this {{ repository.name }}?')) {
+            setIsLoading(true);
+            try {
+                await onDelete({{ repository.name }}.id);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }, [{{ repository.name }}.id, onDelete]);
+
+    return (
+        <div className={`{{ repository.name }}-card ${className}`}>
+            <div className="{{ repository.name }}-header">
+                <h3>{{{ repository.name }}.name}</h3>
+                <span className="{{ repository.name }}-type">{{{ repository.name }}.type}</span>
+{% if repository.has_providers %}
+                <span className="{{ repository.name }}-provider">{{{ repository.name }}.provider}</span>
+{% endif %}
+            </div>
+            
+            {showDetails && (
+                <div className="{{ repository.name }}-details">
+                    <pre>{JSON.stringify({{ repository.name }}.data, null, 2)}</pre>
+                </div>
+            )}
+            
+            <div className="{{ repository.name }}-actions">
+                <button onClick={() => setShowDetails(!showDetails)}>
+                    {showDetails ? 'Hide' : 'Show'} Details
+                </button>
+                <button onClick={handleEdit} disabled={isLoading}>
+                    Edit
+                </button>
+                <button onClick={handleDelete} disabled={isLoading}>
+                    {isLoading ? 'Deleting...' : 'Delete'}
+                </button>
+            </div>
+        </div>
+    );
+};
+```
+
+### Custom Hooks for Reusable Logic
+```tsx
+// Custom hook for {{ repository.name }} management
+export const use{{ repository.name | title }}s = () => {
+    const [{{ repository.name }}s, set{{ repository.name | title }}s] = useState<{{ repository.name | title }}[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetch{{ repository.name | title }}s = useCallback(async (filters?: {{ repository.name | title }}Filters) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await {{ repository.name }}Service.list{{ repository.name | title }}s(filters);
+            set{{ repository.name | title }}s(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch {{ repository.name }}s');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const create{{ repository.name | title }} = useCallback(async ({{ repository.name }}: Create{{ repository.name | title }}Request) => {
+        try {
+            const new{{ repository.name | title }} = await {{ repository.name }}Service.create{{ repository.name | title }}({{ repository.name }});
+            set{{ repository.name | title }}s(prev => [...prev, new{{ repository.name | title }}]);
+            return new{{ repository.name | title }};
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create {{ repository.name }}');
+            throw err;
+        }
+    }, []);
+
+    const update{{ repository.name | title }} = useCallback(async (id: string, updates: Partial<{{ repository.name | title }}>) => {
+        try {
+            const updated{{ repository.name | title }} = await {{ repository.name }}Service.update{{ repository.name | title }}(id, updates);
+            set{{ repository.name | title }}s(prev => prev.map(r => r.id === id ? updated{{ repository.name | title }} : r));
+            return updated{{ repository.name | title }};
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to update {{ repository.name }}');
+            throw err;
+        }
+    }, []);
+
+    const delete{{ repository.name | title }} = useCallback(async (id: string) => {
+        try {
+            await {{ repository.name }}Service.delete{{ repository.name | title }}(id);
+            set{{ repository.name | title }}s(prev => prev.filter(r => r.id !== id));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to delete {{ repository.name }}');
+            throw err;
+        }
+    }, []);
+
+    return {
+        {{ repository.name }}s,
+        loading,
+        error,
+        fetch{{ repository.name | title }}s,
+        create{{ repository.name | title }},
+        update{{ repository.name | title }},
+        delete{{ repository.name | title }}
+    };
+};
+```
+{% endif %}
+
+## State Management
+
+### React Hooks for Local State
+- Use **useState** for component-local state
+- Use **useEffect** for side effects and lifecycle events
+- Use **useReducer** for complex state logic
+- Use **useCallback** and **useMemo** for performance optimization
+
+{% if repository.has_global_state %}
+### Context API for Global State
+```tsx
+interface AppContextType {
+    user: User | null;
+    theme: 'light' | 'dark';
+    notifications: Notification[];
+    setUser: (user: User | null) => void;
+    setTheme: (theme: 'light' | 'dark') => void;
+    addNotification: (notification: Omit<Notification, 'id'>) => void;
+    removeNotification: (id: string) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [user, setUser] = useState<User | null>(null);
+    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
+        const id = generateId();
+        setNotifications(prev => [...prev, { ...notification, id }]);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        }, 5000);
+    }, []);
+
+    const removeNotification = useCallback((id: string) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    }, []);
+
+    const value = {
+        user,
+        theme,
+        notifications,
+        setUser,
+        setTheme,
+        addNotification,
+        removeNotification
+    };
+
+    return (
+        <AppContext.Provider value={value}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+
+export const useApp = () => {
+    const context = useContext(AppContext);
+    if (context === undefined) {
+        throw new Error('useApp must be used within an AppProvider');
+    }
+    return context;
+};
+```
+{% endif %}
+
+## API Integration
+
+### Type-Safe API Client
+```typescript
+// Create type-safe API client functions
+class ApiClient {
+    private baseUrl: string;
+
+    constructor(baseUrl: string = '/api/v1') {
+        this.baseUrl = baseUrl;
+    }
+
+    private async request<T>(
+        endpoint: string, 
+        options: RequestInit = {}
+    ): Promise<T> {
+        const url = `${this.baseUrl}${endpoint}`;
+        
+        const response = await fetch(url, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+            ...options,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.data || data;
+    }
+
+    async get<T>(endpoint: string): Promise<T> {
+        return this.request<T>(endpoint, { method: 'GET' });
+    }
+
+    async post<T>(endpoint: string, body?: any): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'POST',
+            body: body ? JSON.stringify(body) : undefined,
+        });
+    }
+
+    async put<T>(endpoint: string, body?: any): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'PUT',
+            body: body ? JSON.stringify(body) : undefined,
+        });
+    }
+
+    async delete<T>(endpoint: string): Promise<T> {
+        return this.request<T>(endpoint, { method: 'DELETE' });
+    }
+}
+
+export const apiClient = new ApiClient();
+
+{% if repository.has_api %}
+// {{ repository.name | title }}-specific API functions
+export async function fetch{{ repository.name | title }}s(filters?: {{ repository.name | title }}Filters): Promise<{{ repository.name | title }}[]> {
+    const queryParams = filters ? `?${new URLSearchParams(filters as any).toString()}` : '';
+    return apiClient.get<{{ repository.name | title }}[]>(`/{{ repository.name }}s${queryParams}`);
+}
+
+export async function create{{ repository.name | title }}({{ repository.name }}: Create{{ repository.name | title }}Request): Promise<{{ repository.name | title }}> {
+    return apiClient.post<{{ repository.name | title }}>('/{{ repository.name }}s', {{ repository.name }});
+}
+
+export async function update{{ repository.name | title }}(id: string, updates: Partial<{{ repository.name | title }}>): Promise<{{ repository.name | title }}> {
+    return apiClient.put<{{ repository.name | title }}>(`/{{ repository.name }}s/${id}`, updates);
+}
+
+export async function delete{{ repository.name | title }}(id: string): Promise<void> {
+    return apiClient.delete<void>(`/{{ repository.name }}s/${id}`);
+}
+
+{% if repository.has_search %}
+export async function search{{ repository.name | title }}s(query: string, filters?: SearchFilters): Promise<{{ repository.name | title }}[]> {
+    return apiClient.post<{{ repository.name | title }}[]>('/search', { query, filters });
+}
+{% endif %}
+{% endif %}
+```
+
+## Styling Guidelines
+
+{% if repository.has_styled_components %}
+### CSS-in-JS with styled-components (if used)
+```tsx
+import styled from 'styled-components';
+
+const {{ repository.name | title }}CardContainer = styled.div<{ isSelected?: boolean }>`
+    border: 1px solid ${props => props.theme.colors.border};
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: ${props => props.isSelected ? props.theme.colors.selected : props.theme.colors.background};
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+`;
+
+const {{ repository.name | title }}Header = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    h3 {
+        margin: 0;
+        color: ${props => props.theme.colors.primary};
+    }
+`;
+```
+{% endif %}
+
+{% if repository.has_css_modules %}
+### CSS Modules (alternative approach)
+```tsx
+import styles from './{{ repository.name | title }}Card.module.css';
+
+export const {{ repository.name | title }}Card: React.FC<{{ repository.name | title }}CardProps> = ({ {{ repository.name }} }) => {
+    return (
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h3 className={styles.title}>{{{ repository.name }}.name}</h3>
+                <span className={styles.type}>{{{ repository.name }}.type}</span>
+            </div>
+        </div>
+    );
+};
+```
+{% endif %}
+
+### Responsive Design Principles
+- Use **CSS Grid** and **Flexbox** for layouts
+- Implement **mobile-first** responsive design
+- Use **CSS custom properties** for theming
+- Follow **consistent spacing** and **typography** scales
+
+## Error Handling and Loading States
+
+### Error Boundaries
+```tsx
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error?: Error;
+}
+
+export class ErrorBoundary extends React.Component<
+    React.PropsWithChildren<{}>,
+    ErrorBoundaryState
+> {
+    constructor(props: React.PropsWithChildren<{}>) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error('ErrorBoundary caught an error:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="error-boundary">
+                    <h2>Something went wrong</h2>
+                    <p>{this.state.error?.message}</p>
+                    <button onClick={() => this.setState({ hasError: false })}>
+                        Try again
+                    </button>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+```
+
+### Loading States and Skeletons
+```tsx
+export const {{ repository.name | title }}CardSkeleton: React.FC = () => {
+    return (
+        <div className="{{ repository.name }}-card skeleton">
+            <div className="skeleton-header">
+                <div className="skeleton-text skeleton-title"></div>
+                <div className="skeleton-text skeleton-type"></div>
+            </div>
+            <div className="skeleton-content">
+                <div className="skeleton-text"></div>
+                <div className="skeleton-text"></div>
+                <div className="skeleton-text short"></div>
+            </div>
+        </div>
+    );
+};
+
+export const {{ repository.name | title }}ListWithLoading: React.FC<{{ repository.name | title }}ListProps> = ({ 
+    {{ repository.name }}s, 
+    loading, 
+    error,
+    ...props 
+}) => {
+    if (loading) {
+        return (
+            <div className="{{ repository.name }}-list">
+                {Array.from({ length: 5 }, (_, i) => (
+                    <{{ repository.name | title }}CardSkeleton key={i} />
+                ))}
+            </div>
+        );
+    }
+
+    if (error) {
+        return <ErrorMessage message={error} />;
+    }
+
+    return <{{ repository.name | title }}List {{ repository.name }}s={{ repository.name }}s} {...props} />;
+};
+```
+
+{% if repository.has_testing %}
+## Testing Standards
+
+### Component Testing with React Testing Library
+```tsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { {{ repository.name | title }}Card } from './{{ repository.name | title }}Card';
+
+const mock{{ repository.name | title }}: {{ repository.name | title }} = {
+    id: '1',
+    name: 'Test {{ repository.name | title }}',
+    type: 'test_type',
+{% if repository.has_providers %}
+    provider: 'test_provider',
+{% endif %}
+    data: {},
+    metadata: {
+        createdBy: 'test-user',
+        modifiedBy: 'test-user'
+    },
+    createdAt: '2023-01-01T00:00:00Z',
+    modifiedAt: '2023-01-01T00:00:00Z'
+};
+
+describe('{{ repository.name | title }}Card', () => {
+    it('renders {{ repository.name }} information correctly', () => {
+        const onEdit = jest.fn();
+        const onDelete = jest.fn();
+
+        render(
+            <{{ repository.name | title }}Card 
+                {{ repository.name }}={mock{{ repository.name | title }}} 
+                onEdit={onEdit} 
+                onDelete={onDelete} 
+            />
+        );
+
+        expect(screen.getByText('Test {{ repository.name | title }}')).toBeInTheDocument();
+        expect(screen.getByText('test_type')).toBeInTheDocument();
+{% if repository.has_providers %}
+        expect(screen.getByText('test_provider')).toBeInTheDocument();
+{% endif %}
+    });
+
+    it('calls onEdit when edit button is clicked', () => {
+        const onEdit = jest.fn();
+        const onDelete = jest.fn();
+
+        render(
+            <{{ repository.name | title }}Card 
+                {{ repository.name }}={mock{{ repository.name | title }}} 
+                onEdit={onEdit} 
+                onDelete={onDelete} 
+            />
+        );
+
+        fireEvent.click(screen.getByText('Edit'));
+        expect(onEdit).toHaveBeenCalledWith(mock{{ repository.name | title }});
+    });
+
+    it('shows confirmation dialog when delete is clicked', async () => {
+        const onEdit = jest.fn();
+        const onDelete = jest.fn();
+        
+        // Mock window.confirm
+        window.confirm = jest.fn(() => true);
+
+        render(
+            <{{ repository.name | title }}Card 
+                {{ repository.name }}={mock{{ repository.name | title }}} 
+                onEdit={onEdit} 
+                onDelete={onDelete} 
+            />
+        );
+
+        fireEvent.click(screen.getByText('Delete'));
+        
+        await waitFor(() => {
+            expect(window.confirm).toHaveBeenCalledWith(
+                'Are you sure you want to delete this {{ repository.name }}?'
+            );
+            expect(onDelete).toHaveBeenCalledWith('1');
+        });
+    });
+});
+```
+
+### Custom Hook Testing
+```tsx
+import { renderHook, act } from '@testing-library/react';
+import { use{{ repository.name | title }}s } from './use{{ repository.name | title }}s';
+
+// Mock the API service
+jest.mock('../services/{{ repository.name }}Service', () => ({
+    list{{ repository.name | title }}s: jest.fn(),
+    create{{ repository.name | title }}: jest.fn(),
+    update{{ repository.name | title }}: jest.fn(),
+    delete{{ repository.name | title }}: jest.fn(),
+}));
+
+describe('use{{ repository.name | title }}s', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('fetches {{ repository.name }}s successfully', async () => {
+        const mock{{ repository.name | title }}s = [mock{{ repository.name | title }}];
+        ({{ repository.name }}Service.list{{ repository.name | title }}s as jest.Mock).mockResolvedValue(mock{{ repository.name | title }}s);
+
+        const { result } = renderHook(() => use{{ repository.name | title }}s());
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.{{ repository.name }}s).toEqual([]);
+
+        await act(async () => {
+            await result.current.fetch{{ repository.name | title }}s();
+        });
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.{{ repository.name }}s).toEqual(mock{{ repository.name | title }}s);
+        expect(result.current.error).toBeNull();
+    });
+
+    it('handles fetch error correctly', async () => {
+        const errorMessage = 'Failed to fetch';
+        ({{ repository.name }}Service.list{{ repository.name | title }}s as jest.Mock).mockRejectedValue(new Error(errorMessage));
+
+        const { result } = renderHook(() => use{{ repository.name | title }}s());
+
+        await act(async () => {
+            await result.current.fetch{{ repository.name | title }}s();
+        });
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.{{ repository.name }}s).toEqual([]);
+        expect(result.current.error).toBe(errorMessage);
+    });
+});
+```
+{% endif %}
+
+{% if repository.has_accessibility %}
+## Accessibility Guidelines
+
+### Semantic HTML
+- Use **semantic HTML elements** (`<main>`, `<nav>`, `<section>`, `<article>`, etc.)
+- Implement **proper heading hierarchy** (h1 → h2 → h3)
+- Use **descriptive link text** and **button labels**
+- Include **alt text** for images and **aria-labels** for icon buttons
+
+### Keyboard Navigation
+```tsx
+export const {{ repository.name | title }}Card: React.FC<{{ repository.name | title }}CardProps> = ({ {{ repository.name }}, onEdit, onDelete }) => {
+    const handleKeyDown = (event: React.KeyboardEvent, action: () => void) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            action();
+        }
+    };
+
+    return (
+        <div 
+            className="{{ repository.name }}-card"
+            tabIndex={0}
+            role="button"
+            aria-label={`{{ repository.name | title }}: ${{{ repository.name }}.name}`}
+            onKeyDown={(e) => handleKeyDown(e, () => onEdit({{ repository.name }}))}
+        >
+            <div className="{{ repository.name }}-content">
+                <h3>{{{ repository.name }}.name}</h3>
+                <p>{{{ repository.name }}.type}</p>
+            </div>
+            
+            <div className="{{ repository.name }}-actions">
+                <button 
+                    onClick={() => onEdit({{ repository.name }})}
+                    aria-label={`Edit ${{{ repository.name }}.name}`}
+                >
+                    Edit
+                </button>
+                <button 
+                    onClick={() => onDelete({{ repository.name }}.id)}
+                    aria-label={`Delete ${{{ repository.name }}.name}`}
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+};
+```
+{% endif %}
+
+## Performance Optimization
+
+### React.memo and useMemo
+```tsx
+export const {{ repository.name | title }}Card = React.memo<{{ repository.name | title }}CardProps>(({ {{ repository.name }}, onEdit, onDelete }) => {
+    const formattedDate = useMemo(() => {
+        return new Date({{ repository.name }}.modifiedAt).toLocaleDateString();
+    }, [{{ repository.name }}.modifiedAt]);
+
+    const handleEdit = useCallback(() => {
+        onEdit({{ repository.name }});
+    }, [{{ repository.name }}, onEdit]);
+
+    return (
+        <div className="{{ repository.name }}-card">
+            <h3>{{{ repository.name }}.name}</h3>
+            <p>Last modified: {formattedDate}</p>
+            <button onClick={handleEdit}>Edit</button>
+        </div>
+    );
+});
+```
+
+{% if repository.has_lazy_loading %}
+### Code Splitting and Lazy Loading
+```tsx
+import { lazy, Suspense } from 'react';
+
+const {{ repository.name | title }}Details = lazy(() => import('./{{ repository.name | title }}Details'));
+{% if repository.has_graph %}
+const GraphView = lazy(() => import('./GraphView'));
+{% endif %}
+
+export const App: React.FC = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route 
+                    path="/{{ repository.name }}s/:id" 
+                    element={
+                        <Suspense fallback={<LoadingSpinner />}>
+                            <{{ repository.name | title }}Details />
+                        </Suspense>
+                    } 
+                />
+{% if repository.has_graph %}
+                <Route 
+                    path="/graph" 
+                    element={
+                        <Suspense fallback={<LoadingSpinner />}>
+                            <GraphView />
+                        </Suspense>
+                    } 
+                />
+{% endif %}
+            </Routes>
+        </Router>
+    );
+};
+```
+{% endif %}
+
+## Development Commands
+
+### Cross-Platform Development
+```bash
+# Development
+cd frontend && npm run dev         # All platforms
+npm run dev                        # If in frontend directory
+
+# Building
+npm run build                      # Production build
+npm run preview                    # Preview production build
+
+# Testing
+npm test                           # Run tests
+npm run test:coverage              # Run tests with coverage
+npm run test:watch                 # Run tests in watch mode
+
+# Linting and Formatting
+npm run lint                       # ESLint
+npm run lint:fix                   # ESLint with auto-fix
+npm run format                     # Prettier formatting
+```
+
+## TypeScript Best Practices
+
+### Type Definitions
+- Use **interface** for object shapes that might be extended
+- Use **type** for unions, primitives, and computed types
+- Prefer **strict mode** TypeScript configuration
+- Use **generic types** for reusable components and functions
+
+### Error Handling
+```typescript
+// Custom error types
+export class ApiError extends Error {
+    constructor(
+        message: string,
+        public status: number,
+        public code?: string
+    ) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
+
+// Type-safe error handling
+export const handleApiError = (error: unknown): string => {
+    if (error instanceof ApiError) {
+        return `API Error (${error.status}): ${error.message}`;
+    }
+    
+    if (error instanceof Error) {
+        return error.message;
+    }
+    
+    return 'An unknown error occurred';
+};
+```
+
+### Environment Configuration
+```typescript
+// Environment variables with type safety
+interface Environment {
+    apiBaseUrl: string;
+    appName: string;
+    version: string;
+    isDevelopment: boolean;
+    isProduction: boolean;
+}
+
+export const env: Environment = {
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+    appName: import.meta.env.VITE_APP_NAME || '{{ repository.name | title }}',
+    version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+    isDevelopment: import.meta.env.DEV,
+    isProduction: import.meta.env.PROD,
+};
+```
+
+{% if detected_instructions %}
+## Related Documentation
+
+{% for instruction in detected_instructions %}
+{% if instruction.filename != 'typescript.instructions.md' %}
+- **{{ instruction.display_name }}**: See [{{ instruction.filename }}]({{ instruction.filename }}) - {{ instruction.purpose }}
+{% endif %}
+{% endfor %}
+{% endif %}

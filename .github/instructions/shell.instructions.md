@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ shell_patterns | join(',') }}"
+applyTo: 'scripts/**/*.sh'
 ---
 
 # Shell Script Development Standards
 
-This document defines comprehensive shell scripting standards and best practices for consistent, maintainable, and secure shell script development across {{ repository.name }}.
+This document defines comprehensive shell scripting standards and best practices for consistent, maintainable, and secure shell script development across all projects.
 
 ## Shell Script Structure
 
@@ -13,7 +13,7 @@ This document defines comprehensive shell scripting standards and best practices
 ```bash
 #!/bin/bash
 
-# {{ repository.name }} [Purpose] Script
+# [Project Name] [Purpose] Script
 # [Brief description of what the script does]
 
 set -e
@@ -183,13 +183,13 @@ cd "$BACKEND_DIR" || {
 
 ### Tool Installation Pattern
 
-All shell scripts that use external {% if repository.has_go %}Go{% else %}development{% endif %} tools must implement the skip-install pattern:
+All shell scripts that use external Go tools must implement the skip-install pattern:
 
 ```bash
 if command -v tool-name &> /dev/null; then
     if [ "$SKIP_INSTALL" = false ]; then
         print_status "tool-name found, updating to latest version..."
-        {% if repository.has_go %}go install package@latest{% else %}# Install command here{% endif %}
+        go install package@latest
         if [ $? -eq 0 ]; then
             print_success "tool-name updated to latest version"
         else
@@ -201,7 +201,7 @@ if command -v tool-name &> /dev/null; then
 else
     if [ "$SKIP_INSTALL" = false ]; then
         print_status "tool-name not found, installing..."
-        {% if repository.has_go %}go install package@latest{% else %}# Install command here{% endif %}
+        go install package@latest
         if [ $? -ne 0 ]; then
             print_error "Failed to install tool-name!"
             exit 1
@@ -209,7 +209,7 @@ else
         print_success "tool-name installed successfully"
     else
         print_error "tool-name not found and skip-install flag is set!"
-        print_warning "Please install manually: {% if repository.has_go %}go install package@latest{% else %}# Install command{% endif %}"
+        print_warning "Please install manually: go install package@latest"
         exit 1
     fi
 fi
@@ -222,7 +222,7 @@ fi
 check_dependencies() {
     local missing_tools=()
 
-    for tool in {% if repository.has_go %}go {% endif %}{% if repository.has_frontend %}npm node {% endif %}{% if repository.has_python %}python{% endif %}; do
+    for tool in go npm node; do
         if ! command -v "$tool" &> /dev/null; then
             missing_tools+=("$tool")
         fi
@@ -236,13 +236,11 @@ check_dependencies() {
 }
 ```
 
-{% if repository.has_go %}
 ### Common Go Tools
 
 - **golangci-lint**: `github.com/golangci/golangci-lint/cmd/golangci-lint@latest`
 - **gosec**: `github.com/securecodewarrior/gosec/v2/cmd/gosec@latest`
 - **go-callvis**: `github.com/ofabry/go-callvis@latest`
-{% endif %}
 
 ## Error Handling Standards
 
@@ -268,12 +266,12 @@ else
 fi
 
 # For commands where you need the exit code
-{% if repository.has_go %}go build -o output{% else %}# Build command here{% endif %}
+go build -o output
 exit_code=$?
 if [ $exit_code -eq 0 ]; then
-    print_success "{% if repository.has_go %}Go build{% else %}Build{% endif %} successful"
+    print_success "Go build successful"
 else
-    print_error "{% if repository.has_go %}Go build{% else %}Build{% endif %} failed with exit code: $exit_code"
+    print_error "Go build failed with exit code: $exit_code"
     exit 1
 fi
 ```
@@ -283,12 +281,12 @@ fi
 ```bash
 # When you want to continue despite errors
 set +e  # Temporarily disable exit on error
-{% if repository.has_frontend %}npm install{% else %}# Install command here{% endif %}
+npm install
 npm_exit_code=$?
 set -e  # Re-enable exit on error
 
 if [ $npm_exit_code -ne 0 ]; then
-    print_warning "{% if repository.has_frontend %}npm install{% else %}Install command{% endif %} had issues, but continuing..."
+    print_warning "npm install had issues, but continuing..."
 fi
 ```
 
@@ -325,7 +323,7 @@ fi
 ```bash
 # In utility scripts, call component scripts using relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMPONENT_SCRIPT="$SCRIPT_DIR/{% if repository.has_backend %}backend/backend_gotest.sh{% else %}component/component_script.sh{% endif %}"
+COMPONENT_SCRIPT="$SCRIPT_DIR/backend/backend_gotest.sh"
 
 if [ -f "$COMPONENT_SCRIPT" ]; then
     "$COMPONENT_SCRIPT" "${COMPONENT_ARGS[@]}"
@@ -357,7 +355,7 @@ fi
 
 ```bash
 # Proper array initialization and usage
-declare -a TOOLS=({% if repository.has_go %}"golangci-lint" "gosec" "go"{% else %}"tool1" "tool2"{% endif %})
+declare -a TOOLS=("golangci-lint" "gosec" "go")
 declare -a MISSING_TOOLS=()
 
 # Iterating over arrays
@@ -429,11 +427,8 @@ tool "${COMMAND_ARGS[@]}"
 
 ```bash
 # Safely handle environment variables
-{% if repository.name %}{{ repository.name | upper }}_ENV="${{ repository.name | upper }}_ENV:-development}"
-{{ repository.name | upper }}_LOG_LEVEL="${{ repository.name | upper }}_LOG_LEVEL:-info}"
-{% else %}APP_ENV="${APP_ENV:-development}"
-APP_LOG_LEVEL="${APP_LOG_LEVEL:-info}"
-{% endif %}
+SIROS_ENV="${SIROS_ENV:-development}"
+SIROS_LOG_LEVEL="${SIROS_LOG_LEVEL:-info}"
 
 # Validate critical environment variables
 if [ -z "$HOME" ]; then
@@ -448,7 +443,7 @@ fi
 
 ```bash
 # Cache command existence checks
-{% if repository.has_frontend %}NPM_EXISTS=false
+NPM_EXISTS=false
 if command -v npm &> /dev/null; then
     NPM_EXISTS=true
 fi
@@ -457,7 +452,6 @@ fi
 if [ "$NPM_EXISTS" = true ]; then
     npm install
 fi
-{% endif %}
 
 # Minimize subprocess creation
 # Bad: Multiple calls to basename
@@ -586,7 +580,7 @@ All shell scripts must include comprehensive help:
 ```bash
 show_help() {
     cat << EOF
-🔍 {{ repository.name }} [Tool Name]
+🔍 Siros [Tool Name]
 
 DESCRIPTION:
   Brief description of what the script does and its purpose.
@@ -705,14 +699,4 @@ fi
 - Document shell-specific limitations or features
 - Maintain examples with current shell syntax
 
-{% if detected_instructions %}
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'shell.instructions.md' %}
-- **{{ instruction.display_name }}**: See [{{ instruction.filename }}]({{ instruction.filename }}) for {{ instruction.purpose | lower }}
-{% endif %}
-{% endfor %}
-{% endif %}
-
-This instruction file should be updated whenever new shell-specific patterns are established or existing patterns are modified to ensure consistency across all shell scripts in {{ repository.name }}.
+This instruction file should be updated whenever new shell-specific patterns are established or existing patterns are modified to ensure consistency across all shell scripts in the project.

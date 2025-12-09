@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ python_patterns | join(',') }}"
+applyTo: "**/*.py,**/*.pyw,**/*.pyi,**/setup.py,**/setup.cfg,**/pyproject.toml,**/.python-version,**/requirements*.txt,**/Pipfile,**/poetry.lock"
 ---
 
 # Python Development Standards and Guidelines
 
-This document provides comprehensive guidelines for Python development in {{ repository.name }}, covering code style, architecture patterns, testing, security, and best practices for building robust, maintainable Python applications.
+This document provides comprehensive guidelines for Python development, covering code style, architecture patterns, testing, security, and best practices for building robust, maintainable Python applications.
 
 ## Code Style Guidelines
 
@@ -292,100 +292,6 @@ class AppSettings(BaseSettings):
 # Global settings instance
 settings = AppSettings()
 ```
-
-{% if repository.has_backend %}
-## Backend Development
-
-### API Development Patterns
-```python
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import List
-
-app = FastAPI(title="{{ repository.name }} API")
-
-class UserCreate(BaseModel):
-    name: str
-    email: str
-    age: Optional[int] = None
-
-class UserResponse(BaseModel):
-    id: str
-    name: str
-    email: str
-    created_at: datetime
-
-@app.post("/users", response_model=UserResponse)
-async def create_user(
-    user_data: UserCreate,
-    user_service: UserService = Depends(get_user_service)
-) -> UserResponse:
-    """Create a new user."""
-    try:
-        user = await user_service.create_user(**user_data.dict())
-        return UserResponse.from_orm(user)
-    except ValidationError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-```
-
-### Database Integration
-```python
-from sqlalchemy import create_engine, Column, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-Base = declarative_base()
-
-class User(Base):
-    """User model with SQLAlchemy."""
-    
-    __tablename__ = 'users'
-    
-    id = Column(String, primary_key=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-```
-{% endif %}
-
-{% if repository.has_scripts %}
-## Script Development
-
-### Command-Line Interface Patterns
-```python
-import argparse
-import logging
-from pathlib import Path
-
-def setup_logging(level: str = "INFO") -> None:
-    """Configure logging for script."""
-    logging.basicConfig(
-        level=getattr(logging, level.upper()),
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-
-def main() -> None:
-    """Main script entry point."""
-    parser = argparse.ArgumentParser(description="{{ repository.name }} CLI tool")
-    parser.add_argument("--config", type=Path, help="Configuration file path")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
-    
-    args = parser.parse_args()
-    
-    setup_logging("DEBUG" if args.verbose else "INFO")
-    logger = logging.getLogger(__name__)
-    
-    try:
-        # Script logic here
-        logger.info("Script completed successfully")
-    except Exception as e:
-        logger.error(f"Script failed: {e}")
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()
-```
-{% endif %}
 
 ## Error Handling and Logging
 
@@ -1288,23 +1194,4 @@ def profile_memory(func: Callable) -> Callable:
     return wrapper
 ```
 
-{% if repository.languages | length > 1 %}
-## Multi-Language Integration
-
-When working with {{ repository.languages | reject('equalto', 'python') | join(', ') }}:
-
-- **API Integration**: Use proper type annotations for cross-language interfaces
-- **Configuration Management**: Shared configuration patterns with other languages
-- **Testing Strategies**: Integration testing with other components
-- **Documentation**: Cross-reference with other language standards
-{% endif %}
-
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'python.instructions.md' %}
-- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }})
-{% endif %}
-{% endfor %}
-
-This comprehensive Python instruction file provides world-class development standards covering all aspects of Python development, from basic syntax to advanced architectural patterns, ensuring robust, maintainable, and secure Python applications in {{ repository.name }}.
+This comprehensive Python instruction file provides world-class development standards covering all aspects of Python development, from basic syntax to advanced architectural patterns, ensuring robust, maintainable, and secure Python applications.

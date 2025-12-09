@@ -1,24 +1,10 @@
 # Platform-specific configuration
 platforms:
-  github:
-    # GitHub Actions workflows
-    workflows:
-      - name: ci
-        triggers:
-          - push
-          - pull_request
-        jobs:
-          build: {}
-    
-    # Repository settings
-    settings:
-      branch_protection:
-        required_status_checks:
-          strict: true
-          contexts: ["CI"]
-        enforce_admins: false
-        required_pull_request_reviews:
-          required_approving_review_count: 1
-          dismiss_stale_reviews: true
-      security_alerts: true
-      automated_security_fixes: true
+  azuredevops:
+    # Branch policies
+    branch_policies:
+      minimum_reviewers: 1
+      require_work_item_linking: true
+      build_validation: true
+      path_filters:
+        - "/*"

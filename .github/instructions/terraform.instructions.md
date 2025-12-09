@@ -3,10 +3,6 @@ applyTo: "**/*.tf,**/*.hcl,**/terraform.tf,**/variables.tf,**/outputs.tf,**/loca
 ---
 # Terraform Module Development Guidelines
 
-{% if repository.has_infra %}
-This document outlines comprehensive guidelines for Terraform module development in {{ repository.name }}, covering infrastructure as code best practices, module design patterns, and enterprise-grade development standards.
-{% endif %}
-
 ## Documentation Standards
 
 - Write clear and concise documentation for all changes in CHANGELOG.md using conventional format: FEATURES, ENHANCEMENTS, BUG FIXES
@@ -79,15 +75,6 @@ This document outlines comprehensive guidelines for Terraform module development
 - Validate security-related inputs (email formats, resource names, etc.)
 - Document security implications in variable descriptions
 
-{% if repository.languages contains 'terraform' %}
-## Infrastructure as Code Best Practices
-
-- Follow HashiCorp's Terraform best practices for {{ repository.name }}
-- Use provider-specific data sources for dynamic values
-- Implement proper resource tagging strategies
-- Consider state file security and remote backend configuration
-{% endif %}
-
 ## Module Versioning and Compatibility
 
 - Follow semantic versioning (MAJOR.MINOR.PATCH)
@@ -118,14 +105,3 @@ This document outlines comprehensive guidelines for Terraform module development
 - Use provider features appropriately (aliases, configurations)
 - Handle provider-specific limitations gracefully
 - Document provider-specific requirements
-
-{% if detected_instructions %}
-## Related Documentation
-
-For additional development guidance, see:
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'terraform.instructions.md' %}
-- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }}) - {{ instruction.purpose }}
-{% endif %}
-{% endfor %}
-{% endif %}

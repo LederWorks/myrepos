@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ json_patterns | join(',') }}"
+applyTo: "**/*.json,**/*.jsonc,**/*.json5"
 ---
 
 # JSON Development Standards and Guidelines
 
-This document provides comprehensive guidelines for JSON file development in {{ repository.name }}, ensuring consistency, maintainability, and best practices across all JSON configurations, data files, and API schemas.
+This document provides comprehensive guidelines for JSON file development, ensuring consistency, maintainability, and best practices across all JSON configurations, data files, and API schemas.
 
 ## JSON File Types and Usage
 
@@ -26,26 +26,6 @@ This document provides comprehensive guidelines for JSON file development in {{ 
 - **Docker Compose** - Container orchestration
 - **Environment Configs** - Development, staging, production settings
 
-{% if repository.has_frontend %}
-## Frontend Configuration Integration
-
-For {{ repository.name }} frontend development:
-- TypeScript configuration in `tsconfig.json`
-- Package management via `package.json`
-- Build tool configurations (Webpack, Vite, etc.)
-- Environment-specific configuration files
-
-{% endif %}
-{% if repository.has_backend %}
-## Backend Configuration Integration
-
-For {{ repository.name }} backend services:
-- Application configuration files
-- Database connection configurations
-- API specification files (OpenAPI/Swagger)
-- Service discovery and health check endpoints
-
-{% endif %}
 ## Formatting Standards
 
 ### Indentation and Spacing
@@ -57,7 +37,7 @@ For {{ repository.name }} backend services:
 **Good Example:**
 ```json
 {
-  "name": "{{ repository.name }}",
+  "name": "example-project",
   "version": "1.0.0",
   "scripts": {
     "build": "npm run build:prod",
@@ -73,7 +53,7 @@ For {{ repository.name }} backend services:
 **Bad Example:**
 ```json
 {
-"name":"{{ repository.name }}",
+"name":"example-project",
 "version":"1.0.0","scripts":{"build":"npm run build:prod","test":"jest --coverage"},
 "dependencies":{"express":"^4.18.0","lodash":"^4.17.21",}
 }
@@ -100,7 +80,7 @@ For {{ repository.name }} backend services:
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/example/{{ repository.name }}.git"
+    "url": "https://github.com/example/repo.git"
   }
 }
 ```
@@ -204,9 +184,9 @@ For {{ repository.name }} backend services:
 ### package.json Best Practices
 ```json
 {
-  "name": "{{ repository.name }}",
+  "name": "project-name",
   "version": "1.0.0",
-  "description": "{{ repository.description | default('Clear, concise project description') }}",
+  "description": "Clear, concise project description",
   "main": "dist/index.js",
   "scripts": {
     "build": "npm run build:prod",
@@ -283,7 +263,7 @@ For {{ repository.name }} backend services:
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build {{ repository.name }}",
+      "label": "Build Project",
       "type": "shell",
       "command": "npm",
       "args": ["run", "build"],
@@ -297,7 +277,6 @@ For {{ repository.name }} backend services:
 }
 ```
 
-{% if repository.has_api %}
 ## API Schema Design
 
 ### RESTful API Response Format
@@ -357,7 +336,6 @@ For {{ repository.name }} backend services:
 }
 ```
 
-{% endif %}
 ## Validation and Schema Standards
 
 ### JSON Schema Definition
@@ -404,7 +382,7 @@ For {{ repository.name }} backend services:
     "database": {
       "host": "localhost",
       "port": 5432,
-      "name": "{{ repository.name }}_dev",
+      "name": "myapp_dev",
       "ssl": false
     },
     "logging": {
@@ -545,8 +523,8 @@ For {{ repository.name }} backend services:
 ### Schema Documentation
 ```json
 {
-  "title": "{{ repository.name }} Configuration",
-  "description": "Main configuration file for {{ repository.name }}",
+  "title": "Application Configuration",
+  "description": "Main configuration file for the application",
   "examples": [
     {
       "server": {
@@ -554,7 +532,7 @@ For {{ repository.name }} backend services:
         "host": "localhost"
       },
       "database": {
-        "url": "postgresql://localhost:5432/{{ repository.name }}"
+        "url": "postgresql://localhost:5432/myapp"
       }
     }
   ]
@@ -641,17 +619,6 @@ For {{ repository.name }} backend services:
 }
 ```
 
-{% if repository.languages | length > 1 %}
-## Multi-Language Integration
-
-For {{ repository.name }} with {{ repository.languages | join(', ') }} support:
-
-- **Configuration Consistency** - Maintain consistent JSON structure across all language components
-- **Data Exchange** - Use JSON for API communication between different language services
-- **Schema Sharing** - Share JSON schemas across {{ repository.languages | join(' and ') }} components
-- **Validation Alignment** - Ensure JSON validation rules are consistent across all language implementations
-
-{% endif %}
 ## Maintenance Guidelines
 
 ### Regular Reviews
@@ -666,16 +633,4 @@ For {{ repository.name }} with {{ repository.languages | join(', ') }} support:
 - **Style Guides** - Enforce consistent formatting standards
 - **Training** - Team education on JSON best practices
 
-{% if detected_instructions %}
-## Related Documentation
-
-For comprehensive {{ repository.name }} development guidelines, see:
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'json.instructions.md' %}
-- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }}) - {{ instruction.purpose }}
-{% endif %}
-{% endfor %}
-{% endif %}
-
-This comprehensive guide ensures consistent, maintainable, and high-quality JSON development across all {{ repository.name }} components while following industry best practices and security standards.
+This comprehensive guide ensures consistent, maintainable, and high-quality JSON development across all projects while following industry best practices and security standards.

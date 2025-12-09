@@ -1,29 +1,558 @@
 ---
-description: Go coding standards and best practices
-applyTo: '**/*.go'
+applyTo: "{{ go_patterns | join(',') }}"
 ---
 
-# Go Instructions for {{ repo_name }}
+# Go Development Standards for {{ repository.name }}
 
-## Code Style and Standards
-- Follow Go conventions and use gofmt
-- Use meaningful package and variable names
-- Write comprehensive comments for public functions and types
-- Use interfaces to define behavior contracts
-- Keep functions small and focused
+This document provides comprehensive guidelines for Go development in {{ repository.name }}, covering code style, architecture patterns, testing, security, and best practices for building robust, maintainable Go applications.
 
-## Best Practices
-- Use go mod for dependency management
-- Write unit tests using the testing package
-- Handle errors explicitly - don't ignore them
-- Use context.Context for cancellation and timeouts
-- Follow the "accept interfaces, return structs" principle
+{% if repository.has_backend %}
+## Backend Architecture Guidelines
 
-## Project Structure
-- Organize code into logical packages
-- Use main package only for entry points
-- Keep internal packages truly internal
-- Use cmd/ directory for executables
+The {{ repository.name }} backend follows clean architecture principles with clear separation of concerns:
 
-## Repository Types: {{ types | join(', ') }}
-- Follow Go best practices for {{ types | join(', ') }} repositories
+### MVC Pattern Implementation
+
+#### Controllers (`internal/controllers/`)
+Controllers handle HTTP requests and orchestrate business logic without containing it:
+
+```go
+type ResourceController struct {
+    resourceService services.ResourceService
+    vectorService   services.VectorService
+    auditService   services.AuditService
+    logger         *log.Logger
+}
+
+func (c *ResourceController) CreateResource(w http.ResponseWriter, r *http.Request) {
+    // 1. Parse and validate request
+    var req CreateResourceRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        views.WriteError(w, http.StatusBadRequest, "invalid request body", err)
+        return
+    }
+
+    // 2. Delegate to service layer
+    resource, err := c.resourceService.CreateResource(r.Context(), req)
+    if err != nil {
+        views.WriteError(w, http.StatusInternalServerError, "failed to create resource", err)
+        return
+    }
+
+    // 3. Format response via view layer
+    views.WriteResourceResponse(w, http.StatusCreated, resource)
+}
+```
+
+**Controller Standards:**
+- **Thin Controllers**: Only handle HTTP concerns, delegate business logic to services
+- **Validation**: Validate input before passing to service layer
+- **Error Handling**: Convert service errors to appropriate HTTP responses
+- **Logging**: Log request processing for debugging and audit
+- **Context Propagation**: Pass context through all service calls
+
+#### Models (`internal/models/`)
+Models define data structures and core business logic:
+
+```go
+type Resource struct {
+    ID           string                 `json:"id" db:"id"`
+    Type         string                 `json:"type" db:"type"`
+    Provider     string                 `json:"provider" db:"provider"`
+    Name         string                 `json:"name" db:"name"`
+    Data         map[string]interface{} `json:"data" db:"data"`
+    Metadata     ResourceMetadata       `json:"metadata" db:"metadata"`
+    Vector       []float32              `json:"vector,omitempty" db:"vector"`
+    ParentID     *string                `json:"parent_id,omitempty" db:"parent_id"`
+    CreatedAt    time.Time              `json:"created_at" db:"created_at"`
+    ModifiedAt   time.Time              `json:"modified_at" db:"modified_at"`
+}
+
+func (r *Resource) Validate() error {
+    if r.ID == "" {
+        return errors.New("resource ID is required")
+    }
+    if r.Type == "" {
+        return errors.New("resource type is required")
+    }
+    if r.Provider == "" {
+        return errors.New("resource provider is required")
+    }
+    return nil
+}
+```
+
+#### Services (`internal/services/`)
+Services contain business logic and coordinate between models and repositories:
+
+```go
+type ResourceService interface {
+    CreateResource(ctx context.Context, req CreateResourceRequest) (*models.Resource, error)
+    GetResource(ctx context.Context, id string) (*models.Resource, error)
+    UpdateResource(ctx context.Context, id string, updates ResourceUpdates) (*models.Resource, error)
+    DeleteResource(ctx context.Context, id string) error
+    ListResources(ctx context.Context, filters ResourceFilters) ([]*models.Resource, error)
+}
+```
+
+{% endif %}
+
+## Code Style Guidelines
+
+### Function Naming and Structure
+
+```go
+// Use clear, descriptive function names
+func CreateMultiCloudResource(ctx context.Context, req CreateResourceRequest) (*Resource, error)
+
+// Implement proper error handling
+if err != nil {
+    return nil, fmt.Errorf("failed to create resource: %w", err)
+}
+
+// Use context for cancellation and timeouts
+ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+defer cancel()
+```
+
+### Unused Parameter Handling
+
+Go linting tools (revive, golangci-lint) detect unused parameters automatically. Follow these guidelines:
+
+#### Renaming Unused Parameters
+
+- **Prefix with underscore `_`** for unused parameters that must be kept for interface compliance
+- **Use blank identifier `_`** for completely ignored parameters
+- **Keep original names** when parameters might be used in future implementations
+
+```go
+// Interface compliance - keep parameter for future use
+func (s *Service) ProcessData(ctx context.Context, data map[string]interface{}, _metadata ResourceMetadata) error {
+    // metadata might be used later, so prefix with _
+    return s.process(ctx, data)
+}
+
+// Completely unused parameter - use blank identifier
+func (s *Service) HandleRequest(_ context.Context, req Request) Response {
+    // context not needed in this implementation
+    return s.handleSync(req)
+}
+```
+
+### Import Management and Duplicate Import Prevention (dupImport)
+
+The `dupImport` linter warning occurs when the same package is imported multiple times, often with different aliases or as both normal and blank imports.
+
+#### Common Duplicate Import Scenarios
+
+**❌ BAD: Same package imported multiple times**
+```go
+import (
+    "database/sql"
+    "github.com/lib/pq"           // Normal import for using pq.Array()
+    _ "github.com/lib/pq"         // Blank import for driver registration - DUPLICATE!
+)
+```
+
+**✅ GOOD: Single import when package is actively used**
+```go
+import (
+    "database/sql"
+    "github.com/lib/pq"          // Single import - handles both usage and driver registration
+)
+
+func example() {
+    // Use package functions directly
+    rows, err := db.Query("SELECT * FROM table", pq.Array(values))
+    var stringArray pq.StringArray
+}
+```
+
+#### Tools and Automation
+
+**goimports** automatically organizes imports:
+```bash
+# Format imports automatically
+goimports -w .
+
+# Check import formatting
+goimports -d .
+```
+
+### API Design Patterns
+
+#### Constructor Functions and Return Types
+
+**Rule**: Exported constructor functions should return **interface types**, not unexported concrete types.
+
+**✅ GOOD: Exported function returning exported interface**
+```go
+func NewResourceRepository(db *sql.DB) ResourceRepository {
+    return &resourceRepository{db: db}
+}
+```
+
+**Benefits of interface returns**:
+- **Clean API**: Users work with well-defined interfaces
+- **Testability**: Easy to mock for unit tests
+- **Flexibility**: Implementation can change without breaking callers
+- **Consistency**: Public functions return public types
+
+### Heavy Parameter Optimization (hugeParam)
+
+The `hugeParam` linter warning occurs when large structs (typically >96 bytes) are passed by value instead of by pointer, causing expensive copying operations.
+
+**✅ GOOD: Using pointer parameters**
+```go
+// Pointer parameter - no copying overhead
+func (s *schemaService) CreateSchema(ctx context.Context, schema *models.Schema) error {
+    return s.repo.Create(ctx, schema) // Already a pointer
+}
+```
+
+**Performance Benefits**:
+- **Memory**: Eliminates large struct copying (104-176 bytes → 8 bytes pointer)
+- **CPU**: Reduces allocation overhead in high-frequency operations
+- **Cache**: Better CPU cache utilization with pointer sharing
+- **Scalability**: Improved performance under load with frequent API calls
+
+### Range Value Copy Optimization (rangeValCopy)
+
+The `rangeValCopy` linter warning occurs when range loops copy large structs (typically >256 bytes) on each iteration, causing performance overhead.
+
+**✅ GOOD: Using pointer iteration or indexing**
+
+```go
+// Zero-copy iteration with pointers
+for i := range resources {
+    resource := &resources[i] // Point to original, no copy
+    results[i] = SearchResult{
+        "id":   resource.ID,
+        "name": resource.Name,
+        "data": resource.Data,
+    }
+}
+
+// Index-based access, no copying
+for i := 0; i < len(resources); i++ {
+    results[i] = SearchResult{
+        "id":   resources[i].ID,    // Direct slice access
+        "name": resources[i].Name,
+        "data": resources[i].Data,
+    }
+}
+```
+
+## Architecture Patterns
+
+- Follow **clean architecture** principles with clear layer separation
+- Implement **dependency injection** for testability using interfaces
+- Use **interfaces** for abstractions between layers
+- Apply **single responsibility principle** to each component
+
+## API Development
+
+### HTTP Routing
+
+- Use **Gorilla Mux** for HTTP routing
+- Implement **middleware** for CORS, logging, and authentication
+- Follow **REST conventions** for endpoint design
+- Provide **JSON responses** with consistent error formats
+- Support **filtering, pagination, and sorting** for list endpoints
+
+{% if repository.has_api or repository.has_backend %}
+### REST API Structure
+
+```
+GET    /api/v1/resources              # List resources with filtering
+POST   /api/v1/resources              # Create new resource
+GET    /api/v1/resources/{id}         # Get specific resource
+PUT    /api/v1/resources/{id}         # Update resource
+DELETE /api/v1/resources/{id}         # Delete resource
+
+POST   /api/v1/search                 # Semantic search
+GET    /api/v1/schemas                # List available schemas
+POST   /api/v1/terraform/import       # Import Terraform state
+```
+{% endif %}
+
+## Database Integration
+
+### PostgreSQL with pgvector
+
+- Use **PostgreSQL** with **pgvector** extension for vector operations
+- Implement **prepared statements** to prevent SQL injection
+- Use **database transactions** for atomic operations
+- Create **proper indexes** for query performance
+- Design **vector similarity queries** for resource relationship discovery
+
+### Transaction Management
+
+```go
+func (s *resourceService) CreateResourceWithAudit(ctx context.Context, req CreateResourceRequest) (*models.Resource, error) {
+    tx, err := s.db.BeginTx(ctx, nil)
+    if err != nil {
+        return nil, fmt.Errorf("failed to begin transaction: %w", err)
+    }
+    defer tx.Rollback()
+
+    // Create resource
+    resource, err := s.createResourceInTx(ctx, tx, req)
+    if err != nil {
+        return nil, err
+    }
+
+    // Record audit trail
+    if err := s.recordAuditInTx(ctx, tx, resource.ID, "CREATE", resource); err != nil {
+        return nil, err
+    }
+
+    if err := tx.Commit(); err != nil {
+        return nil, fmt.Errorf("failed to commit transaction: %w", err)
+    }
+
+    return resource, nil
+}
+```
+
+{% if repository.languages | length > 1 %}
+## Multi-Language Integration
+
+When working with {{ repository.languages | reject('equalto', 'go') | join(', ') }} alongside Go:
+
+- **Interface Contracts**: Define clear API contracts for cross-language communication
+- **Data Serialization**: Use consistent JSON/Protocol Buffer schemas
+- **Error Handling**: Implement consistent error response formats
+- **Testing**: Include integration tests for cross-language interactions
+{% endif %}
+
+## Multi-Cloud Provider Integration
+
+### Provider Pattern
+
+```go
+type CloudProvider interface {
+    ListResources(ctx context.Context, filters ResourceFilters) ([]Resource, error)
+    GetResource(ctx context.Context, id string) (*Resource, error)
+    CreateResource(ctx context.Context, spec ResourceSpec) (*Resource, error)
+    UpdateResource(ctx context.Context, id string, updates ResourceUpdates) (*Resource, error)
+    DeleteResource(ctx context.Context, id string) error
+    DiscoverRelationships(ctx context.Context, resourceID string) ([]Relationship, error)
+}
+
+// Implement for each cloud provider
+type AWSProvider struct {
+    ec2Client    *ec2.Client
+    s3Client     *s3.Client
+    rdsClient    *rds.Client
+    vpcClient    *ec2.Client
+}
+
+type AzureProvider struct {
+    resourceClient   *armresources.Client
+    networkClient    *armnetwork.Client
+    computeClient    *armcompute.Client
+}
+
+type GCPProvider struct {
+    computeService   *compute.Service
+    storageClient    *storage.Client
+    resourceManager  *cloudresourcemanager.Service
+}
+
+type OCIProvider struct {
+    computeClient    core.ComputeClient
+    networkClient    core.VirtualNetworkClient
+    identityClient   identity.IdentityClient
+}
+```
+
+### Resource Management
+
+- Store resources as **individual vectors** with original CSP structure
+- Enrich with **metadata**: parent_id, created, created_by, modified, modified_by, IAM
+- Support **custom schemas** beyond predefined cloud resource types
+- Implement **deduplication logic** to identify related resources without merging
+- Maintain **cross-cloud relationship** discovery through vector queries
+
+## Testing Standards
+
+### Unit Testing
+
+```go
+func TestCreateResource(t *testing.T) {
+    // Setup
+    mockStorage := &MockStorage{}
+    service := NewResourceService(mockStorage)
+
+    // Test case
+    resource, err := service.CreateResource(context.Background(), validRequest)
+
+    // Assertions
+    assert.NoError(t, err)
+    assert.NotNil(t, resource)
+    assert.Equal(t, "expected-name", resource.Name)
+}
+```
+
+### Controller Testing
+
+```go
+func TestResourceController_CreateResource(t *testing.T) {
+    // Setup
+    mockService := &MockResourceService{}
+    controller := NewResourceController(mockService, logger)
+
+    // Mock expectations
+    expectedResource := &models.Resource{ID: "test-id", Name: "test"}
+    mockService.On("CreateResource", mock.Anything, mock.Anything).Return(expectedResource, nil)
+
+    // Test
+    req := httptest.NewRequest("POST", "/resources", strings.NewReader(`{"name":"test"}`))
+    w := httptest.NewRecorder()
+
+    controller.CreateResource(w, req)
+
+    // Assertions
+    assert.Equal(t, http.StatusCreated, w.Code)
+    mockService.AssertExpectations(t)
+}
+```
+
+### Test Suite Organization
+
+- **models**: Business logic and validation tests
+- **services**: Business logic orchestration tests
+- **controllers**: HTTP handler and API tests
+- **repositories**: Data access layer tests
+- **integration**: End-to-end tests with real dependencies
+
+## Security Best Practices
+
+### Secure File Operations and Path Handling
+
+The `G304` security warning indicates potential file inclusion vulnerabilities (CWE-22). Follow these patterns for secure file operations:
+
+```go
+func validateConfigPath(path string) (string, error) {
+    // Reject empty paths
+    if path == "" {
+        return "", fmt.Errorf("config path cannot be empty")
+    }
+
+    // Clean the path to resolve any . or .. elements
+    cleanPath := filepath.Clean(path)
+
+    // Reject paths that try to traverse directories with ..
+    if strings.Contains(cleanPath, "..") {
+        return "", fmt.Errorf("config path cannot contain directory traversal sequences")
+    }
+
+    // Convert to absolute path for consistency
+    absPath, err := filepath.Abs(cleanPath)
+    if err != nil {
+        return "", fmt.Errorf("failed to resolve absolute path: %w", err)
+    }
+
+    return absPath, nil
+}
+```
+
+### Input Validation
+
+- Validate **all user inputs** at the controller layer
+- Use **parameterized queries** to prevent SQL injection
+- Implement **input sanitization** for all user-provided data
+- Use **struct tags** for validation rules
+- **Validate file paths** before any file system operations
+- **Sanitize file names** and reject directory traversal attempts
+
+### Authentication & Authorization
+
+- Implement **middleware** for authentication
+- Use **context** to pass user information through request pipeline
+- Validate **permissions** at the service layer
+- Implement **audit logging** for security events
+
+## Development Commands
+
+### Cross-Platform Development
+
+```bash
+# Linux/macOS
+cd backend && go run ./cmd/{{ repo_name }}-server
+go test ./...
+go build -o {{ repo_name }}-server ./cmd/{{ repo_name }}-server
+
+# Windows
+cd backend; go run ./cmd/{{ repo_name }}-server
+go test ./...
+go build -o {{ repo_name }}-server.exe ./cmd/{{ repo_name }}-server
+```
+
+### Testing
+
+```bash
+# Run comprehensive test suite
+./scripts/test.sh                    # Linux/macOS
+.\scripts\test.ps1                   # Windows
+
+# Run specific test suite with coverage
+./scripts/test.sh --suite models --coverage     # Linux/macOS
+.\scripts\test.ps1 -TestSuite models -Coverage  # Windows
+```
+
+## Performance Considerations
+
+### Database Optimization
+
+- Use **connection pooling** for database connections
+- Implement **proper indexing** for vector similarity queries
+- Use **prepared statements** for frequently executed queries
+- Consider **read replicas** for high-traffic scenarios
+
+### Concurrency
+
+- Think about **concurrency** and **race conditions**
+- Use **context** for cancellation and timeouts
+- Implement **proper locking** for shared resources
+- Consider **worker pools** for parallel processing
+
+### Memory Management
+
+- Be mindful of **memory allocation** for large datasets
+- Use **streaming** for large data processing
+- Implement **proper cleanup** of resources
+- Monitor **garbage collection** performance
+
+## Deployment Considerations
+
+### Single Binary Deployment
+
+- **Embed frontend assets** in Go binary using `embed.FS`
+- Support **configuration via files and environment variables**
+- Implement **graceful shutdown** and **health checks**
+- Provide **Docker images** for containerized deployment
+
+### Configuration Management
+
+- Use **environment variables** for sensitive configuration
+- Provide **default values** for optional settings
+- Implement **configuration validation** at startup
+- Support **hot reloading** of non-sensitive configuration
+
+### Monitoring and Observability
+
+- Implement **structured logging** with appropriate levels
+- Add **metrics collection** for key operations
+- Include **health check endpoints** for monitoring
+- Implement **distributed tracing** for complex operations
+
+{% if detected_instructions %}
+## Related Documentation
+{% for instruction in detected_instructions %}
+{% if instruction.filename != 'go.instructions.md' %}
+- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }})
+{% endif %}
+{% endfor %}
+{% endif %}

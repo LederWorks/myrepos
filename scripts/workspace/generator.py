@@ -242,6 +242,7 @@ class WorkspaceGenerator:
             self._create_workspace_file(config)
             self._create_vscode_config(config)
             self._create_omd_files(config)
+            self._create_platform_templates(config)
             self._update_gitignore(config)
             self.generate_copilot_instructions()
 
@@ -807,6 +808,46 @@ class WorkspaceGenerator:
                     print("  ✓ Updated .gitignore")
             except (IOError, OSError) as e:
                 print(f"  ⚠️  Error updating .gitignore: {e}")
+
+    def _create_platform_templates(self, config: RepositoryConfig) -> None:
+        """Create platform-specific templates and files"""
+        if config.platform == "azuredevops":
+            self._create_azure_devops_templates(config)
+        elif config.platform == "github":
+            self._create_github_templates(config)
+
+    def _create_azure_devops_templates(self, config: RepositoryConfig) -> None:
+        """Create Azure DevOps specific templates"""
+        # Create pull request template
+        pr_template_dir = config.repo_path / ".azuredevops" / "pull_request_template" / "branches"
+        pr_template_dir.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            template = self.jinja_env.get_template(".azuredevops/pull_request_template/branches/main.MD.j2")
+            content = template.render(
+                repo_name=config.name,
+                platform=config.platform,
+                types=config.types,
+                languages=config.languages,
+                features=[],  # Can be customized via config
+                enhancements=[],  # Can be customized via config
+                bug_fixes=[],  # Can be customized via config
+            )
+            
+            pr_template_file = pr_template_dir / "main.MD"
+            with open(pr_template_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            print("  ✓ Generated .azuredevops/pull_request_template/branches/main.MD")
+            
+        except TemplateNotFound:
+            print("  ⚠️  Template .azuredevops/pull_request_template/branches/main.MD.j2 not found")
+        except (yaml.YAMLError, ValueError, TypeError) as e:
+            print(f"  ⚠️  Error generating Azure DevOps PR template: {e}")
+
+    def _create_github_templates(self, config: RepositoryConfig) -> None:
+        """Create GitHub specific templates (placeholder for future use)"""
+        # Placeholder for GitHub-specific templates
+        pass
 
     def generate_copilot_instructions(self) -> None:
         """Generate GitHub Copilot instruction files if enabled"""

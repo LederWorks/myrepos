@@ -9,7 +9,7 @@ languages:
   - python
   - shell
   - yaml
-platform: github
+platform: azuredevops
 types:
   - docs
   - template

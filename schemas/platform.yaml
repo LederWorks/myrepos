@@ -16,28 +16,6 @@ properties:
       github:
         type: object
         properties:
-          # Issue and PR templates
-          templates:
-            type: object
-            properties:
-              issue_templates:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    about:
-                      type: string
-                    labels:
-                      type: array
-                      items:
-                        type: string
-                  additionalProperties: true
-              pull_request_template:
-                type: string
-            additionalProperties: false
-
           # Repository settings
           settings:
             type: object
@@ -57,27 +35,23 @@ properties:
       azuredevops:
         type: object
         properties:
-          # Work item templates
-          work_items:
+          # Branch policies
+          branch_policies:
             type: object
             properties:
-              process_template:
-                type: string
-                enum: [Agile, Scrum, CMMI, Basic]
-              custom_fields:
+              minimum_reviewers:
+                type: integer
+                minimum: 1
+                maximum: 10
+              require_work_item_linking:
+                type: boolean
+              build_validation:
+                type: boolean
+              path_filters:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    type:
-                      type: string
-                  additionalProperties: true
-            additionalProperties: false
-
+                  type: string
+            additionalProperties: true
         additionalProperties: false
-
     additionalProperties: false
-
 additionalProperties: false

@@ -1,0 +1,388 @@
+{# TypeScript Language Configuration Template #}
+{# Generates comprehensive VS Code configuration for TypeScript/JavaScript development #}
+{# Supports React, Node.js, and modern web development workflows #}
+
+file_associations:
+  - "*.ts"
+  - "*.tsx" 
+  - "*.js"
+  - "*.jsx"
+  - "*.mjs"
+  - "*.cjs"
+  - "*.json"
+  - "*.jsonc"
+
+settings:
+  "[typescript]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.codeActionsOnSave:
+      source.fixAll.eslint: "explicit"
+      source.organizeImports: "explicit"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  "[typescriptreact]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.codeActionsOnSave:
+      source.fixAll.eslint: "explicit"
+      source.organizeImports: "explicit"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  "[javascript]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.codeActionsOnSave:
+      source.fixAll.eslint: "explicit"
+      source.organizeImports: "explicit"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  "[javascriptreact]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.codeActionsOnSave:
+      source.fixAll.eslint: "explicit"
+      source.organizeImports: "explicit"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  "[json]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  "[jsonc]":
+    editor.formatOnSave: true
+    editor.defaultFormatter: "esbenp.prettier-vscode"
+    editor.tabSize: 2
+    editor.insertSpaces: true
+    
+  typescript.preferences.includePackageJsonAutoImports: "auto"
+  typescript.updateImportsOnFileMove.enabled: "always"
+  typescript.suggest.autoImports: true
+  typescript.preferences.importModuleSpecifier: "relative"
+  typescript.inlayHints.parameterNames.enabled: "literals"
+  typescript.inlayHints.variableTypes.enabled: true
+  typescript.inlayHints.functionLikeReturnTypes.enabled: true
+  
+  javascript.preferences.includePackageJsonAutoImports: "auto"
+  javascript.updateImportsOnFileMove.enabled: "always"
+  javascript.suggest.autoImports: true
+  javascript.preferences.importModuleSpecifier: "relative"
+  javascript.inlayHints.parameterNames.enabled: "literals"
+  javascript.inlayHints.variableTypes.enabled: true
+  javascript.inlayHints.functionLikeReturnTypes.enabled: true
+  
+  emmet.includeLanguages:
+    javascript: "javascriptreact"
+    typescript: "typescriptreact"
+  
+  files.associations:
+    "*.js": "javascript"
+    "*.jsx": "javascriptreact"
+    "*.ts": "typescript"
+    "*.tsx": "typescriptreact"
+    "*.json": "jsonc"
+
+required_extensions:
+  - "ms-vscode.vscode-typescript-next"
+  - "esbenp.prettier-vscode"
+  - "dbaeumer.vscode-eslint"
+  - "bradlc.vscode-tailwindcss"
+
+recommended_extensions:
+  - "formulahendry.auto-rename-tag"
+  - "christian-kohler.path-intellisense"
+  - "ms-vscode.vscode-json"
+  - "yzhang.markdown-all-in-one"
+  - "ms-vscode.sublime-keybindings"
+  - "usernamehw.errorlens"
+  - "streetsidesoftware.code-spell-checker"
+  - "ms-vscode-remote.remote-containers"
+{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+  - "dsznajder.es7-react-js-snippets"
+  - "burkeholland.simple-react-snippets"
+  - "steoates.autoimport-es6-ts"
+  - "xabikos.ReactSnippets"
+{% endif %}
+{% if 'node' in repository.frameworks or 'backend' in repository.types %}
+  - "ms-vscode.vscode-node-azure-pack"
+  - "christian-kohler.npm-intellisense"
+  - "eg2.vscode-npm-script"
+{% endif %}
+{% if 'testing' in repository.features %}
+  - "orta.vscode-jest"
+  - "kavod-io.vscode-jest-test-adapter"
+{% endif %}
+
+tasks:
+  - label: "TypeScript: Build"
+    type: "npm"
+    script: "build"
+    group:
+      kind: "build"
+      isDefault: true
+    presentation:
+      echo: true
+      reveal: "silent"
+      focus: false
+      panel: "shared"
+    problemMatcher: 
+      - "$tsc"
+      
+  - label: "TypeScript: Watch"
+    type: "npm"
+    script: "build"
+    options:
+      shell:
+        args: 
+          - "--watch"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "silent"
+      focus: false
+      panel: "shared"
+    problemMatcher:
+      - "$tsc-watch"
+      
+  - label: "TypeScript: Type Check"
+    type: "shell"
+    command: "npx"
+    args:
+      - "tsc"
+      - "--noEmit"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "silent"
+      focus: false
+      panel: "shared"
+    problemMatcher:
+      - "$tsc"
+      
+{% if 'testing' in repository.features %}
+  - label: "Jest: Run Tests"
+    type: "npm"
+    script: "test"
+    group:
+      kind: "test"
+      isDefault: true
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+    problemMatcher:
+      - "$eslint-stylish"
+      
+  - label: "Jest: Run Tests (Watch)"
+    type: "npm"
+    script: "test"
+    options:
+      shell:
+        args:
+          - "--watch"
+    group: "test"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+    
+  - label: "Jest: Coverage"
+    type: "npm"
+    script: "test:coverage"
+    group: "test"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+{% endif %}
+
+  - label: "ESLint: Fix All"
+    type: "shell"
+    command: "npx"
+    args:
+      - "eslint"
+      - "."
+      - "--fix"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "silent"
+      focus: false
+      panel: "shared"
+    problemMatcher:
+      - "$eslint-stylish"
+      
+  - label: "Prettier: Format All"
+    type: "shell"
+    command: "npx"
+    args:
+      - "prettier"
+      - "--write"
+      - "."
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "silent"
+      focus: false
+      panel: "shared"
+
+{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+  - label: "React: Start Dev Server"
+    type: "npm"
+    script: "dev"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+    runOptions:
+      runOn: "folderOpen"
+      
+  - label: "React: Build Production"
+    type: "npm"
+    script: "build"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+{% endif %}
+
+{% if 'node' in repository.frameworks or 'backend' in repository.types %}
+  - label: "Node: Start Server"
+    type: "npm"
+    script: "start"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+    runOptions:
+      runOn: "folderOpen"
+      
+  - label: "Node: Development Mode"
+    type: "npm"
+    script: "dev"
+    group: "build"
+    presentation:
+      echo: true
+      reveal: "always"
+      focus: false
+      panel: "shared"
+{% endif %}
+
+launch_configurations:
+  - name: "Launch {{ repository.name | title }}"
+    type: "node"
+    request: "launch"
+    program: "${workspaceFolder}/dist/index.js"
+    outFiles:
+      - "${workspaceFolder}/dist/**/*.js"
+    env:
+      NODE_ENV: "development"
+    console: "integratedTerminal"
+    
+  - name: "Attach to {{ repository.name | title }}"
+    type: "node"
+    request: "attach"
+    port: 9229
+    localRoot: "${workspaceFolder}"
+    remoteRoot: "/app"
+    skipFiles:
+      - "<node_internals>/**"
+      
+{% if 'testing' in repository.features %}
+  - name: "Jest Tests"
+    type: "node"
+    request: "launch"
+    program: "${workspaceFolder}/node_modules/.bin/jest"
+    args:
+      - "--runInBand"
+      - "--no-coverage"
+    cwd: "${workspaceFolder}"
+    console: "integratedTerminal"
+    skipFiles:
+      - "<node_internals>/**"
+{% endif %}
+
+{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+  - name: "Launch Chrome"
+    type: "chrome"
+    request: "launch"
+    url: "http://localhost:3000"
+    webRoot: "${workspaceFolder}/src"
+    sourceMaps: true
+    
+  - name: "Attach to Chrome"
+    type: "chrome"
+    request: "attach"
+    port: 9222
+    webRoot: "${workspaceFolder}/src"
+    sourceMaps: true
+{% endif %}
+
+linting:
+  eslint:
+    enabled: true
+    configFile: ".eslintrc.json"
+    extensions:
+      - ".js"
+      - ".jsx" 
+      - ".ts"
+      - ".tsx"
+    rules:
+      "@typescript-eslint/no-unused-vars": "error"
+      "@typescript-eslint/explicit-function-return-type": "warn"
+      "react-hooks/rules-of-hooks": "error"
+      "react-hooks/exhaustive-deps": "warn"
+      
+  prettier:
+    enabled: true
+    configFile: ".prettierrc"
+    options:
+      semi: true
+      singleQuote: true
+      tabWidth: 2
+      trailingComma: "es5"
+      printWidth: 80
+      
+  typescript:
+    enabled: true
+    configFile: "tsconfig.json"
+    strict: true
+    noImplicitAny: true
+    strictNullChecks: true
+
+package_management:
+  npm:
+    lockFile: "package-lock.json"
+    scripts:
+      build: "tsc"
+      dev: "nodemon src/index.ts"
+      test: "jest"
+      "test:watch": "jest --watch"
+      "test:coverage": "jest --coverage"
+      lint: "eslint . --ext .ts,.tsx,.js,.jsx"
+      "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix"
+      format: "prettier --write ."
+      "type-check": "tsc --noEmit"
+      
+  yarn:
+    lockFile: "yarn.lock" 
+    workspaces: true
+    
+  pnpm:
+    lockFile: "pnpm-lock.yaml"
+    workspaces: true

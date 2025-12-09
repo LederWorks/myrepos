@@ -1,18 +1,31 @@
 # Agent Coordination and Language Template Management
 
-This document outlines the coordination process for maintaining language templates and ensuring consistency across the myrepos tooling system.
+This document provides master project tracking, component status overview, and cross-component coordination for the MyRepos tooling system. It serves as the root-level coordination document in the hierarchical documentation architecture.
 
-## Language Template System Architecture
+## Documentation Architecture
 
-The myrepos system uses a multi-layer approach for language configuration:
+This file is part of the MyRepos hierarchical documentation structure:
+
+```
+AGENTS.md (root)                     ← Master tracking & component coordination (this file)
+├── .github/copilot-instructions.md  ← GitHub Copilot project context
+├── .github/instructions/*.md        ← Technology-specific development standards
+└── docs/*.md                        ← Component-specific documentation
+```
+
+For GitHub Copilot context and instruction file navigation, see [GitHub Copilot Instructions](.github/copilot-instructions.md).
+
+## System Architecture Overview
+
+The MyRepos system uses a multi-layer approach for language configuration and cross-component coordination:
 
 1. **Enhanced Templates** (`templates/languages/*.yaml.j2`) - Rich configurations with all features
 2. **Generated VS Code Files** (`.vscode/*.json`) - Applied configurations for development environment  
 3. **Schema Validation File** (`.omd/languages.yaml`) - Populated summary for user visibility and validation
 
-## Update Process for Language Features
+## Component Coordination Process
 
-When adding new default settings, extensions, tasks, or configurations to any supported language, follow this sequence:
+When adding new default settings, extensions, tasks, or configurations to any supported language, follow this coordination sequence across components:
 
 ### 1. Update Enhanced Language Templates
 **Location**: `templates/languages/{language}.yaml.j2`
@@ -34,7 +47,7 @@ The languages.yaml generator template must be updated to:
 - Populate the schema-compliant structure with actual values
 - Maintain validation compatibility while showing real data
 
-**Current Issue**: The template generates empty structures instead of extracting actual data from enhanced templates.
+**Implementation Note**: Template development follows comprehensive standards defined in [Jinja2 Instructions](.github/instructions/jinja2.instructions.md).
 
 ### 3. Regenerate Workspace Configuration
 **Command**: `python scripts/setup-repository.py /path/to/repo`
@@ -55,13 +68,88 @@ python scripts/setup-repository.py /path/to/repo
 python scripts/setup-repository.py --validate /path/to/repo
 ```
 
-## Coordination Requirements
+## J2 Template Generation and Dynamic Documentation System
+
+### Master Todo List for Template Generation
+
+**Primary Objectives**: Generate J2 templates for all instruction files and templatize copilot-instructions.md with dynamic detection-based referencing.
+
+#### Phase 1: Instruction File J2 Template Generation
+- [ ] **Create J2 templates for all 16 instruction files** based on detection patterns
+- [ ] **Implement dynamic context variables** (repository, detected_instructions, language_patterns, project_structure)
+- [ ] **Add conditional content generation** based on repository analysis
+- [ ] **Integrate cross-reference automation** for related instruction files
+- [ ] **Apply comprehensive Jinja2 development standards** with trailing comma patterns
+
+#### Phase 2: Copilot Instructions Templatization
+- [ ] **Convert copilot-instructions.md to J2 template** with dynamic instruction referencing
+- [ ] **Implement automated cross-reference table generation** based on detected instruction files
+- [ ] **Add dynamic file linking system** for detected technologies
+- [ ] **Integrate repository detection logic** for contextual instruction selection
+
+#### Phase 3: Generator Enhancement
+- [ ] **Update generator.py instruction detection** with complete pattern matching
+- [ ] **Implement instruction template rendering** alongside language templates
+- [ ] **Add cross-reference validation** between instruction and language templates
+- [ ] **Integrate testing for dynamic generation** across repository types
+
+#### Phase 4: Documentation and Coordination
+- [ ] **Update AGENTS.md coordination patterns** for instruction template management
+- [ ] **Document template development workflow** for instruction files
+- [ ] **Create maintenance checklist** for dual-system coordination
+- [ ] **Validate complete template ecosystem** functionality
+
+### Instruction Files Comprehensive Inventory
+
+Integrated inventory based on complete detection architecture with trigger conditions and direct file navigation:
+
+| Instruction File                                                                | Trigger Condition (File Patterns)                                                | J2 Template                                                                                     | Language Template                                            | Purpose                                                                                               |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| [📝 Markdown Instructions](.github/instructions/markdown.instructions.md)        | `**/*.md`, `**/*.MD`, `**/*.markdown`, `/*.md`                                   | [markdown.instructions.md.j2](templates/.github/instructions/markdown.instructions.md.j2)       | [markdown.yaml.j2](templates/languages/markdown.yaml.j2)     | Markdown writing standards, formatting guidelines, documentation quality assurance                    |
+| [🐍 Python Instructions](.github/instructions/python.instructions.md)            | `**/*.py`, `**/*.pyw`, `**/*.pyi`, `**/pyproject.toml`, `**/requirements*.txt`   | [python.instructions.md.j2](templates/.github/instructions/python.instructions.md.j2)           | [python.yaml.j2](templates/languages/python.yaml.j2)         | Python development guidelines, script architecture, testing standards, virtual environment management |
+| [🔧 Go Instructions](.github/instructions/go.instructions.md)                    | `backend/**/*.go`, `go.mod`, `go.sum`                                            | [go.instructions.md.j2](templates/.github/instructions/go.instructions.md.j2)                   | [go.yaml.j2](templates/languages/go.yaml.j2)                 | Go development guidelines, project structure, testing standards, dependency management                |
+| [⚛️ TypeScript Instructions](.github/instructions/typescript.instructions.md)    | `frontend/**/*.ts`, `frontend/**/*.tsx`, `frontend/**/*.js`, `frontend/**/*.jsx` | [typescript.instructions.md.j2](templates/.github/instructions/typescript.instructions.md.j2)   | N/A                                                          | TypeScript/JavaScript development, component architecture, build configuration, package management    |
+| [🔄 GitHub Instructions](.github/instructions/github.instructions.md)            | `.github/**/*.yml`, `.github/**/*.yaml`, `.github/**/*.md`, `**/workflow/**/*`   | [github.instructions.md.j2](templates/.github/instructions/github.instructions.md.j2)           | N/A                                                          | GitHub Actions workflows, repository configuration, issue templates, security practices               |
+| [🛠️ Scripts Instructions](.github/instructions/scripts.instructions.md)          | `scripts/**/*.ps1`, `scripts/**/*.sh`, `scripts/**/*.sql`                        | [scripts.instructions.md.j2](templates/.github/instructions/scripts.instructions.md.j2)         | N/A                                                          | Script development standards, cross-platform compatibility, parameter conventions, output formatting  |
+| [📜 PowerShell Instructions](.github/instructions/powershell.instructions.md)    | `scripts/**/*.ps1`                                                               | [powershell.instructions.md.j2](templates/.github/instructions/powershell.instructions.md.j2)   | [powershell.yaml.j2](templates/languages/powershell.yaml.j2) | PowerShell-specific standards, CmdletBinding patterns, Windows development                            |
+| [🐚 Shell Instructions](.github/instructions/shell.instructions.md)              | `scripts/**/*.sh`                                                                | [shell.instructions.md.j2](templates/.github/instructions/shell.instructions.md.j2)             | [shell.yaml.j2](templates/languages/shell.yaml.j2)           | Shell-specific standards, POSIX compliance, Unix/Linux development                                    |
+| [🏗️ Terraform Instructions](.github/instructions/terraform.instructions.md)      | `**/*.tf`, `**/*.hcl`, `**/terraform.tf`, `**/variables.tf`, `**/outputs.tf`     | [terraform.instructions.md.j2](templates/.github/instructions/terraform.instructions.md.j2)     | [terraform.yaml.j2](templates/languages/terraform.yaml.j2)   | Terraform development guidelines, IaC best practices, module conventions                              |
+| [🎨 Jinja2 Instructions](.github/instructions/jinja2.instructions.md)            | `**/*.j2`, `**/*.jinja`, `**/*.jinja2`, `templates/**/*`                         | [jinja2.instructions.md.j2](templates/.github/instructions/jinja2.instructions.md.j2)           | [j2.yaml.j2](templates/languages/j2.yaml.j2)                 | Jinja2 template development standards, formatting best practices, custom functions                    |
+| [📊 JSON Instructions](.github/instructions/json.instructions.md)                | `**/*.json`, `**/*.jsonc`, `**/*.json5`                                          | [json.instructions.md.j2](templates/.github/instructions/json.instructions.md.j2)               | [json.yaml.j2](templates/languages/json.yaml.j2)             | JSON development standards, configuration management, API design, schema validation                   |
+| [📄 YAML Instructions](.github/instructions/yaml.instructions.md)                | `**/*.yaml`, `**/*.yml`, `**/*.yaml.j2`, `**/*.yml.j2`                           | [yaml.instructions.md.j2](templates/.github/instructions/yaml.instructions.md.j2)               | [yaml.yaml.j2](templates/languages/yaml.yaml.j2)             | YAML configuration standards, cloud platforms, security, validation, performance                      |
+| [🗄️ SQL Instructions](.github/instructions/sql.instructions.md)                  | `**/*.sql`, `**/migrations/*.sql`, `**/schema/*.sql`, `**/procedures/*.sql`      | [sql.instructions.md.j2](templates/.github/instructions/sql.instructions.md.j2)                 | [sql.yaml.j2](templates/languages/sql.yaml.j2)               | Database development standards, query optimization, security, migrations, testing                     |
+| [☁️ Azure DevOps Instructions](.github/instructions/azuredevops.instructions.md) | Universal (Platform Detection)                                                   | [azuredevops.instructions.md.j2](templates/.github/instructions/azuredevops.instructions.md.j2) | N/A                                                          | CI/CD pipeline configuration, build strategies, work item integration, release management             |
+| [☁️ GCP Instructions](.github/instructions/gcp.instructions.md)                  | Universal (Platform Detection)                                                   | [gcp.instructions.md.j2](templates/.github/instructions/gcp.instructions.md.j2)                 | N/A                                                          | Google Cloud Platform guidelines, resource organization, IAM best practices, service integration      |
+| [💻 VSCode Instructions](.github/instructions/vscode.instructions.md)            | `.vscode/**/*`                                                                   | [vscode.instructions.md.j2](templates/.github/instructions/vscode.instructions.md.j2)           | N/A                                                          | VS Code workspace configuration, task automation, debugging, extension recommendations                |
+
+#### Inventory Analysis
+
+**✅ Complete Coverage** (Instruction + J2 Template + Language Template):
+- Markdown, Python, Go, PowerShell, Terraform, Jinja2, JSON, YAML, SQL
+- **9/16 instruction files** have complete tri-component integration
+
+**🟡 Instruction + Language Template** (Missing J2 Template):
+- Shell - has language template but needs J2 template for dynamic generation
+
+**🟠 Platform-Wide Instructions** (No Language Template Needed):
+- TypeScript, GitHub, Scripts, Azure DevOps, GCP, VS Code
+- **6/16 instruction files** are platform-wide and don't require language-specific templates
+
+**🔄 Dynamic Generation Priority**:
+1. **High Priority**: All 16 instruction files need J2 templates for dynamic generation
+2. **Medium Priority**: Shell language template alignment with J2 template
+3. **Low Priority**: Platform instructions optimization for specific project types
+
+## Cross-Component Coordination Requirements
+
+These coordination requirements ensure consistency across all MyRepos components and maintain integration with the instruction file system and dynamic template generation.
 
 ### When Adding New Language Support:
 1. **Create Enhanced Language Template**: `templates/languages/{language}.yaml.j2` with full configuration
    - Include file_associations, settings, required_extensions, recommended_extensions, tasks, linting
    - Follow established YAML structure and naming conventions
    - Use proper VS Code setting patterns for language-specific configurations
+   - Adhere to template development standards (see [Jinja2 Instructions](.github/instructions/jinja2.instructions.md))
 
 2. **Update Language Detection Logic**: `scripts/workspace/generator.py`
    - Add file extensions to `language_patterns` dictionary in `_detect_languages()` method
@@ -168,60 +256,17 @@ Languages Summary (.omd/languages.yaml)
 Schema (schemas/languages.yaml)
 ```
 
-## Template Formatting Best Practices
+## Template Development Standards
 
-### Trailing Comma Strategy for JSON Arrays
-**Solution Implemented**: Use trailing commas in all JSON array templates to ensure consistent formatting and simpler template logic.
+For comprehensive Jinja2 template development guidelines, including formatting best practices, trailing comma strategies, custom YAML-style JSON formatting, and template quality standards, see:
 
-**Benefits**:
-- Eliminates complex `{% if not loop.last %}` conditional comma logic
-- Produces consistently formatted output with proper line breaks
-- Makes templates easier to maintain and debug
-- JSONC format in VS Code supports trailing commas
-- Future-proof: adding new elements requires only one line change
+**[Jinja2 Instructions](.github/instructions/jinja2.instructions.md)**
 
-**Template Pattern**:
-```jinja
-"array_property": [
-{% for item in items %}
-    "{{ item }}",
-{% endfor %}
-]
-```
-
-**Applied To**:
-- `templates/.vscode/extensions.json.j2` - Extension recommendations
-- `templates/.vscode/launch.json.j2` - Debug configurations
-- `templates/.omd/languages.yaml.j2` - Languages configuration summary
-- All other array-based VS Code configuration templates
-
-### Custom YAML-Style JSON Formatting
-**Advanced Solution**: Implemented custom `format_yaml_json()` function for languages.yaml template to produce readable, properly indented output while maintaining YAML schema compliance.
-
-**Benefits**:
-- Converts inline JSON to structured, multi-line format with proper indentation
-- Maintains trailing commas throughout all nested structures
-- Provides excellent readability for complex configuration objects
-- Passes YAML schema validation requirements
-- Eliminates need for manual formatting of generated files
-
-**Implementation Details**:
-- Added to `scripts/workspace/generator.py` as Jinja2 global function
-- Handles nested objects and arrays recursively with proper indentation levels
-- Uses 2-space indentation increments matching YAML standards
-- Template calls function with appropriate base indentation level (3 for languages.yaml structure)
-
-**Function Signature**:
-```python
-def format_yaml_json(obj, indent_level=0):
-    """Format JSON objects and arrays with YAML-style readability and trailing commas"""
-```
-
-**Usage in Templates**:
-```jinja
-settings:
-  {{ format_yaml_json(config.settings, 3) if config.settings else "{}" }}
-```
+Key template standards implemented:
+- **Trailing Comma Strategy**: Eliminates complex conditional comma logic in JSON arrays
+- **Custom YAML-Style JSON Formatting**: `format_yaml_json()` function for readable output
+- **Template Quality Checklist**: Standardized validation and formatting requirements
+- **Cross-Platform Compatibility**: Templates work across all supported platforms
 
 ### Current Implementation Status
 
@@ -261,38 +306,262 @@ languages:
 - Complete language detection and repository type detection system
 - J2 and enhanced terraform language support fully implemented
 
-## Maintenance Checklist
+## Cross-Component Maintenance Checklist
 
-When making language configuration changes:
+When making language configuration changes, ensure coordination across all system components:
 
 - [ ] Enhanced template updated with new features
 - [ ] Languages.yaml.j2 template extracts new data correctly
 - [ ] VS Code files generate correctly with new features
 - [ ] Schema validation passes
 - [ ] Generated languages.yaml shows actual populated data
-- [ ] **Array templates use trailing comma pattern for consistent formatting**
+- [ ] **Templates follow formatting standards** (see [Jinja2 Instructions](.github/instructions/jinja2.instructions.md))
 - [ ] Documentation updated if new configuration categories added
 - [ ] Tests pass for affected repositories
 
-### Template Quality Checklist
+### Template Quality Standards
 
-When creating or updating Jinja2 templates:
+For complete template quality checklist and development standards, see [Jinja2 Instructions](.github/instructions/jinja2.instructions.md#template-quality-standards).
 
-- [ ] Use trailing commas for all JSON arrays
-- [ ] Avoid complex conditional comma logic (`{% if not loop.last %}`)
-- [ ] Ensure consistent indentation and line breaks
-- [ ] Test with both single and multiple element arrays
-- [ ] Verify JSONC compatibility for VS Code files
-- [ ] Validate generated output formatting
+## Agent Coordination Responsibilities
 
-## Agent Responsibilities
+### Language Template System Coordination
 
-1. **Template Updates**: Ensure enhanced templates have comprehensive configurations
+1. **Template Updates**: Ensure enhanced templates have comprehensive configurations across all supported languages
 2. **Data Extraction**: Maintain languages.yaml.j2 to populate with real data using inline JSON format
-3. **Validation**: Maintain schema compliance while providing useful information
-4. **Consistency**: Keep all language templates following the same structure and patterns
-5. **Formatting Standards**: Apply trailing comma pattern to all JSON array templates
-6. **Documentation**: Update this guide when new patterns or requirements emerge
+3. **Schema Validation**: Maintain schema compliance while providing useful information across all components
+4. **Cross-Component Consistency**: Keep all language templates following the same structure and patterns
+5. **Standards Compliance**: Follow comprehensive development guidelines across all instruction files:
+   - [Jinja2 Instructions](.github/instructions/jinja2.instructions.md) for template development
+   - [Python Instructions](.github/instructions/python.instructions.md) for script development
+   - [Scripts Instructions](.github/instructions/scripts.instructions.md) for automation
+6. **Documentation Coordination**: Update this guide and coordinate with instruction files when new patterns emerge
+7. **Cross-Platform Integration**: Ensure all components work consistently across Windows, Linux, and macOS
+
+### J2 Instruction Templating System Coordination
+
+The MyRepos system includes a dual coordination framework managing both language template generation and dynamic instruction file templating. This section outlines coordination requirements for the J2 instruction templating system that operates alongside the established language template coordination.
+
+#### Instruction File Template Architecture
+
+**Template Structure**: All instruction files in `.github/instructions/` follow a standardized J2 template pattern:
+- **YAML Frontmatter**: `applyTo` patterns for file matching and auto-detection
+- **Content Sections**: Structured development guidelines with consistent organization
+- **Cross-References**: Dynamic links to related instruction files and project components
+- **Template Variables**: Configurable content based on repository detection and technology stack
+
+**Dynamic Generation Process**:
+1. **Repository Analysis**: Detect languages, frameworks, and project types
+2. **Instruction Selection**: Generate only relevant instruction files based on detection
+3. **Cross-Reference Generation**: Build dynamic instruction file reference table
+4. **Template Rendering**: Apply detected context to J2 instruction templates
+5. **Integration**: Coordinate with language template system and VS Code configuration
+
+#### Instruction File Detection and Filtering
+
+**Technology Detection Logic**: Instruction files are generated based on repository analysis:
+
+```python
+# Instruction file detection patterns in scripts/workspace/generator.py
+instruction_patterns = {
+    'markdown.instructions.md': {
+        'patterns': ['**/*.md', '**/*.MD', '**/*.markdown'],
+        'display_name': '📝 Markdown Instructions',
+        'purpose': 'Markdown writing standards, formatting guidelines, and documentation quality assurance'
+    },
+    'python.instructions.md': {
+        'patterns': ['**/*.py', '**/*.pyw', '**/*.pyi', '**/pyproject.toml', '**/requirements*.txt'],
+        'display_name': '🐍 Python Instructions', 
+        'purpose': 'Python development guidelines, script architecture, testing standards, virtual environment management'
+    },
+    'go.instructions.md': {
+        'patterns': ['backend/**/*.go', 'go.mod', 'go.sum'],
+        'display_name': '🔧 Go Instructions',
+        'purpose': 'Go development guidelines, project structure, testing standards, dependency management'
+    },
+    'typescript.instructions.md': {
+        'patterns': ['frontend/**/*.ts', 'frontend/**/*.tsx', 'frontend/**/*.json', 'frontend/**/*.js', 'frontend/**/*.jsx'],
+        'display_name': '⚛️ TypeScript Instructions',
+        'purpose': 'TypeScript/JavaScript development, component architecture, build configuration, package management'
+    },
+    'github.instructions.md': {
+        'patterns': ['.github/**/*.yml', '.github/**/*.yaml', '.github/**/*.md', '**/workflow/**/*', '.github/ISSUE_TEMPLATE/*', '.github/PULL_REQUEST_TEMPLATE/*'],
+        'display_name': '🔄 GitHub Instructions',
+        'purpose': 'GitHub Actions workflows, repository configuration, issue templates, security practices'
+    },
+    'scripts.instructions.md': {
+        'patterns': ['scripts/**/*.ps1', 'scripts/**/*.sh', 'scripts/**/*.sql'],
+        'display_name': '🛠️ Scripts Instructions',
+        'purpose': 'Script development standards, cross-platform compatibility, parameter conventions, output formatting'
+    },
+    'powershell.instructions.md': {
+        'patterns': ['scripts/**/*.ps1'],
+        'display_name': '📜 PowerShell Instructions',
+        'purpose': 'PowerShell-specific standards, CmdletBinding patterns, Windows development'
+    },
+    'shell.instructions.md': {
+        'patterns': ['scripts/**/*.sh'],
+        'display_name': '🐚 Shell Instructions', 
+        'purpose': 'Shell-specific standards, POSIX compliance, Unix/Linux development'
+    },
+    'terraform.instructions.md': {
+        'patterns': ['**/*.tf', '**/*.hcl', '**/terraform.tf', '**/variables.tf', '**/outputs.tf', '**/locals.tf'],
+        'display_name': '🏗️ Terraform Instructions',
+        'purpose': 'Terraform development guidelines, IaC best practices, module conventions'
+    },
+    'jinja2.instructions.md': {
+        'patterns': ['**/*.j2', '**/*.jinja', '**/*.jinja2', 'templates/**/*'],
+        'display_name': '🎨 Jinja2 Instructions',
+        'purpose': 'Jinja2 template development standards, formatting best practices, custom functions, template quality assurance'
+    },
+    'json.instructions.md': {
+        'patterns': ['**/*.json', '**/*.jsonc', '**/*.json5'],
+        'display_name': '📊 JSON Instructions',
+        'purpose': 'JSON development standards, configuration management, API design, schema validation'
+    },
+    'yaml.instructions.md': {
+        'patterns': ['**/*.yaml', '**/*.yml', '**/*.yaml.j2', '**/*.yml.j2'],
+        'display_name': '📄 YAML Instructions',
+        'purpose': 'YAML configuration standards, cloud platforms, security, validation, performance optimization'
+    },
+    'sql.instructions.md': {
+        'patterns': ['**/*.sql', '**/migrations/*.sql', '**/schema/*.sql', '**/seeds/*.sql', '**/procedures/*.sql', '**/functions/*.sql', '**/triggers/*.sql', '**/views/*.sql'],
+        'display_name': '🗄️ SQL Instructions',
+        'purpose': 'Database development standards, query optimization, security, migrations, testing'
+    },
+    'azuredevops.instructions.md': {
+        'patterns': ['**/*'],  # Universal patterns, activated by platform detection
+        'display_name': '☁️ Azure DevOps Instructions',
+        'purpose': 'CI/CD pipeline configuration, build strategies, work item integration, release management'
+    },
+    'gcp.instructions.md': {
+        'patterns': ['**/*'],  # Universal patterns, activated by platform detection  
+        'display_name': '☁️ GCP Instructions',
+        'purpose': 'Google Cloud Platform guidelines, resource organization, IAM best practices, service integration'
+    },
+    'vscode.instructions.md': {
+        'patterns': ['.vscode/**/*'],
+        'display_name': '💻 VSCode Instructions',
+        'purpose': 'VS Code workspace configuration, task automation, debugging, extension recommendations'
+    }
+}
+
+def detect_required_instructions(repository_path):
+    """Detect which instruction files are needed based on repository analysis."""
+    detected_instructions = []
+    
+    for instruction_file, config in instruction_patterns.items():
+        patterns = config['patterns']
+        
+        # Check if any pattern matches files in repository
+        for pattern in patterns:
+            if glob.glob(os.path.join(repository_path, pattern)):
+                detected_instructions.append({
+                    'filename': instruction_file,
+                    'display_name': config['display_name'],
+                    'purpose': config['purpose'],
+                    'file_patterns': patterns
+                })
+                break  # Found match, move to next instruction file
+                
+    return detected_instructions
+```
+
+**Dynamic Instruction Generation**: Only detected technologies generate corresponding instruction files, ensuring clean and relevant AI agent guidance without unnecessary instruction clutter.
+
+#### Instruction Template Implementation
+
+**J2 Template Structure**: Each instruction file becomes a J2 template in `templates/.github/instructions/`:
+
+```jinja2
+{# templates/.github/instructions/python.instructions.md.j2 #}
+---
+applyTo: "{{ python_patterns | join(',') }}"
+---
+# Python Development Standards and Guidelines
+
+This document provides comprehensive guidelines for Python development in {{ repository.name }}.
+
+{% if repository.has_backend %}
+## Backend Development
+[Backend-specific Python guidelines]
+{% endif %}
+
+{% if repository.has_scripts %}
+## Script Development  
+[Script-specific Python guidelines]
+{% endif %}
+
+{% if repository.languages | length > 1 %}
+## Multi-Language Integration
+[Guidelines for Python integration with {{ repository.languages | reject('equalto', 'python') | join(', ') }}]
+{% endif %}
+
+{# Dynamic cross-references to other detected instruction files #}
+## Related Documentation
+{% for instruction in detected_instructions %}
+{% if instruction.filename != 'python.instructions.md' %}
+- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }})
+{% endif %}
+{% endfor %}
+```
+
+**Template Context Variables**:
+- `repository`: Repository metadata (name, languages, types, features)
+- `detected_instructions`: List of other instruction files being generated
+- `language_patterns`: File patterns for the specific language
+- `project_structure`: Directory structure and organization patterns
+
+#### Cross-Reference Table Automation
+
+**Dynamic Table Generation**: The `copilot-instructions.md` cross-reference table is automatically generated based on detected instruction files:
+
+```jinja2
+| Instruction File | File Pattern | Purpose |
+| ---------------- | ------------ | ------- |
+{% for instruction in detected_instructions %}
+| [{{ instruction.display_name }}](instructions/{{ instruction.filename }}) | {{ instruction.file_patterns | join(', ') }} | {{ instruction.purpose }} |
+{% endfor %}
+```
+
+**Integration Points**:
+- **Repository Detection**: Coordinate with language template detection for consistent technology identification
+- **File Pattern Matching**: Align with language template file associations for unified detection logic
+- **Documentation Consistency**: Ensure instruction file purposes align with language template descriptions
+
+#### Instruction Template Development Standards
+
+**Template Coordination Requirements**:
+1. **Consistent Structure**: All instruction templates follow established organization patterns
+2. **YAML Frontmatter**: Standardized `applyTo` patterns matching detection logic
+3. **Cross-Reference Integration**: Dynamic links to related instruction files and components
+4. **Content Synchronization**: Instruction content aligns with language template configurations
+5. **Template Quality**: Follow comprehensive Jinja2 development standards
+
+**Template Update Process**:
+1. **Detection Logic Update**: Modify `instruction_patterns` for new technology support
+2. **Template Creation**: Create new instruction template following established patterns
+3. **Cross-Reference Integration**: Update dynamic table generation to include new instruction
+4. **Testing**: Validate instruction generation across different repository types
+5. **Documentation**: Update coordination requirements and agent responsibilities
+
+#### Dual-System Maintenance Coordination
+
+**Integrated Maintenance Checklist**:
+- [ ] Language template enhancements coordinate with instruction file updates
+- [ ] Instruction file detection aligns with language template detection patterns  
+- [ ] Cross-reference table generation includes all detected instruction files
+- [ ] Template development standards apply to both language and instruction templates
+- [ ] Documentation updates reflect changes in both coordination systems
+- [ ] Testing validates both language template and instruction file generation
+- [ ] Schema compliance maintained across both template systems
+
+**Cross-System Dependencies**:
+- **Shared Detection Logic**: Technology identification used by both systems
+- **Consistent File Patterns**: Alignment between language templates and instruction files
+- **Coordinated Updates**: Changes to detection logic affect both systems
+- **Unified Testing**: Validation covers both language and instruction template generation
+- **Documentation Synchronization**: Updates to either system require coordination documentation updates
 
 ## New Language Template Implementation ✅
 
@@ -327,138 +596,65 @@ When creating or updating Jinja2 templates:
 
 ## Resolved Issues
 
-### Languages.yaml Schema Compliance ✅
-**Problem**: Template generated empty structures instead of actual configuration data, causing validation to pass but providing no useful information.
+### Template Implementation Success ✅
 
-**Root Cause**: `templates/.omd/languages.yaml.j2` was not extracting data from enhanced templates.
+**Resolved Issues**: The `templates/.omd/languages.yaml.j2` template now generates populated structures using custom YAML-style JSON formatting with real configuration data extracted from enhanced templates:
 
-**Solution**:
-1. Updated template to use `load_enhanced_language_config()` function
-2. Converted from nested YAML structure to inline JSON format for schema compliance
-3. Added source comments showing template origin and data counts
-
-**Exact Changes**:
-```jinja
-# Before: Empty structures
-settings: {}
-required_extensions: []
-
-# After: Real data extraction
-settings: {{ config.settings | tojson if config.settings else "{}" }}
-required_extensions: {{ config.required_extensions | tojson if config.required_extensions else "[]" }}
+```yaml
+languages:
+  python:
+    # Source: templates/languages/python.yaml.j2 (4 settings, 2 tasks)
+    settings:
+      {
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "ms-python.python",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+          },
+        },
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+      }
+    required_extensions:
+      [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.vscode-pylance",
+        "ms-python.isort",
+      ]
 ```
 
-### VS Code Configuration Formatting ✅  
-**Problem**: Generated JSON files had formatting issues - missing newlines before closing brackets, inconsistent indentation.
+For complete implementation details, formatting standards, and troubleshooting guides, see [Jinja2 Instructions](.github/instructions/jinja2.instructions.md).
 
-**Root Cause**: Jinja2 `{% if not loop.last %}` logic didn't handle final array elements properly.
+## Change Coordination Requirements
 
-**Solution**: Implemented trailing comma strategy for all arrays and objects.
+### Cross-Component Impact Assessment
+When making changes to any MyRepos component:
 
-**Exact Changes**:
-- `templates/.vscode/extensions.json.j2`:
-```jinja
-# Before: Conditional comma logic
-"{{ ext }}"{% if not loop.last %},{% endif %}
+- **Component Dependencies**: Consider how changes affect workspace generation, validation, and template rendering
+- **Platform Compatibility**: Ensure changes work consistently across GitHub, Azure DevOps, and local development
+- **Language Integration**: Verify changes don't break existing language configurations
+- **Schema Compliance**: Maintain validation compliance throughout the change process
+- **AI Integration**: Update instruction files to reflect new patterns or capabilities
 
-# After: Trailing comma approach  
-"{{ ext }}",
-```
+### Documentation Maintenance Standards
 
-- `templates/.vscode/launch.json.j2`:
-```jinja
-# Before: Complex conditional formatting
-}{% if not loop.last %},{% endif %}
+- **AGENTS.md**: Update component status, coordination requirements, and implementation tracking
+- **copilot-instructions.md**: Update project overview and instruction file references for functional changes
+- **Instruction Files**: Update technology-specific guidance for relevant changes
+- **docs/ Files**: Update technical documentation for system architecture or process changes
+- **Schema Files**: Update JSON schemas for any configuration structure changes
+- **Templates**: Update template comments and documentation for template modifications
 
-# After: Simple trailing comma
-},
-```
+### Coordination Workflow
 
-### Template Simplification ✅
-**Problem**: Complex conditional comma logic (`{% if not loop.last %}`) made templates hard to maintain and caused formatting inconsistencies.
+1. **Assessment**: Evaluate cross-component impact of proposed changes
+2. **Planning**: Update relevant instruction files and documentation
+3. **Implementation**: Make changes while maintaining cross-platform compatibility
+4. **Validation**: Test changes across all supported platforms and languages
+5. **Documentation**: Update this coordination document to reflect new patterns
+6. **AI Integration**: Ensure instruction files provide appropriate guidance for AI agents
 
-**Root Cause**: Attempting to avoid trailing commas led to complex template logic that failed in edge cases.
-
-**Solution**: Standardized on trailing comma approach across all templates.
-
-**Exact Implementation**:
-1. **Extensions Template**: Simplified from 3-line conditional to 1-line trailing comma
-2. **Launch Template**: Eliminated conditional spacing logic
-3. **All Array Templates**: Applied consistent `item,` pattern
-
-**Benefits Achieved**:
-- Reduced template complexity by 60%
-- Eliminated formatting edge cases
-- JSONC compatibility ensured trailing comma support
-
-### Custom YAML-Style JSON Formatter ✅
-**Problem**: Languages.yaml used unreadable inline JSON that was difficult to review and maintain.
-
-**Root Cause**: Standard `| tojson` filter produces single-line output without proper indentation.
-
-**Solution**: Implemented custom `format_yaml_json()` function in `scripts/workspace/generator.py`.
-
-**Exact Implementation**:
-```python
-def format_yaml_json(obj, indent_level=0):
-    """Format JSON objects and arrays with YAML-style readability and trailing commas"""
-    if isinstance(obj, list):
-        if not obj:
-            return "[]"
-        base_indent = "  " * indent_level
-        item_indent = "  " * (indent_level + 1)
-        items = []
-        for item in obj:
-            formatted_item = format_yaml_json(item, indent_level + 1)
-            items.append(f'{item_indent}{formatted_item},')
-        return "[\n" + "\n".join(items) + "\n" + base_indent + "]"
-    elif isinstance(obj, dict):
-        if not obj:
-            return "{}"
-        base_indent = "  " * indent_level
-        item_indent = "  " * (indent_level + 1)
-        items = []
-        for key, value in obj.items():
-            formatted_value = format_yaml_json(value, indent_level + 1)
-            items.append(f'{item_indent}{json.dumps(key)}: {formatted_value},')
-        return "{\n" + "\n".join(items) + "\n" + base_indent + "}"
-    else:
-        return json.dumps(obj)
-```
-    if isinstance(obj, list):
-        if not obj:
-            return "[]"
-        base_indent = "  " * indent_level
-        item_indent = "  " * (indent_level + 1)
-        items = []
-        for item in obj:
-            formatted_item = format_yaml_json(item, indent_level + 1)
-            items.append(f'{item_indent}{formatted_item},')
-        return "[\n" + "\n".join(items) + "\n" + base_indent + "]"
-    elif isinstance(obj, dict):
-        if not obj:
-            return "{}"
-        base_indent = "  " * indent_level
-        item_indent = "  " * (indent_level + 1)
-        items = []
-        for key, value in obj.items():
-            formatted_value = format_yaml_json(value, indent_level + 1)
-            items.append(f'{item_indent}{json.dumps(key)}: {formatted_value},')
-        return "{\n" + "\n".join(items) + "\n" + base_indent + "}"
-```
-
-**Template Integration**:
-```jinja
-# Before: Inline JSON
-settings: {{ config.settings | tojson if config.settings else "{}" }}
-
-# After: YAML-style formatting
-settings:
-  {{ format_yaml_json(config.settings, 3) if config.settings else "{}" }}
-```
-
-**Results**:
-- Transformed unreadable single-line JSON into properly indented multi-line format
-- Maintained YAML schema validation compliance
-- Added trailing commas throughout for consistency
-- Used indent_level=3 to align with YAML structure (languages > language > property > content)
+This comprehensive coordination system ensures that MyRepos maintains consistency, quality, and AI-assisted development capabilities across all components and platforms.

@@ -75,3 +75,6 @@ dmypy.json
 .directory
 .fuse_hidden*
 *.code-workspace
+
+# Development files
+dev/

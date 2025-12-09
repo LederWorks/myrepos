@@ -4,17 +4,7 @@ applyTo: "**/*.yaml,**/*.yml,**/*.yaml.j2,**/*.yml.j2"
 
 # YAML Development Standards and Guidelines
 
-This document defines comprehensive standards for YAML file development, configuration management, and template creation across all projects in {{ repository.name }}, ensuring consistency, maintainability, and best practices.
-
-{% if repository.languages %}
-## Supported Languages in {{ repository.name }}
-{{ repository.languages | join(', ') }}
-{% endif %}
-
-{% if repository.types %}
-## Repository Types
-{{ repository.types | join(', ') }}
-{% endif %}
+This document defines comprehensive standards for YAML file development, configuration management, and template creation across all projects, ensuring consistency, maintainability, and best practices.
 
 ## YAML File Structure Standards
 
@@ -42,7 +32,7 @@ metadata:
   name: application-config
   namespace: production
   labels:
-    app: {{ repository.name }}
+    app: myapp
     environment: production
     version: "1.0.0"
 
@@ -51,7 +41,7 @@ data:
   database:
     host: "localhost"
     port: 5432
-    name: "{{ repository.name }}_db"
+    name: "myapp_db"
     ssl_mode: "require"
   
   cache:
@@ -72,7 +62,7 @@ data:
 ```yaml
 # ✅ GOOD: Consistent 2-space indentation
 application:
-  name: "{{ repository.name }}"
+  name: "myapp"
   version: "1.0.0"
   
   database:
@@ -85,7 +75,7 @@ application:
 
 # ❌ BAD: Inconsistent indentation
 application:
-    name: "{{ repository.name }}"
+    name: "myapp"
   version: "1.0.0"
 database:
       host: "localhost"
@@ -152,7 +142,7 @@ servers:
 # ✅ GOOD: Nested object structure
 application:
   metadata:
-    name: "{{ repository.name }}"
+    name: "myapp"
     version: "1.0.0"
     description: "Production web application"
     
@@ -182,7 +172,7 @@ application:
 ```yaml
 # base-config.yaml - Common settings
 application:
-  name: "{{ repository.name }}"
+  name: "myapp"
   log_level: "info"
   
 database:
@@ -299,7 +289,7 @@ api:
 ```yaml
 # Document expected file permissions in comments
 # File should be readable only by application user (600)
-# Path: /etc/{{ repository.name }}/secure-config.yaml
+# Path: /etc/myapp/secure-config.yaml
 # Permissions: -rw------- (600)
 
 application:
@@ -337,7 +327,6 @@ validation:
       type: "boolean"
 ```
 
-{% if repository.has_containers or repository.platform == 'kubernetes' %}
 ## Cloud Platform Configuration
 
 ### Kubernetes Configuration
@@ -347,17 +336,17 @@ validation:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ repository.name }}-pod
+  name: myapp-pod
   namespace: production
   labels:
-    app: {{ repository.name }}
+    app: myapp
     version: "1.0.0"
     environment: production
     
 spec:
   containers:
-    - name: {{ repository.name }}
-      image: "myregistry/{{ repository.name }}:1.0.0"
+    - name: myapp
+      image: "myregistry/myapp:1.0.0"
       ports:
         - containerPort: 8080
           name: http
@@ -404,14 +393,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ repository.name }}-service
+  name: myapp-service
   namespace: production
   labels:
-    app: {{ repository.name }}
+    app: myapp
     
 spec:
   selector:
-    app: {{ repository.name }}
+    app: myapp
   ports:
     - name: http
       port: 80
@@ -427,7 +416,7 @@ version: '3.8'
 
 services:
   web:
-    image: "{{ repository.name }}:latest"
+    image: "myapp:latest"
     build:
       context: .
       dockerfile: Dockerfile
@@ -491,9 +480,7 @@ volumes:
   postgres_data:
   redis_data:
 ```
-{% endif %}
 
-{% if repository.has_cicd %}
 ### CI/CD Pipeline Configuration
 
 #### GitHub Actions Workflow
@@ -577,9 +564,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 ```
-{% endif %}
 
-{% if repository.has_api %}
 ## Data Serialization and APIs
 
 ### API Response Formatting
@@ -588,9 +573,9 @@ jobs:
 # OpenAPI/Swagger specification
 openapi: 3.0.3
 info:
-  title: "{{ repository.name }} API"
+  title: "MyApp API"
   version: "1.0.0"
-  description: "Production API for {{ repository.name }}"
+  description: "Production API for MyApp"
   contact:
     name: "API Support"
     email: "api-support@example.com"
@@ -684,7 +669,7 @@ components:
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "https://example.com/schemas/app-config.json"
 
-title: "{{ repository.name }} Configuration"
+title: "Application Configuration"
 type: object
 
 required:
@@ -740,7 +725,6 @@ properties:
         maximum: 100
         default: 10
 ```
-{% endif %}
 
 ## Performance and Optimization
 
@@ -795,7 +779,7 @@ cache:
     # File cache (persistent)
     file:
       enabled: true
-      directory: "/var/cache/{{ repository.name }}"
+      directory: "/var/cache/myapp"
       max_size: "1GB"
       ttl: 86400  # 24 hours
       
@@ -878,36 +862,36 @@ validation:
 ### Inline Documentation
 
 ```yaml
-# {{ repository.name }} Configuration
+# Application Configuration
 # This file contains the main configuration for the production environment
 # Last updated: 2023-12-09
 # Owner: Platform Team <platform@example.com>
 
 # Core application settings
 application:
-  name: "{{ repository.name }}"          # Application identifier
-  version: "1.0.0"                      # Semantic version
-  log_level: "warn"                     # Logging verbosity for production
+  name: "myapp"                    # Application identifier
+  version: "1.0.0"                # Semantic version
+  log_level: "warn"               # Logging verbosity for production
   
   # Feature flags for gradual rollouts
   features:
-    new_dashboard: true                 # Enable new dashboard UI
-    beta_api: false                     # Disable beta API endpoints
-    metrics_collection: true            # Enable performance metrics
+    new_dashboard: true           # Enable new dashboard UI
+    beta_api: false              # Disable beta API endpoints
+    metrics_collection: true     # Enable performance metrics
     
 # Database configuration
 # Primary PostgreSQL database for application data
 database:
-  host: "${DATABASE_HOST}"              # Database hostname (from env var)
-  port: 5432                           # Standard PostgreSQL port
-  name: "{{ repository.name }}_production"  # Production database name
-  ssl: true                            # Require SSL connections
+  host: "${DATABASE_HOST}"        # Database hostname (from env var)
+  port: 5432                     # Standard PostgreSQL port
+  name: "myapp_production"       # Production database name
+  ssl: true                      # Require SSL connections
   
   # Connection pooling settings
   pool:
-    min_connections: 5                 # Minimum pool size
-    max_connections: 50                # Maximum pool size
-    idle_timeout: 300                  # Seconds before closing idle connections
+    min_connections: 5           # Minimum pool size
+    max_connections: 50          # Maximum pool size
+    idle_timeout: 300           # Seconds before closing idle connections
 ```
 
 ### Configuration Change Management
@@ -975,20 +959,20 @@ error_handling:
 ```yaml
 # Debug settings (only for development/staging)
 debug:
-  enabled: false                       # Never enable in production
+  enabled: false                 # Never enable in production
   
   # Debug features
   features:
-    request_logging: false             # Log all HTTP requests
-    query_logging: false               # Log all database queries
-    cache_tracing: false               # Trace cache operations
-    performance_metrics: true          # Enable performance monitoring
+    request_logging: false       # Log all HTTP requests
+    query_logging: false         # Log all database queries
+    cache_tracing: false         # Trace cache operations
+    performance_metrics: true    # Enable performance monitoring
     
   # Debug endpoints (remove in production)
   endpoints:
     health_detailed: "/debug/health"
     metrics: "/debug/metrics"
-    config_dump: "/debug/config"       # Never expose in production!
+    config_dump: "/debug/config"  # Never expose in production!
 ```
 
 ## Maintenance and Updates
@@ -1007,12 +991,12 @@ debug:
 # Configuration management automation
 automation:
   validation:
-    pre_commit: true                   # Validate before commits
-    ci_pipeline: true                  # Validate in CI/CD
+    pre_commit: true             # Validate before commits
+    ci_pipeline: true           # Validate in CI/CD
     
   deployment:
-    blue_green: true                   # Use blue-green deployments
-    rollback_enabled: true             # Enable automatic rollback
+    blue_green: true            # Use blue-green deployments
+    rollback_enabled: true      # Enable automatic rollback
     
   monitoring:
     config_drift_detection: true
@@ -1033,9 +1017,9 @@ security:
   scanning:
     enabled: true
     tools:
-      - "checkov"                      # Infrastructure security
-      - "kics"                         # Configuration security
-      - "terrascan"                    # Policy validation
+      - "checkov"               # Infrastructure security
+      - "kics"                  # Configuration security
+      - "terrascan"            # Policy validation
       
   policies:
     no_hardcoded_secrets: true
@@ -1048,14 +1032,4 @@ security:
     fail_on_high: true
 ```
 
-{% if detected_instructions %}
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'yaml.instructions.md' %}
-- **{{ instruction.display_name }}**: See [{{ instruction.filename }}]({{ instruction.filename }}) for {{ instruction.purpose }}
-{% endif %}
-{% endfor %}
-{% endif %}
-
-This comprehensive YAML instruction file provides enterprise-grade standards for YAML development, covering configuration management, security, performance, and best practices across all common use cases in {{ repository.name }}.
+This comprehensive YAML instruction file provides enterprise-grade standards for YAML development, covering configuration management, security, performance, and best practices across all common use cases.

@@ -1,10 +1,10 @@
 ---
-applyTo: "{{ powershell_patterns | join(',') }}"
+applyTo: 'scripts/**/*.ps1'
 ---
 
 # PowerShell Script Development Standards
 
-This document defines PowerShell-specific standards for all PowerShell scripts in {{ repository.name }}, ensuring consistency, maintainability, and best practices across all `.ps1` files.
+This document defines PowerShell-specific standards for all PowerShell scripts in the project, ensuring consistency, maintainability, and best practices across all `.ps1` files.
 
 ## PowerShell Script Structure
 
@@ -460,45 +460,4 @@ if ($Help) {
 - Document PowerShell-specific limitations or features
 - Maintain examples with current PowerShell syntax
 
-{% if repository.has_backend %}
-## Backend Development Guidelines
-
-When working with PowerShell scripts for backend services in {{ repository.name }}:
-
-- Follow server-specific PowerShell patterns for service management
-- Implement proper logging for production environments
-- Use structured error handling for service operations
-- Support configuration management for different environments
-{% endif %}
-
-{% if repository.has_frontend %}
-## Frontend Build Integration
-
-PowerShell scripts supporting frontend development in {{ repository.name }}:
-
-- Coordinate with npm/yarn build processes
-- Handle asset compilation and optimization
-- Support development server management
-- Implement hot reload and watch functionality
-{% endif %}
-
-{% if repository.has_infra %}
-## Infrastructure Automation
-
-PowerShell scripts for infrastructure management in {{ repository.name }}:
-
-- Follow cloud provider PowerShell module conventions
-- Implement proper credential management and security
-- Support infrastructure deployment and configuration
-- Handle environment-specific configurations and deployments
-{% endif %}
-
-## Related Documentation
-
-{% for instruction in detected_instructions %}
-{% if instruction.filename != 'powershell.instructions.md' %}
-- **{{ instruction.display_name }}**: [{{ instruction.filename }}]({{ instruction.filename }}) - {{ instruction.purpose }}
-{% endif %}
-{% endfor %}
-
-This instruction file should be updated whenever new PowerShell-specific patterns are established or existing patterns are modified to ensure consistency across all PowerShell scripts in {{ repository.name }}.
+This instruction file should be updated whenever new PowerShell-specific patterns are established or existing patterns are modified to ensure consistency across all PowerShell scripts in the project.
