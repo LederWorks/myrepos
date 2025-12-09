@@ -12,33 +12,10 @@ properties:
     type: object
     description: "Platform-specific configurations"
     properties:
-      
       # GitHub specific configuration
       github:
         type: object
         properties:
-          # GitHub Actions workflows
-          workflows:
-            type: array
-            description: "GitHub Actions workflow configurations"
-            items:
-              type: object
-              required:
-                - name
-                - triggers
-              properties:
-                name:
-                  type: string
-                triggers:
-                  type: array
-                  items:
-                    type: string
-                    enum: [push, pull_request, schedule, workflow_dispatch, release]
-                jobs:
-                  type: object
-                  additionalProperties: true
-              additionalProperties: true
-
           # Issue and PR templates
           templates:
             type: object
@@ -80,28 +57,6 @@ properties:
       azuredevops:
         type: object
         properties:
-          # Azure Pipelines
-          pipelines:
-            type: array
-            description: "Azure Pipelines configuration"
-            items:
-              type: object
-              required:
-                - name
-                - trigger
-              properties:
-                name:
-                  type: string
-                trigger:
-                  type: object
-                  additionalProperties: true
-                stages:
-                  type: array
-                  items:
-                    type: object
-                    additionalProperties: true
-              additionalProperties: true
-
           # Work item templates
           work_items:
             type: object
@@ -121,125 +76,6 @@ properties:
                   additionalProperties: true
             additionalProperties: false
 
-        additionalProperties: false
-
-      # GitLab specific configuration
-      gitlab:
-        type: object
-        properties:
-          # GitLab CI/CD
-          ci_cd:
-            type: object
-            properties:
-              stages:
-                type: array
-                items:
-                  type: string
-              variables:
-                type: object
-                additionalProperties:
-                  type: string
-              jobs:
-                type: object
-                additionalProperties:
-                  type: object
-            additionalProperties: true
-
-          # Merge request templates
-          templates:
-            type: object
-            properties:
-              merge_request_templates:
-                type: array
-                items:
-                  type: string
-              issue_templates:
-                type: array
-                items:
-                  type: string
-            additionalProperties: false
-
-        additionalProperties: false
-
-    additionalProperties: false
-
-  # Cross-platform CI/CD configuration
-  ci_cd:
-    type: object
-    description: "Cross-platform CI/CD configuration"
-    properties:
-      # Build configuration
-      build:
-        type: object
-        properties:
-          strategy:
-            type: string
-            enum: [single, matrix]
-          matrix:
-            type: object
-            properties:
-              os:
-                type: array
-                items:
-                  type: string
-                  enum: [ubuntu-latest, windows-latest, macos-latest]
-              language_version:
-                type: array
-                items:
-                  type: string
-            additionalProperties: false
-          steps:
-            type: array
-            items:
-              type: object
-              properties:
-                name:
-                  type: string
-                command:
-                  type: string
-                condition:
-                  type: string
-              additionalProperties: true
-        additionalProperties: false
-
-      # Test configuration
-      test:
-        type: object
-        properties:
-          framework:
-            type: string
-          coverage:
-            type: object
-            properties:
-              enabled:
-                type: boolean
-              threshold:
-                type: number
-                minimum: 0
-                maximum: 100
-            additionalProperties: false
-          integration_tests:
-            type: boolean
-          e2e_tests:
-            type: boolean
-        additionalProperties: false
-
-      # Deployment configuration
-      deploy:
-        type: object
-        properties:
-          environments:
-            type: array
-            items:
-              type: string
-              enum: [development, staging, production]
-          strategy:
-            type: string
-            enum: [blue-green, rolling, canary]
-          triggers:
-            type: array
-            items:
-              type: string
         additionalProperties: false
 
     additionalProperties: false

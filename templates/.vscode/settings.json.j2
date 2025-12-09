@@ -13,17 +13,29 @@
   }
 }) -%}
 
-{# Merge language settings from enhanced templates #}
+{# Merge language settings from enhanced templates with overrides #}
+{%- set workspace_config = load_workspace_config() -%}
 {%- for language in metadata.languages -%}
   {%- set enhanced_config = load_enhanced_language_config(language) -%}
   {%- if enhanced_config and enhanced_config.languages and enhanced_config.languages[language] and enhanced_config.languages[language].settings -%}
-    {%- set _ = all_settings.update(enhanced_config.languages[language].settings) -%}
+    {%- set language_settings = enhanced_config.languages[language].settings -%}
+    
+    {# Apply language overrides if present #}
+    {%- if workspace_config.workspace and workspace_config.workspace.language_overrides -%}
+      {%- set language_settings = apply_language_overrides(language_settings, language, workspace_config.workspace.language_overrides) -%}
+    {%- endif -%}
+    
+    {# Merge processed language settings #}
+    {%- set _ = all_settings.update(language_settings) -%}
   {%- endif -%}
 {%- endfor -%}
 
 {# Platform settings (inline definitions) #}
 {# Currently no platform-specific settings needed #}
 
-
+{# Merge workspace settings from .omd/workspace.yaml #}
+{%- if workspace_config.workspace and workspace_config.workspace.settings -%}
+  {%- set _ = all_settings.update(workspace_config.workspace.settings) -%}
+{%- endif -%}
 
 {{ all_settings | tojson(indent=2) }}

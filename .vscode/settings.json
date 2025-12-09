@@ -1,6 +1,4 @@
 
-
-
 {
   "[fish]": {
     "editor.insertSpaces": true,
@@ -10,8 +8,7 @@
     "editor.formatOnSave": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
-    "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 100
+    "editor.wordWrap": "on"
   },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",

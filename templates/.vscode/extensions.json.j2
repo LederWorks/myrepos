@@ -2,23 +2,50 @@
 {%- set recommended_extensions = [] -%}
 {%- set all_extensions_seen = [] -%}
 
-{# Language extensions from enhanced templates #}
+{# Language extensions from enhanced templates with overrides #}
+{%- set workspace_config = load_workspace_config() -%}
 {%- for language in metadata.languages -%}
   {%- set enhanced_config = load_enhanced_language_config(language) -%}
   {%- if enhanced_config and enhanced_config.languages and enhanced_config.languages[language] -%}
     {%- set lang_config = enhanced_config.languages[language] -%}
-    {# Add required extensions #}
+    
+    {# Get language overrides if present #}
+    {%- set lang_overrides = {} -%}
+    {%- if workspace_config.workspace and workspace_config.workspace.language_overrides and workspace_config.workspace.language_overrides[language] -%}
+      {%- set lang_overrides = workspace_config.workspace.language_overrides[language] -%}
+    {%- endif -%}
+    
+    {# Process required extensions with overrides #}
     {%- if lang_config.required_extensions -%}
       {%- for ext in lang_config.required_extensions -%}
-        {%- if ext not in all_extensions_seen -%}
+        {%- set skip_ext = false -%}
+        {%- if lang_overrides.extensions and lang_overrides.extensions.unwanted and ext in lang_overrides.extensions.unwanted -%}
+          {%- set skip_ext = true -%}
+        {%- endif -%}
+        {%- if not skip_ext and ext not in all_extensions_seen -%}
           {%- set _ = required_extensions.append(ext) -%}
           {%- set _ = all_extensions_seen.append(ext) -%}
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}
-    {# Add recommended extensions #}
+    
+    {# Process recommended extensions with overrides #}
     {%- if lang_config.recommended_extensions -%}
       {%- for ext in lang_config.recommended_extensions -%}
+        {%- set skip_ext = false -%}
+        {%- if lang_overrides.extensions and lang_overrides.extensions.unwanted and ext in lang_overrides.extensions.unwanted -%}
+          {%- set skip_ext = true -%}
+        {%- endif -%}
+        {%- if not skip_ext and ext not in all_extensions_seen -%}
+          {%- set _ = recommended_extensions.append(ext) -%}
+          {%- set _ = all_extensions_seen.append(ext) -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    
+    {# Add additional extensions from overrides #}
+    {%- if lang_overrides.extensions and lang_overrides.extensions.additional -%}
+      {%- for ext in lang_overrides.extensions.additional -%}
         {%- if ext not in all_extensions_seen -%}
           {%- set _ = recommended_extensions.append(ext) -%}
           {%- set _ = all_extensions_seen.append(ext) -%}
@@ -53,6 +80,38 @@
     {%- set _ = all_extensions_seen.append(ext) -%}
   {%- endif -%}
 {%- endfor -%}
+
+{# Workspace extensions from .omd/workspace.yaml #}
+{%- set workspace_config = load_workspace_config() -%}
+{%- if workspace_config.workspace -%}
+  {# Add workspace recommended extensions #}
+  {%- if workspace_config.workspace.recommended_extensions -%}
+    {%- for ext in workspace_config.workspace.recommended_extensions -%}
+      {%- if ext not in all_extensions_seen -%}
+        {%- set _ = recommended_extensions.append(ext) -%}
+        {%- set _ = all_extensions_seen.append(ext) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {# Filter out unwanted extensions #}
+  {%- if workspace_config.workspace.unwanted_extensions -%}
+    {%- set unwanted = workspace_config.workspace.unwanted_extensions -%}
+    {%- set filtered_required = [] -%}
+    {%- set filtered_recommended = [] -%}
+    {%- for ext in required_extensions -%}
+      {%- if ext not in unwanted -%}
+        {%- set _ = filtered_required.append(ext) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- for ext in recommended_extensions -%}
+      {%- if ext not in unwanted -%}
+        {%- set _ = filtered_recommended.append(ext) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- set required_extensions = filtered_required -%}
+    {%- set recommended_extensions = filtered_recommended -%}
+  {%- endif -%}
+{%- endif -%}
 
 {
 	"recommendations": [

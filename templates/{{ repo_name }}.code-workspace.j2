@@ -1,8 +1,13 @@
+{%- set workspace_config = load_workspace_config() -%}
+{%- set additional_folders = workspace_config.workspace.additional_folders if workspace_config.workspace else [] -%}
 {
 	"folders": [
 		{
 			"path": "."
-		}
+		}{% for folder in additional_folders %},
+		{
+			"path": "{{ folder }}"
+		}{% endfor %}
 	]{% if extensions or settings %},
 	{% if settings %}"settings": {{ settings | tojson }}{% if extensions %},{% endif %}{% endif %}
 	{% if extensions %}"extensions": {

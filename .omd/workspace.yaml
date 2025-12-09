@@ -19,6 +19,21 @@ workspace:
   # Debug launch configurations
   launch_configurations: []
 
+  # Language configuration overrides
+  language_overrides:
+    # Example: Remove wordWrapColumn setting from j2 language
+    j2:
+      settings:
+        "[jinja]":
+          editor.wordWrapColumn: null # Remove this specific setting
+    # Example: Override python settings
+    # python:
+    #   settings:
+    #     "python.defaultInterpreterPath": "./custom/path/python"
+    #   extensions:
+    #     unwanted: ["ms-python.pylint"]  # Remove specific extensions
+    #     additional: ["ms-python.mypy-type-checker"]  # Add extra extensions
+
 # GitHub Copilot configuration
 copilot:
   # Custom instructions for this repository

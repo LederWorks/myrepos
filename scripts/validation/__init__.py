@@ -2,4 +2,4 @@
 
 from .validator import SchemaValidator
 
-__all__ = ['SchemaValidator']
+__all__ = ["SchemaValidator"]

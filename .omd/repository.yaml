@@ -3,13 +3,14 @@
 
 copilot_instructions: false
 languages:
-- j2
-- markdown
-- powershell
-- python
-- shell
-- yaml
+  - j2
+  - markdown
+  - powershell
+  - python
+  - shell
+  - yaml
 platform: github
 types:
-- docs
-- template
+  - docs
+  - template
+  - tool

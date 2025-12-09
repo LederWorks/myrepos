@@ -2,4 +2,4 @@
 
 from .generator import WorkspaceGenerator, RepositoryConfig
 
-__all__ = ['WorkspaceGenerator', 'RepositoryConfig']
+__all__ = ["WorkspaceGenerator", "RepositoryConfig"]

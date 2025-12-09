@@ -2,3 +2,11 @@
 jinja2>=3.0.0
 pyyaml>=6.0.0
 jsonschema>=4.0.0
+
+# Type checking and development
+types-PyYAML>=6.0.0
+types-jsonschema>=4.0.0
+
+# Optional: Enhanced functionality
+pathspec>=0.9.0  # For advanced .gitignore pattern matching
+click>=8.0.0     # If you want to add CLI interface improvements

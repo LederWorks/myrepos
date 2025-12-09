@@ -95,6 +95,35 @@ properties:
                 type: string
           additionalProperties: true
 
+      # Language configuration overrides
+      language_overrides:
+        type: object
+        description: "Override specific language configurations"
+        patternProperties:
+          "^(terraform|python|javascript|typescript|go|rust|java|csharp|cpp|c|php|ruby|swift|kotlin|scala|shell|powershell|sql|html|css|yaml|json|dockerfile|helm|ansible|markdown|j2)$":
+            type: object
+            properties:
+              settings:
+                type: object
+                description: "Settings to override or remove (use null to remove)"
+                additionalProperties: true
+              extensions:
+                type: object
+                properties:
+                  unwanted:
+                    type: array
+                    description: "Extensions to exclude for this language"
+                    items:
+                      type: string
+                  additional:
+                    type: array
+                    description: "Extra extensions to add for this language"
+                    items:
+                      type: string
+                additionalProperties: false
+            additionalProperties: false
+        additionalProperties: false
+
     additionalProperties: false
 
   # GitHub Copilot instructions configuration
