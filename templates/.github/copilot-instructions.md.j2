@@ -1,75 +1,399 @@
 ---
 description: Coding standards and conventions for {{ repo_name }}
-applyTo: '**'
+applyTo: "**"
 ---
 
-# {{ repo_name | title }} - Coding Standards
+# GitHub Copilot Instructions for {{ repo_name }}
 
-## Repository Overview
+## 🏗️ Project Overview
 
-**Repository Type:** {{ types | join(', ') }}
-**Languages:** {{ languages | join(', ') }}
-**Platform:** {{ platform }}
+{{ repo_name | title }} is a {{ types | join(', ') }} repository designed for {{ repo_description | default('comprehensive development') }}. The platform follows established development standards, maintains unified tooling across multiple programming languages, and provides comprehensive guidance for AI-assisted development.
 
-## General Guidelines
+### Core Architecture Philosophy
 
-- Follow established coding standards for each language
-- Write clear, self-documenting code
-- Include comprehensive tests for new functionality
-- Use meaningful commit messages following conventional commits
-- Keep functions and classes focused and single-purpose
+This repository treats each component as an individual module while preserving organizational hierarchies and cross-component relationships. Key architectural principles:
 
-## Code Quality Standards
+- **Multi-Language Native**: Simultaneous support for {{ languages | length }}+ programming languages with specialized configurations  
+{%- if 'template' in types %}
+- **Template-Based Generation**: Each component generated from standardized templates with language-specific configurations
+{%- endif %}
+{%- if 'infra' in types %}
+- **Infrastructure as Code**: Terraform-based infrastructure with comprehensive module patterns
+{%- endif %}
+{%- if 'lib' in types %}
+- **Library Standards**: Semantic versioning, backward compatibility, and comprehensive API documentation
+{%- endif %}
+- **Cross-Platform Compatibility**: Unified tooling for Windows, Linux, and macOS environments
+- **AI Integration**: Comprehensive instruction files for intelligent development assistance
 
-- Code must pass all linting and formatting checks
-- Maintain consistent code style across the entire repository
-- Write comprehensive documentation for public APIs
-- Include error handling and logging where appropriate
-- Follow security best practices for the technology stack
+## 📚 Instruction Files Reference
 
-## Testing Requirements
+This project uses modular instruction files for platform-specific development guidelines. Each file contains targeted guidance for specific components or technologies:
 
-- Write unit tests for all new functions and methods
-- Ensure test coverage meets project standards
-- Include integration tests for critical workflows
-- All tests must pass before merging changes
+### Instruction Standards
 
-## Language-Specific Guidelines
+The {{ repo_name }} project follows a hierarchical documentation architecture designed for AI agent navigation and comprehensive development guidance:
 
+```
+{{ repo_name }}/
+├── .github/copilot-instructions.md  ← GitHub Copilot project context (this file)
+├── .github/instructions/*.md        ← Technology-specific development standards
+└── docs/*.md                        ← Component-specific documentation
+```
+
+#### Documentation Hierarchy Purpose
+
+- **copilot-instructions.md** (this file): GitHub Copilot context and instruction file navigation
+- **\*.instructions.md**: Technology-specific development standards and implementation patterns
+- **docs/\*.md**: Detailed documentation for specific systems and processes
+
+#### AI Agent Navigation Pattern
+
+1. **Start Here**: copilot-instructions.md provides project context and instruction file overview
+2. **Technology Guidance**: Use appropriate \*.instructions.md for specific development tasks
+3. **Component Tracking**: Reference relevant component documentation for detailed status and roadmaps
+4. **Cross-Reference**: Documentation files cross-reference for comprehensive guidance
+
+### Core Instruction Files
+
+{%- set instruction_mapping = {
+  'markdown': {'icon': '📝', 'purpose': 'Markdown writing standards, formatting guidelines, and documentation quality assurance'},
+  'python': {'icon': '🐍', 'purpose': 'Python development guidelines, script architecture, testing standards, virtual environment management'},
+  'go': {'icon': '🔧', 'purpose': 'Go development guidelines, project structure, testing standards, dependency management'},
+  'typescript': {'icon': '⚛️', 'purpose': 'TypeScript/JavaScript development, component architecture, build configuration, package management'},
+  'github': {'icon': '🔄', 'purpose': 'GitHub Actions workflows, repository configuration, issue templates, security practices'},
+  'scripts': {'icon': '🛠️', 'purpose': 'Script development standards, cross-platform compatibility, parameter conventions, output formatting'},
+  'powershell': {'icon': '📜', 'purpose': 'PowerShell-specific standards, CmdletBinding patterns, Windows development'},
+  'shell': {'icon': '🐚', 'purpose': 'Shell-specific standards, POSIX compliance, Unix/Linux development'},
+  'terraform': {'icon': '🏗️', 'purpose': 'Terraform development guidelines, IaC best practices, module conventions'},
+  'jinja2': {'icon': '🎨', 'purpose': 'Jinja2 template development standards, formatting best practices, custom functions, template quality assurance'},
+  'json': {'icon': '📊', 'purpose': 'JSON development standards, configuration management, API design, schema validation'},
+  'yaml': {'icon': '📄', 'purpose': 'YAML configuration standards, cloud platforms, security, validation, performance optimization'},
+  'sql': {'icon': '🗄️', 'purpose': 'Database development standards, query optimization, security, migrations, testing'},
+  'azuredevops': {'icon': '☁️', 'purpose': 'CI/CD pipeline configuration, build strategies, work item integration, release management'},
+  'gcp': {'icon': '☁️', 'purpose': 'Google Cloud Platform guidelines, resource organization, IAM best practices, service integration'},
+  'aws': {'icon': '☁️', 'purpose': 'AWS development standards, resource organization, security, identity management, best practices'},
+  'azure': {'icon': '☁️', 'purpose': 'Azure development standards, resource organization, security, identity management, best practices'},
+  'oci': {'icon': '☁️', 'purpose': 'Oracle Cloud Infrastructure guidelines, resource organization, IAM best practices, service integration'}
+} %}
+
+{%- if detected_instructions is defined and detected_instructions|length > 0 %}
+| Instruction File | File Pattern | Purpose |
+|------------------|--------------|---------|
+{%- for instruction in detected_instructions %}
+{%- set lang_key = instruction.filename | replace('.instructions.md', '') %}
+{%- if instruction_mapping[lang_key] is defined %}
+| [{{ instruction_mapping[lang_key].icon }} {{ instruction.display_name }}](instructions/{{ instruction.filename }}) | {{ instruction.file_patterns | join(', ') }} | {{ instruction_mapping[lang_key].purpose }} |
+{%- endif %}
+{%- endfor %}
+{%- else %}
+{# Fallback if detected_instructions not available #}
 {%- for language in languages %}
-- See [{{ language }}.instructions.md](instructions/{{ language }}.instructions.md) for {{ language | title }} specific guidelines
+{%- if instruction_mapping[language] is defined %}
+| [{{ instruction_mapping[language].icon }} {{ language | title }} Instructions](instructions/{{ language }}.instructions.md) | Language-specific patterns | {{ instruction_mapping[language].purpose }} |
+{%- endif %}
 {%- endfor %}
 
-## Repository Type: {{ types | join(', ') | title }}
+{# Always include platform-specific instructions #}
+{%- if ci_platform == 'github' %}
+| [🔄 GitHub Instructions](instructions/github.instructions.md) | `.github/**/*.yml`, `.github/**/*.yaml`, `.github/**/*.md`, `**/workflow/**/*`, `.github/ISSUE_TEMPLATE/*`, `.github/PULL_REQUEST_TEMPLATE/*` | GitHub Actions workflows, repository configuration, issue templates, security practices |
+{%- endif %}
+{%- if ci_platform == 'azuredevops' %}
+| [☁️ Azure DevOps Instructions](instructions/azuredevops.instructions.md) | `**/*` | CI/CD pipeline configuration, build strategies, work item integration, release management |
+{%- endif %}
+
+{# Include cloud platform instructions based on deployment_platform #}
+{%- if deployment_platform == 'aws' %}
+| [☁️ AWS Instructions](instructions/aws.instructions.md) | `**/*` | AWS development standards, resource organization, security, identity management, best practices |
+{%- endif %}
+{%- if deployment_platform == 'azure' %}
+| [☁️ Azure Instructions](instructions/azure.instructions.md) | `**/*` | Azure development standards, resource organization, security, identity management, best practices |
+{%- endif %}
+{%- if deployment_platform == 'gcp' %}
+| [☁️ GCP Instructions](instructions/gcp.instructions.md) | `**/*` | Google Cloud Platform guidelines, resource organization, IAM best practices, service integration |
+{%- endif %}
+{%- if deployment_platform == 'oci' %}
+| [☁️ OCI Instructions](instructions/oci.instructions.md) | `**/*` | Oracle Cloud Infrastructure guidelines, resource organization, IAM best practices, service integration |
+{%- endif %}
+{%- endif %}
+
+### When to Use Each Instruction File
+
+{%- for language in languages %}
+{%- if instruction_mapping[language] is defined %}
+- **{{ language | title }} Instructions**: When {{ language_usage_context[language] | default('working on ' + language + ' development, ' + instruction_mapping[language].purpose | lower) }}
+{%- endif %}
+{%- endfor %}
+
+{%- if ci_platform == 'github' %}
+- **GitHub Instructions**: When setting up CI/CD pipelines, configuring repository settings, managing collaborative workflows, or working with GitHub Actions
+{%- endif %}
+{%- if ci_platform == 'azuredevops' %}
+- **Azure DevOps Instructions**: When configuring CI/CD pipelines, Azure DevOps integration, or DevOps workflows
+{%- endif %}
+
+{%- if deployment_platform %}
+- **{{ deployment_platform | title }} Instructions**: When working with {{ deployment_platform | upper }} resources, infrastructure deployment, or cloud-specific integrations
+{%- endif %}
+
+### Cross-Reference Guidelines
+
+These instruction files work together to provide comprehensive development guidance:
+
+1. **Documentation Standards**: All technical writing should follow the markdown instructions
+{%- if 'python' in languages and ('typescript' in languages or 'go' in languages) %}
+2. **Full-Stack Development**: Python and {{ 'TypeScript' if 'typescript' in languages else 'Go' }} instructions complement each other for complete tooling development
+{%- endif %}
+{%- if 'json' in languages or 'yaml' in languages %}
+3. **Configuration Management**: {{ (['JSON'] if 'json' in languages else []) + (['YAML'] if 'yaml' in languages else []) | join(' and ') }} instructions provide standards for configuration files across all platforms
+{%- endif %}
+{%- if 'sql' in languages %}
+4. **Data Management**: SQL instructions support database design and optimization across all application tiers
+{%- endif %}
+5. **DevOps Integration**: {{ ci_platform | title }} {{ 'and ' + deployment_platform | title if deployment_platform else '' }} instructions support the development processes defined in platform-specific files
+{%- if 'scripts' in languages %}
+6. **Scripts & Automation**: Scripts instructions provide standards for build automation, development workflows, and cross-platform compatibility
+{%- endif %}
+7. **Quality Assurance**: Each instruction file includes testing and quality standards appropriate to its domain
+
+## 🎯 Development Guidelines
+
+For detailed platform-specific coding guidelines, please refer to the appropriate instruction files:
+
+{%- for language in languages %}
+{%- if instruction_mapping[language] is defined %}
+- **{{ language | title }} Development**: See [{{ language | title }} Instructions](instructions/{{ language }}.instructions.md) for {{ instruction_mapping[language].purpose | lower }}
+{%- endif %}
+{%- endfor %}
+
+### General Development Principles
+
+{%- if 'template' in types %}
+- **Template-Driven Architecture**: Follow template-based configuration pattern for workspace generation
+- **Schema Validation**: Ensure all generated configurations validate against defined schemas
+{%- endif %}
+- **Cross-Platform Compatibility**: Write code that works consistently across Windows, Linux, and macOS
+{%- if languages | length > 1 %}
+- **Language-Specific Optimization**: Leverage language-specific templates for optimal integration
+{%- endif %}
+{%- if 'infra' in types %}
+- **Infrastructure Standards**: Use consistent resource naming, tagging, and security practices
+{%- endif %}
+- **Modular Design**: Use modular architecture for maintainability and reusability
+- **Documentation Standards**: Maintain comprehensive documentation with examples and best practices
+- **Quality Assurance**: Include validation, testing, and quality checks in all development processes
+- **AI Integration**: Provide comprehensive instruction files for intelligent development assistance
+
+## 🔧 Development Workflow
+
+{%- if 'scripts' in languages %}
+For detailed script development guidelines including cross-platform compatibility, parameter standards, and automation best practices, see [Scripts Instructions](instructions/scripts.instructions.md).
+{%- endif %}
+
+### Repository Type: {{ types | join(', ') | title }}
 
 {%- if 'lib' in types %}
-### Library Development
-- Follow semantic versioning for releases
+#### Library Development Standards
+- Follow semantic versioning for all releases (MAJOR.MINOR.PATCH)
 - Maintain backward compatibility when possible
-- Provide clear API documentation
-- Include usage examples in documentation
+- Provide comprehensive API documentation with examples
+- Include usage examples in documentation and tests
+- Implement proper package distribution and dependency management
 {%- endif %}
 
 {%- if 'app' in types %}
-### Application Development
-- Follow established architectural patterns
-- Implement proper error handling and logging
-- Include configuration management
-- Ensure scalability and performance considerations
+#### Application Development Standards
+- Follow established architectural patterns (MVC, microservices, etc.)
+- Implement comprehensive error handling and logging
+- Include proper configuration management for different environments
+- Ensure scalability and performance considerations in design
+- Implement proper security measures and input validation
 {%- endif %}
 
 {%- if 'infra' in types %}
-### Infrastructure as Code
-- Use consistent resource naming conventions
-- Include proper resource tagging
-- Implement least privilege security principles
-- Document infrastructure dependencies
+#### Infrastructure as Code Standards
+- Use consistent resource naming conventions across all deployments
+- Implement comprehensive resource tagging for cost allocation and management
+- Apply least privilege security principles to all resource access
+- Document all infrastructure dependencies and relationships
+- Use modular infrastructure patterns for reusability
 {%- endif %}
 
 {%- if 'tool' in types %}
-### Tool Development
-- Provide comprehensive CLI help and documentation
-- Include usage examples and common scenarios
-- Implement proper error messages and exit codes
-- Support standard input/output patterns
+#### Tool Development Standards
+- Provide comprehensive CLI help and usage documentation
+- Include practical usage examples and common scenarios
+- Implement clear error messages and appropriate exit codes
+- Support standard input/output patterns and pipe operations
+- Follow cross-platform compatibility guidelines
 {%- endif %}
+
+{%- if 'template' in types %}
+#### Template Development Standards
+- Follow comprehensive template formatting standards
+- Use consistent variable naming and template patterns
+- Implement proper template validation and error handling
+- Provide template documentation and usage examples
+- Support cross-platform template generation
+{%- endif %}
+
+### Cross-Platform Development
+
+{%- if languages | length > 1 %}
+{{ repo_name }} provides comprehensive development across multiple languages and platforms:
+{%- endif %}
+
+{%- if 'python' in languages %}
+#### Python Development
+- Use virtual environments for dependency isolation
+- Follow PEP 8 coding standards and type hints
+- Implement comprehensive testing with pytest
+- Use proper package structure and distribution
+{%- endif %}
+
+{%- if 'go' in languages %}
+#### Go Development  
+- Follow Go conventions and use go fmt for formatting
+- Implement proper error handling patterns
+- Use Go modules for dependency management
+- Write comprehensive tests with the testing package
+{%- endif %}
+
+{%- if 'typescript' in languages %}
+#### TypeScript Development
+- Use strict TypeScript configuration
+- Follow established React/Node.js patterns
+- Implement proper type definitions and interfaces
+- Use comprehensive testing frameworks
+{%- endif %}
+
+{%- if 'terraform' in languages %}
+#### Infrastructure Development
+- Use Terraform for infrastructure provisioning
+- Follow module development best practices
+- Implement proper state management and backend configuration
+- Use comprehensive validation and testing
+{%- endif %}
+
+## 🌐 Multi-Platform Integration
+
+### Supported Platforms
+
+**CI/CD Platform**: {{ ci_platform | title }}
+{%- if deployment_platform %}
+**Deployment Platform**: {{ deployment_platform | title }}
+{%- endif %}
+**Languages**: {{ languages | join(', ') | title }}
+
+{%- if ci_platform == 'github' %}
+#### GitHub Integration
+- Use GitHub Actions for CI/CD workflows
+- Follow GitHub repository configuration best practices  
+- Implement proper issue and pull request templates
+- Use GitHub security features and branch protection
+{%- endif %}
+
+{%- if ci_platform == 'azuredevops' %}
+#### Azure DevOps Integration
+- Use Azure Pipelines for CI/CD automation
+- Follow Azure DevOps project structure best practices
+- Implement proper work item integration
+- Use Azure DevOps security features and policies
+{%- endif %}
+
+{%- if deployment_platform %}
+#### {{ deployment_platform | title }} Deployment
+{%- if deployment_platform == 'aws' %}
+- Follow AWS Well-Architected Framework principles
+- Use appropriate AWS services for workload requirements
+- Implement proper IAM security and access controls
+- Use AWS native monitoring and logging services
+{%- elif deployment_platform == 'azure' %}
+- Follow Azure architecture best practices
+- Use appropriate Azure services for workload requirements  
+- Implement proper Azure AD security and access controls
+- Use Azure native monitoring and logging services
+{%- elif deployment_platform == 'gcp' %}
+- Follow Google Cloud architecture best practices
+- Use appropriate GCP services for workload requirements
+- Implement proper IAM security and access controls
+- Use GCP native monitoring and logging services
+{%- elif deployment_platform == 'kubernetes' %}
+- Follow Kubernetes deployment best practices
+- Use appropriate Kubernetes resources and patterns
+- Implement proper RBAC security and access controls
+- Use cloud-native monitoring and logging solutions
+{%- endif %}
+{%- endif %}
+
+## 🧪 When Suggesting Code
+
+### For Multi-Language Development
+- Consider cross-platform compatibility across all supported languages
+- Ensure proper dependency management for each language ecosystem
+- Follow established patterns and conventions for each technology
+- Think about integration points between different language components
+- Consider performance implications across the technology stack
+
+### For Infrastructure Changes
+{%- if 'terraform' in languages %}
+- Use Terraform best practices for infrastructure as code
+- Consider resource dependencies and state management
+- Think about security implications and least privilege access
+- Ensure proper resource tagging and naming conventions
+{%- endif %}
+{%- if deployment_platform %}
+- Follow {{ deployment_platform | title }}-specific best practices and patterns
+- Consider cost optimization and resource efficiency
+- Implement proper monitoring and alerting strategies
+{%- endif %}
+
+### For Template Changes
+{%- if 'template' in types %}
+- Ensure template compatibility across target platforms
+- Consider template inheritance and reusability patterns
+- Think about template validation and error handling
+- Maintain consistency with existing template standards
+{%- endif %}
+
+## 📋 Primary Development Rules
+
+### Always Update the Complete Stack
+
+When making any changes to the {{ repo_name }} system:
+
+1. **Code Updates**: Update relevant source code in appropriate language directories
+2. **Documentation Updates**: Update `README.md` and relevant `docs/` files  
+{%- if 'template' in types %}
+3. **Template Updates**: Update templates and ensure schema compliance
+{%- endif %}
+{%- if 'infra' in types %}
+4. **Infrastructure Updates**: Update Terraform configurations and validate changes
+{%- endif %}
+5. **Cross-Platform Testing**: Validate changes work across all supported platforms
+6. **Instruction Files**: Update relevant `.github/instructions/*.md` files for technology-specific guidance
+7. **Integration Testing**: Run comprehensive tests across all components
+
+### Documentation Maintenance Standards
+
+- **README.md**: Update project overview, features, and usage examples for any functional changes
+{%- if 'template' in types %}
+- **Template Documentation**: Update template usage guides and examples
+{%- endif %}
+- **docs/**: Update technical documentation for system architecture or process changes
+- **Instruction Files**: Update technology-specific guidance for relevant changes
+{%- if 'infra' in types %}
+- **Infrastructure Documentation**: Update deployment guides and architecture diagrams
+{%- endif %}
+
+### Change Coordination Requirements
+
+- **Cross-Component Impact**: Consider how changes affect different language components and integrations
+- **Platform Compatibility**: Ensure changes work consistently across {{ ci_platform | title }}{{ ' and ' + deployment_platform | title if deployment_platform else '' }}
+{%- if languages | length > 1 %}
+- **Language Integration**: Verify changes don't break existing cross-language functionality
+{%- endif %}
+- **Quality Compliance**: Maintain validation compliance throughout the change process
+- **AI Integration**: Update instruction files to reflect new patterns or capabilities
+
+This comprehensive instruction system ensures that GitHub Copilot understands the {{ repo_name }} project structure, development patterns, and coordination requirements to provide contextually appropriate suggestions for this {{ types | join('/') }} platform.

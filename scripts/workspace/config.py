@@ -35,7 +35,7 @@ class ConfigManager:
         return {
             "name": self.repo_path.name,
             "description": "",
-            "platform": "github",
+            "ci_platform": "github",
             "types": ["lib"],
             "languages": [],
             "tags": [],
@@ -95,7 +95,7 @@ class ConfigManager:
     ):
         """Apply repository-level configuration overrides"""
         for key, value in repo_overrides.items():
-            if key in ["platform", "types", "languages", "tags"]:
+            if key in ["platform", "ci_platform", "deployment_platform", "types", "languages", "tags"]:
                 if value is not None:
                     config[key] = value
             elif key == "name" and value:
@@ -132,7 +132,8 @@ class RepositoryConfig:
         # Extract configuration values
         self.name = self.config.get("name", repo_path.name)
         self.description = self.config.get("description", "")
-        self.platform = self.config.get("platform", "github")
+        self.ci_platform = self.config.get("ci_platform", self.config.get("platform", "github"))
+        self.deployment_platform = self.config.get("deployment_platform")
         self.types = self.config.get("types", ["lib"])
         self.languages = self.config.get("languages", [])
         self.tags = self.config.get("tags", [])
@@ -162,7 +163,7 @@ class RepositoryConfig:
                 "pipelines": True,
             },
         }
-        return platform_configs.get(self.platform, platform_configs["github"])
+        return platform_configs.get(self.ci_platform, platform_configs["github"])
 
     def get_type_specific_config(self) -> Dict[str, Any]:
         """Get configuration based on repository types"""
@@ -188,7 +189,8 @@ class RepositoryConfig:
         return {
             "name": self.name,
             "description": self.description,
-            "platform": self.platform,
+            "ci_platform": self.ci_platform,
+            "deployment_platform": self.deployment_platform,
             "types": self.types,
             "languages": self.languages,
             "tags": self.tags,

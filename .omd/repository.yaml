@@ -1,7 +1,7 @@
 # Auto-detected repository configuration
 # Edit as needed and re-run setup
 
-copilot_instructions: false
+copilot_enabled: true
 languages:
   - j2
   - markdown
@@ -9,7 +9,7 @@ languages:
   - python
   - shell
   - yaml
-platform: azuredevops
+ci_platform: azuredevops
 types:
   - docs
   - template

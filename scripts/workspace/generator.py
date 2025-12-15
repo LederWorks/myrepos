@@ -229,13 +229,13 @@ class WorkspaceGenerator:
             config = RepositoryConfig(repo_path, self.tools_dir)
 
             # Store current metadata and repo path for templates
-            self._current_platform = config.platform
+            self._current_platform = config.ci_platform
             self._current_types = config.types
             self._current_repo_path = repo_path
 
             print(f"🔍 Processing repository: {config.name}")
             print("📊 Detected content:")
-            print(f"        platform: {config.platform}")
+            print(f"        platform: {config.ci_platform}")
             print(f"        languages: {','.join(config.languages)}")
             print(f"        types: {','.join(config.types)}")
 
@@ -244,7 +244,7 @@ class WorkspaceGenerator:
             self._create_omd_files(config)
             self._create_platform_templates(config)
             self._update_gitignore(config)
-            self.generate_copilot_instructions()
+            self.generate_copilot_instructions(config)
 
             print(f"✅ Setup completed for {config.name}")
 
@@ -287,7 +287,7 @@ class WorkspaceGenerator:
         config = RepositoryConfig(repo_path, self.tools_dir)
 
         # Store current context for templates
-        self._current_platform = config.platform
+        self._current_platform = config.ci_platform
         self._current_types = config.types
         self._current_repo_path = repo_path
 
@@ -502,7 +502,7 @@ class WorkspaceGenerator:
                 metadata=config.to_dict(),
                 repo_name=config.name,
                 languages=config.languages,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
             )
             with open(workspace_file, "w", encoding="utf-8") as f:
@@ -516,7 +516,7 @@ class WorkspaceGenerator:
                     metadata=config.to_dict(),
                     repo_name=config.name,
                     languages=config.languages,
-                    platform=config.platform,
+                    platform=config.ci_platform,
                     types=config.types,
                 )
                 with open(workspace_file, "w", encoding="utf-8") as f:
@@ -542,7 +542,7 @@ class WorkspaceGenerator:
                 metadata=config.to_dict(),
                 repo_name=config.name,
                 languages=config.languages,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
             )
             with open(settings_file, "w", encoding="utf-8") as f:
@@ -571,7 +571,7 @@ class WorkspaceGenerator:
                 metadata=config.to_dict(),
                 repo_name=config.name,
                 languages=config.languages,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
             )
             with open(extensions_file, "w", encoding="utf-8") as f:
@@ -602,7 +602,7 @@ class WorkspaceGenerator:
                 metadata=config.to_dict(),
                 repo_name=config.name,
                 languages=config.languages,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
             )
             with open(launch_file, "w", encoding="utf-8") as f:
@@ -710,7 +710,7 @@ class WorkspaceGenerator:
                 metadata=config.to_dict(),
                 repo_name=config.name,
                 languages=config.languages,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
             )
             languages_file = omd_dir / "languages.yaml"
@@ -731,7 +731,7 @@ class WorkspaceGenerator:
                     languages=config.languages,
                     types=config.types,
                     repo_name=config.name,
-                    platform=config.platform,
+                    platform=config.ci_platform,
                     metadata=config.to_dict(),
                 )
                 with open(workspace_file, "w", encoding="utf-8") as f:
@@ -748,7 +748,7 @@ class WorkspaceGenerator:
         try:
             template = self.jinja_env.get_template(".omd/platform.yaml.j2")
             content = template.render(
-                platform=config.platform,
+                platform=config.ci_platform,
                 languages=config.languages,
                 types=config.types,
                 metadata=config.to_dict(),
@@ -773,7 +773,7 @@ class WorkspaceGenerator:
                 template = self.jinja_env.get_template(".gitignore.j2")
                 content = template.render(
                     languages=config.languages,
-                    platform=config.platform,
+                    platform=config.ci_platform,
                     types=config.types,
                     metadata=config.to_dict(),
                     repo_name=config.name,
@@ -811,10 +811,17 @@ class WorkspaceGenerator:
 
     def _create_platform_templates(self, config: RepositoryConfig) -> None:
         """Create platform-specific templates and files"""
-        if config.platform == "azuredevops":
+        if config.ci_platform == "azuredevops":
             self._create_azure_devops_templates(config)
-        elif config.platform == "github":
+        elif config.ci_platform == "github":
             self._create_github_templates(config)
+        
+        # Create .github directory if copilot is enabled, regardless of platform
+        copilot_enabled = config.config.get("copilot_enabled", False)
+        if copilot_enabled and config.ci_platform != "github":
+            # Ensure .github exists for copilot instructions even on non-GitHub platforms
+            github_dir = config.repo_path / ".github"
+            github_dir.mkdir(exist_ok=True)
 
     def _create_azure_devops_templates(self, config: RepositoryConfig) -> None:
         """Create Azure DevOps specific templates"""
@@ -826,7 +833,7 @@ class WorkspaceGenerator:
             template = self.jinja_env.get_template(".azuredevops/pull_request_template/branches/main.MD.j2")
             content = template.render(
                 repo_name=config.name,
-                platform=config.platform,
+                platform=config.ci_platform,
                 types=config.types,
                 languages=config.languages,
                 features=[],  # Can be customized via config
@@ -847,11 +854,201 @@ class WorkspaceGenerator:
     def _create_github_templates(self, config: RepositoryConfig) -> None:
         """Create GitHub specific templates (placeholder for future use)"""
         # Placeholder for GitHub-specific templates
-        pass
+        # .github directory creation handled by copilot_enabled logic
 
-    def generate_copilot_instructions(self) -> None:
+    def generate_copilot_instructions(self, config: RepositoryConfig) -> None:
         """Generate GitHub Copilot instruction files if enabled"""
-        # Copilot instructions generation disabled for now
+        # Check if copilot instructions are enabled
+        copilot_enabled = config.config.get("copilot_enabled", False)
+        if not copilot_enabled:
+            return
+
+        print("📝 Generating GitHub Copilot instructions...")
+
+        # Create .github directory regardless of platform when copilot is enabled
+        github_dir = config.repo_path / ".github"
+        github_dir.mkdir(exist_ok=True)
+
+        # Detect required instruction files based on repository content
+        detected_instructions = self._detect_instruction_files(config)
+        
+        try:
+            template = self.jinja_env.get_template(".github/copilot-instructions.md.j2")
+            content = template.render(
+                repository=config.to_dict(),
+                detected_instructions=detected_instructions,
+                ci_platform=config.ci_platform,
+                deployment_platform=config.config.get("deployment_platform", "docker"),
+                copilot_enabled=copilot_enabled
+            )
+            
+            copilot_file = github_dir / "copilot-instructions.md"
+            with open(copilot_file, "w", encoding="utf-8") as f:
+                f.write(content)
+                
+            print(f"  ✓ Generated .github/copilot-instructions.md with {len(detected_instructions)} instruction files")
+            
+        except TemplateNotFound:
+            print("  ⚠️  copilot-instructions.md.j2 template not found")
+        except Exception as e:
+            print(f"  ⚠️  Error generating copilot instructions: {e}")
+
+    def _detect_instruction_files(self, config: RepositoryConfig) -> List[Dict[str, Any]]:
+        """Detect which instruction files should be included based on repository content"""
+        # Instruction file patterns and their detection logic
+        instruction_patterns = {
+            'markdown.instructions.md': {
+                'patterns': ['**/*.md', '**/*.MD', '**/*.markdown', '/*.md', '/*.MD', '/*.markdown'],
+                'display_name': '📝 Markdown Instructions',
+                'purpose': 'Markdown writing standards, formatting guidelines, and documentation quality assurance'
+            },
+            'python.instructions.md': {
+                'patterns': ['**/*.py', '**/*.pyw', '**/*.pyi', '**/pyproject.toml', '**/requirements*.txt'],
+                'display_name': '🐍 Python Instructions', 
+                'purpose': 'Python development guidelines, script architecture, testing standards, virtual environment management'
+            },
+            'go.instructions.md': {
+                'patterns': ['backend/**/*.go', 'go.mod', 'go.sum'],
+                'display_name': '🔧 Go Instructions',
+                'purpose': 'Go development guidelines, project structure, testing standards, dependency management'
+            },
+            'typescript.instructions.md': {
+                'patterns': ['frontend/**/*.ts', 'frontend/**/*.tsx', 'frontend/**/*.json', 'frontend/**/*.js', 'frontend/**/*.jsx'],
+                'display_name': '⚛️ TypeScript Instructions',
+                'purpose': 'TypeScript/JavaScript development, component architecture, build configuration, package management'
+            },
+            'github.instructions.md': {
+                'patterns': ['.github/**/*.yml', '.github/**/*.yaml', '.github/**/*.md', '**/workflow/**/*', '.github/ISSUE_TEMPLATE/*', '.github/PULL_REQUEST_TEMPLATE/*'],
+                'display_name': '🔄 GitHub Instructions',
+                'purpose': 'GitHub Actions workflows, repository configuration, issue templates, security practices'
+            },
+            'scripts.instructions.md': {
+                'patterns': ['scripts/**/*.ps1', 'scripts/**/*.sh', 'scripts/**/*.sql'],
+                'display_name': '🛠️ Scripts Instructions',
+                'purpose': 'Script development standards, cross-platform compatibility, parameter conventions, output formatting'
+            },
+            'powershell.instructions.md': {
+                'patterns': ['scripts/**/*.ps1'],
+                'display_name': '📜 PowerShell Instructions',
+                'purpose': 'PowerShell-specific standards, CmdletBinding patterns, Windows development'
+            },
+            'shell.instructions.md': {
+                'patterns': ['scripts/**/*.sh'],
+                'display_name': '🐚 Shell Instructions', 
+                'purpose': 'Shell-specific standards, POSIX compliance, Unix/Linux development'
+            },
+            'terraform.instructions.md': {
+                'patterns': ['**/*.tf', '**/*.hcl', '**/terraform.tf', '**/variables.tf', '**/outputs.tf', '**/locals.tf'],
+                'display_name': '🏗️ Terraform Instructions',
+                'purpose': 'Terraform development guidelines, IaC best practices, module conventions'
+            },
+            'jinja2.instructions.md': {
+                'patterns': ['**/*.j2', '**/*.jinja', '**/*.jinja2', 'templates/**/*'],
+                'display_name': '🎨 Jinja2 Instructions',
+                'purpose': 'Jinja2 template development standards, formatting best practices, custom functions, template quality assurance'
+            },
+            'json.instructions.md': {
+                'patterns': ['**/*.json', '**/*.jsonc', '**/*.json5'],
+                'display_name': '📊 JSON Instructions',
+                'purpose': 'JSON development standards, configuration management, API design, schema validation'
+            },
+            'yaml.instructions.md': {
+                'patterns': ['**/*.yaml', '**/*.yml', '**/*.yaml.j2', '**/*.yml.j2'],
+                'display_name': '📄 YAML Instructions',
+                'purpose': 'YAML configuration standards, cloud platforms, security, validation, performance optimization'
+            },
+            'sql.instructions.md': {
+                'patterns': ['**/*.sql', '**/migrations/*.sql', '**/schema/*.sql', '**/seeds/*.sql', '**/procedures/*.sql', '**/functions/*.sql', '**/triggers/*.sql', '**/views/*.sql'],
+                'display_name': '🗄️ SQL Instructions',
+                'purpose': 'Database development standards, query optimization, security, migrations, testing'
+            },
+            'azuredevops.instructions.md': {
+                'patterns': ['**/*'],  # Universal patterns, activated by platform detection
+                'display_name': '☁️ Azure DevOps Instructions',
+                'purpose': 'CI/CD pipeline configuration, build strategies, work item integration, release management',
+                'platform_trigger': 'azuredevops'
+            },
+            'gcp.instructions.md': {
+                'patterns': ['**/*'],  # Universal patterns, activated by platform detection  
+                'display_name': '☁️ GCP Instructions',
+                'purpose': 'Google Cloud Platform guidelines, resource organization, IAM best practices, service integration',
+                'deployment_platform_trigger': 'gcp'
+            },
+            'aws.instructions.md': {
+                'patterns': ['**/*'],
+                'display_name': '☁️ AWS Instructions',
+                'purpose': 'AWS development guidelines, resource organization, security, IAM best practices, service integration',
+                'deployment_platform_trigger': 'aws'
+            },
+            'azure.instructions.md': {
+                'patterns': ['**/*'],
+                'display_name': '☁️ Azure Instructions',
+                'purpose': 'Azure development guidelines, resource organization, security, identity management, operational best practices',
+                'deployment_platform_trigger': 'azure'
+            },
+            'oci.instructions.md': {
+                'patterns': ['**/*'],
+                'display_name': '☁️ OCI Instructions',
+                'purpose': 'Oracle Cloud Infrastructure guidelines, resource organization, IAM best practices, service integration',
+                'deployment_platform_trigger': 'oci'
+            },
+            'vscode.instructions.md': {
+                'patterns': ['.vscode/**/*'],
+                'display_name': '💻 VSCode Instructions',
+                'purpose': 'VS Code workspace configuration, task automation, debugging, extension recommendations'
+            }
+        }
+
+        detected_instructions = []
+        ci_platform = config.ci_platform
+        deployment_platform = config.config.get("deployment_platform", "docker")
+
+        for instruction_file, instruction_config in instruction_patterns.items():
+            should_include = False
+            
+            # Check platform-specific triggers
+            if 'platform_trigger' in instruction_config:
+                if ci_platform == instruction_config['platform_trigger']:
+                    should_include = True
+            elif 'deployment_platform_trigger' in instruction_config:
+                if deployment_platform == instruction_config['deployment_platform_trigger']:
+                    should_include = True
+            else:
+                # Check file patterns
+                patterns = instruction_config['patterns']
+                for pattern in patterns:
+                    # Use repository detection logic to check if any files match the pattern
+                    if self._check_pattern_match(config.repo_path, pattern):
+                        should_include = True
+                        break
+            
+            if should_include:
+                detected_instructions.append({
+                    'filename': instruction_file,
+                    'display_name': instruction_config['display_name'],
+                    'purpose': instruction_config['purpose'],
+                    'file_patterns': instruction_config['patterns']
+                })
+        
+        return detected_instructions
+
+    def _check_pattern_match(self, repo_path: Path, pattern: str) -> bool:
+        """Check if any files in the repository match the given pattern"""
+        import glob
+
+        # Convert pattern to work with glob
+        if pattern.startswith('/'):
+            # Root level pattern
+            search_pattern = str(repo_path / pattern[1:])
+        else:
+            # Recursive pattern
+            search_pattern = str(repo_path / pattern)
+        
+        try:
+            matches = glob.glob(search_pattern, recursive=True)
+            return len(matches) > 0
+        except Exception:
+            return False
 
     def _create_metadata_template(self, repo_path: Path) -> None:
         """Create a template metadata file"""
