@@ -1,5 +1,5 @@
 ---
-applyTo: 'backend/**/*.go,go.mod,go.sum'
+applyTo: '**/*.go,**/*.go.mod,**/*.go.sum'
 ---
 
 # Go Development Standards

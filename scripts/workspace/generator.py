@@ -877,6 +877,9 @@ class WorkspaceGenerator:
         # Detect required instruction files based on repository content
         detected_instructions = self._detect_instruction_files(config)
         
+        # Detect AGENTS.md files in the repository
+        detected_agents = self._detect_agents_files(config)
+        
         # Create .github/instructions directory
         instructions_dir = github_dir / "instructions"
         instructions_dir.mkdir(exist_ok=True)
@@ -895,6 +898,7 @@ class WorkspaceGenerator:
                 types=config.types,
                 languages=config.languages,
                 detected_instructions=detected_instructions,
+                detected_agents=detected_agents,
                 ci_platform=config.ci_platform,
                 deployment_platform=config.config.get("deployment_platform"),
                 copilot_enabled=copilot_enabled,
@@ -905,7 +909,8 @@ class WorkspaceGenerator:
             with open(copilot_file, "w", encoding="utf-8") as f:
                 f.write(content)
                 
-            print(f"  ✓ Generated .github/copilot-instructions.md with {len(detected_instructions)} instruction files")
+            agents_text = f" and {len(detected_agents)} AGENTS.md files" if detected_agents else ""
+            print(f"  ✓ Generated .github/copilot-instructions.md with {len(detected_instructions)} instruction files{agents_text}")
             
         except TemplateNotFound:
             print("  ⚠️  copilot-instructions.md.j2 template not found")
@@ -1033,13 +1038,18 @@ class WorkspaceGenerator:
                 if deployment_platform == instruction_config['deployment_platform_trigger']:
                     should_include = True
             else:
-                # Check file patterns
-                patterns = instruction_config['patterns']
-                for pattern in patterns:
-                    # Use repository detection logic to check if any files match the pattern
-                    if self._check_pattern_match(config.repo_path, pattern):
-                        should_include = True
-                        break
+                # Check if this is a language-specific instruction file
+                language_name = instruction_file.replace('.instructions.md', '')
+                if language_name in config.languages:
+                    should_include = True
+                else:
+                    # Check file patterns
+                    patterns = instruction_config['patterns']
+                    for pattern in patterns:
+                        # Use repository detection logic to check if any files match the pattern
+                        if self._check_pattern_match(config.repo_path, pattern):
+                            should_include = True
+                            break
             
             if should_include:
                 detected_instructions.append({
@@ -1050,6 +1060,44 @@ class WorkspaceGenerator:
                 })
         
         return detected_instructions
+
+    def _detect_agents_files(self, config: RepositoryConfig) -> List[Dict[str, Any]]:
+        """Detect AGENTS.md files in the repository"""
+        agents_files = []
+        repo_path = config.repo_path
+        
+        # Search for AGENTS.md files recursively
+        import glob
+        search_pattern = str(repo_path / "**/AGENTS.md")
+        
+        try:
+            matches = glob.glob(search_pattern, recursive=True)
+            for match in matches:
+                # Get relative path from repository root
+                relative_path = Path(match).relative_to(repo_path)
+                
+                # Determine the purpose based on location
+                if str(relative_path) == "AGENTS.md":
+                    purpose = "Main component tracking and coordination"
+                    display_name = "🎯 Main AGENTS.md"
+                else:
+                    # Get the directory name for context
+                    dir_name = relative_path.parent.name if relative_path.parent.name != "." else "root"
+                    purpose = f"Sub-component tracking for {dir_name}"
+                    display_name = f"📋 {dir_name}/AGENTS.md"
+                
+                agents_files.append({
+                    'filename': str(relative_path),
+                    'display_name': display_name,
+                    'purpose': purpose,
+                    'full_path': match
+                })
+        except Exception as e:
+            self.logger.debug(f"Error detecting AGENTS.md files: {e}")
+        
+        # Sort by path for consistent ordering
+        agents_files.sort(key=lambda x: x['filename'])
+        return agents_files
 
     def _check_pattern_match(self, repo_path: Path, pattern: str) -> bool:
         """Check if any files in the repository match the given pattern"""
@@ -1079,6 +1127,24 @@ class WorkspaceGenerator:
             template_path = f".github/instructions/{filename}.j2"
             try:
                 template = self.jinja_env.get_template(template_path)
+                # Define language-specific file patterns
+                language_patterns = {
+                    'go': ['**/*.go', '**/go.mod', '**/go.sum'],
+                    'python': ['**/*.py', '**/*.pyw', '**/*.pyi', '**/pyproject.toml', '**/requirements*.txt'],
+                    'typescript': ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+                    'yaml': ['**/*.yaml', '**/*.yml', '**/*.yaml.j2', '**/*.yml.j2'],
+                    'json': ['**/*.json', '**/*.jsonc', '**/*.json5'],
+                    'markdown': ['**/*.md', '**/*.MD', '**/*.markdown', '/*.md', '/*.MD', '/*.markdown'],
+                    'terraform': ['**/*.tf', '**/*.hcl', '**/terraform.tf', '**/variables.tf', '**/outputs.tf', '**/locals.tf'],
+                    'sql': ['**/*.sql', '**/migrations/*.sql', '**/schema/*.sql', '**/seeds/*.sql', '**/procedures/*.sql', '**/functions/*.sql', '**/triggers/*.sql', '**/views/*.sql'],
+                    'shell': ['**/*.sh', '**/*.bash', '**/*.zsh'],
+                    'powershell': ['**/*.ps1', '**/*.psm1', '**/*.psd1']
+                }
+                
+                # Get the language name from filename
+                language_name = filename.replace('.instructions.md', '')
+                file_patterns = language_patterns.get(language_name, instruction['file_patterns'])
+                
                 content = template.render(
                     repo_name=config.name,
                     repo_description=config.description,
@@ -1089,7 +1155,19 @@ class WorkspaceGenerator:
                     deployment_platform=config.config.get("deployment_platform", "docker"),
                     instruction=instruction,
                     repository=config.to_dict(),
-                    markdown_patterns=['**/*.md', '**/*.MD', '**/*.markdown', '/*.md', '/*.MD', '/*.markdown']
+                    # Language-specific pattern variables
+                    go_patterns=language_patterns.get('go', []),
+                    python_patterns=language_patterns.get('python', []),
+                    typescript_patterns=language_patterns.get('typescript', []),
+                    yaml_patterns=language_patterns.get('yaml', []),
+                    json_patterns=language_patterns.get('json', []),
+                    markdown_patterns=language_patterns.get('markdown', []),
+                    terraform_patterns=language_patterns.get('terraform', []),
+                    sql_patterns=language_patterns.get('sql', []),
+                    shell_patterns=language_patterns.get('shell', []),
+                    powershell_patterns=language_patterns.get('powershell', []),
+                    # Current language patterns for generic use
+                    current_patterns=file_patterns
                 )
                 
                 with open(instruction_file, "w", encoding="utf-8") as f:

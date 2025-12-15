@@ -37,9 +37,35 @@ The {{ repo_name }} project follows a hierarchical documentation architecture de
 ```
 {{ repo_name }}/
 ├── .github/copilot-instructions.md  ← GitHub Copilot project context (this file)
-├── .github/instructions/*.md        ← Technology-specific development standards
+├── .github/instructions/
+{% for instruction in detected_instructions -%}
+│   ├── {{ instruction.filename }} ← {{ instruction.display_name.replace('📝 ', '').replace('🐍 ', '').replace('🔧 ', '').replace('⚛️ ', '').replace('🔄 ', '').replace('🛠️ ', '').replace('📜 ', '').replace('🐚 ', '').replace('🏗️ ', '').replace('🎨 ', '').replace('📊 ', '').replace('📄 ', '').replace('🗄️ ', '').replace('☁️ ', '').replace('💻 ', '') }}
+{% endfor -%}
+{%- if detected_agents %}
+{% for agent in detected_agents -%}
+├── {{ agent.filename }}               ← {{ agent.purpose }}
+{% endfor -%}
+{%- endif %}
 └── docs/*.md                        ← Component-specific documentation
 ```
+
+{%- if detected_agents %}
+
+#### AGENTS.md Files
+
+{%- for agent in detected_agents %}
+- **[{{ agent.display_name }}]({{ agent.filename }})**: {{ agent.purpose }}
+{%- endfor %}
+
+AGENTS.md files provide:
+- Component implementation status and tracking
+- Cross-component coordination requirements  
+- Feature roadmap and development priorities
+- Standards compliance and quality gates
+- Known issues, limitations, and workarounds
+- Contributing guidelines and development setup
+
+{%- endif %}
 
 #### Documentation Hierarchy Purpose
 
