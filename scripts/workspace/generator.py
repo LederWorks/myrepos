@@ -225,6 +225,15 @@ class WorkspaceGenerator:
 
     def setup_repository(self, repo_path: Path) -> None:
         """Setup VS Code workspace and configuration for a repository"""
+        repo_path = Path(repo_path)
+        metadata_file = repo_path / ".omd" / "repository.yaml"
+        
+        # Check if repository.yaml exists, if not trigger auto-detection
+        if not metadata_file.exists():
+            print("🔍 No metadata found, auto-detecting repository configuration...")
+            self._auto_detect_and_setup(repo_path)
+            return
+
         try:
             config = RepositoryConfig(repo_path, self.tools_dir)
 
@@ -248,12 +257,10 @@ class WorkspaceGenerator:
 
             print(f"✅ Setup completed for {config.name}")
 
-        except FileNotFoundError:
-            print("🔍 No metadata found, auto-detecting repository configuration...")
-            self._auto_detect_and_setup(repo_path)
-
         except (ValueError, yaml.YAMLError) as e:
             print(f"❌ Metadata error: {e}")
+            print("🔍 Falling back to auto-detection...")
+            self._auto_detect_and_setup(repo_path)
 
     def _auto_detect_and_setup(self, repo_path: Path) -> None:
         """Auto-detect repository configuration and set up workspace"""
@@ -267,16 +274,14 @@ class WorkspaceGenerator:
 
         # Create detected configuration
         detected_config = {
-            "name": repo_path.name,
-            "description": f"Auto-detected repository: {repo_path.name}",
-            "platform": platform,
+            "ci_platform": platform,
             "types": repo_types,
             "languages": languages,
             "tags": [],
         }
 
         print("📊 Auto-detected content:")
-        print(f"        platform: {detected_config['platform']}")
+        print(f"        platform: {detected_config['ci_platform']}")
         print(f"        languages: {','.join(detected_config['languages'])}")
         print(f"        types: {','.join(detected_config['types'])}")
 
@@ -872,14 +877,28 @@ class WorkspaceGenerator:
         # Detect required instruction files based on repository content
         detected_instructions = self._detect_instruction_files(config)
         
+        # Create .github/instructions directory
+        instructions_dir = github_dir / "instructions"
+        instructions_dir.mkdir(exist_ok=True)
+        
+        # Create individual instruction files
+        self._create_instruction_files(config, instructions_dir, detected_instructions)
+        
         try:
+            # Prepare template variables
+            description = config.description or f"Core {', '.join(config.types)} repository for the {config.name} component"
+            
             template = self.jinja_env.get_template(".github/copilot-instructions.md.j2")
             content = template.render(
-                repository=config.to_dict(),
+                repo_name=config.name,
+                repo_description=description,
+                types=config.types,
+                languages=config.languages,
                 detected_instructions=detected_instructions,
                 ci_platform=config.ci_platform,
-                deployment_platform=config.config.get("deployment_platform", "docker"),
-                copilot_enabled=copilot_enabled
+                deployment_platform=config.config.get("deployment_platform"),
+                copilot_enabled=copilot_enabled,
+                language_usage_context={}  # Provide empty dict to use defaults
             )
             
             copilot_file = github_dir / "copilot-instructions.md"
@@ -1049,6 +1068,69 @@ class WorkspaceGenerator:
             return len(matches) > 0
         except Exception:
             return False
+
+    def _create_instruction_files(self, config: RepositoryConfig, instructions_dir: Path, detected_instructions: List[Dict[str, Any]]) -> None:
+        """Create individual instruction files in .github/instructions/ directory"""
+        for instruction in detected_instructions:
+            filename = instruction['filename']
+            instruction_file = instructions_dir / filename
+            
+            # Try to use a specific template for this instruction file
+            template_path = f".github/instructions/{filename}.j2"
+            try:
+                template = self.jinja_env.get_template(template_path)
+                content = template.render(
+                    repo_name=config.name,
+                    repo_description=config.description,
+                    types=config.types,
+                    languages=config.languages,
+                    detected_languages=config.languages,
+                    ci_platform=config.ci_platform,
+                    deployment_platform=config.config.get("deployment_platform", "docker"),
+                    instruction=instruction,
+                    repository=config.to_dict(),
+                    markdown_patterns=['**/*.md', '**/*.MD', '**/*.markdown', '/*.md', '/*.MD', '/*.markdown']
+                )
+                
+                with open(instruction_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                print(f"  ✓ Generated {filename} from template")
+                
+            except TemplateNotFound:
+                # Create a basic instruction file if no template exists
+                basic_content = f"""# {instruction['display_name'].replace('📝 ', '').replace('🐍 ', '').replace('🔧 ', '').replace('⚛️ ', '').replace('🔄 ', '').replace('🛠️ ', '').replace('📜 ', '').replace('🐚 ', '').replace('🏗️ ', '').replace('🎨 ', '').replace('📊 ', '').replace('📄 ', '').replace('🗄️ ', '').replace('☁️ ', '').replace('💻 ', '')}
+
+## Purpose
+
+{instruction['purpose']}
+
+## File Patterns
+
+This instruction file applies to the following file patterns:
+{chr(10).join(f'- `{pattern}`' for pattern in instruction['file_patterns'])}
+
+## Guidelines
+
+Add specific guidelines for {config.name} repository here.
+
+## Best Practices
+
+- Follow established coding standards
+- Maintain consistent formatting
+- Document your changes
+- Test thoroughly before committing
+
+## Repository-Specific Notes
+
+Add any {config.name}-specific notes or requirements here.
+"""
+                
+                with open(instruction_file, "w", encoding="utf-8") as f:
+                    f.write(basic_content)
+                print(f"  ✓ Generated {filename} (basic template)")
+            
+            except Exception as e:
+                print(f"  ⚠️  Error generating {filename}: {e}")
 
     def _create_metadata_template(self, repo_path: Path) -> None:
         """Create a template metadata file"""

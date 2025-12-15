@@ -66,7 +66,7 @@ main:
 - **Language-Specific Caching**: Automated dependency caching for improved build performance
 - **Security Integration**: Comprehensive vulnerability scanning and security analysis
 - **Multi-Platform Support**: Cross-platform builds (Linux, macOS, Windows) with multiple architectures
-{% if repository.types contains 'monorepo' %}
+{% if 'monorepo' in repository.types %}
 - **Monorepo Support**: Coordinated multi-component builds with proper dependency management
 {% endif %}
 - **Container Publishing**: Multi-architecture container images with registry integration

@@ -145,12 +145,19 @@ These instruction files work together to provide comprehensive development guida
 2. **Full-Stack Development**: Python and {{ 'TypeScript' if 'typescript' in languages else 'Go' }} instructions complement each other for complete tooling development
 {%- endif %}
 {%- if 'json' in languages or 'yaml' in languages %}
-3. **Configuration Management**: {{ (['JSON'] if 'json' in languages else []) + (['YAML'] if 'yaml' in languages else []) | join(' and ') }} instructions provide standards for configuration files across all platforms
+{%- set config_languages = [] %}
+{%- if 'json' in languages %}
+  {%- set config_languages = config_languages + ['JSON'] %}
+{%- endif %}
+{%- if 'yaml' in languages %}
+  {%- set config_languages = config_languages + ['YAML'] %}
+{%- endif %}
+3. **Configuration Management**: {{ config_languages | join(' and ') }} instructions provide standards for configuration files across all platforms
 {%- endif %}
 {%- if 'sql' in languages %}
 4. **Data Management**: SQL instructions support database design and optimization across all application tiers
 {%- endif %}
-5. **DevOps Integration**: {{ ci_platform | title }} {{ 'and ' + deployment_platform | title if deployment_platform else '' }} instructions support the development processes defined in platform-specific files
+5. **DevOps Integration**: {{ ci_platform | title }} {{ ('and ' + deployment_platform) | title if deployment_platform else '' }} instructions support the development processes defined in platform-specific files
 {%- if 'scripts' in languages %}
 6. **Scripts & Automation**: Scripts instructions provide standards for build automation, development workflows, and cross-platform compatibility
 {%- endif %}

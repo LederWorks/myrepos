@@ -118,6 +118,211 @@ settings:
 
 #### Comment Standards
 - Use `{# #}` for template comments (not rendered)
+- Add descriptive headers explaining template purpose and output
+- Document complex logic with inline comments
+- Use section dividers for template organization
+
+```jinja2
+{# 
+  Template: VS Code Extensions Configuration
+  Purpose: Generate extension recommendations based on detected languages
+  Output: .vscode/extensions.json
+#}
+
+{# Language-specific extension mapping #}
+{% set language_extensions = {
+    'python': ['ms-python.python', 'ms-python.black-formatter'],
+    'go': ['golang.go', 'ms-vscode.go']
+} %}
+
+{# Main configuration generation #}
+{
+  "recommendations": [
+    {# Base extensions for all projects #}
+{% for extension in base_extensions %}
+    "{{ extension }}",
+{% endfor %}
+    {# Language-specific extensions #}
+{% for language in languages %}
+  {% if language in language_extensions %}
+    {% for extension in language_extensions[language] %}
+    "{{ extension }}",
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+  ]
+}
+```
+
+### Variable Handling and Safety
+
+#### Undefined Variable Handling
+- Always provide default values for optional variables
+- Use the `default()` filter for safe variable access
+- Test for variable existence before complex operations
+
+```jinja2
+{# Safe variable access with defaults #}
+{{ config.description | default('Auto-generated configuration') }}
+
+{# Conditional rendering based on variable existence #}
+{% if deployment_platform is defined and deployment_platform %}
+"deploymentPlatform": "{{ deployment_platform }}",
+{% endif %}
+
+{# Safe list operations #}
+{% set extensions = config.extensions | default([]) %}
+{% for extension in extensions %}
+  "{{ extension }}",
+{% endfor %}
+```
+
+#### Type Safety and Validation
+- Validate variable types before operations
+- Handle edge cases gracefully
+- Provide meaningful error messages
+
+```jinja2
+{# Type checking and validation #}
+{% if languages is defined and languages is iterable %}
+  {% for language in languages %}
+    {% if language is string and language %}
+      "{{ language }}": { ... },
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {# Error handling or default configuration #}
+  "default": { "message": "No languages configured" }
+{% endif %}
+```
+
+### Template Performance Optimization
+
+#### Efficient Loop Patterns
+- Cache complex calculations outside loops
+- Use appropriate loop controls (`break`, `continue`)
+- Minimize nested loops where possible
+
+```jinja2
+{# Pre-calculate complex values #}
+{% set filtered_languages = languages | selectattr('enabled') | list %}
+{% set has_frontend = 'typescript' in languages or 'javascript' in languages %}
+
+{# Efficient iteration #}
+{% for language in filtered_languages %}
+  {% if language.config is defined %}
+    "{{ language.name }}": {{ language.config | tojson }},
+  {% endif %}
+{% endfor %}
+```
+
+#### Memory Management
+- Avoid creating large intermediate lists unnecessarily
+- Use generators and filters appropriately
+- Clean up temporary variables in long templates
+
+### Error Handling and Debugging
+
+#### Template Debugging Techniques
+- Use conditional debug output for development
+- Implement graceful degradation for missing data
+- Provide informative error messages
+
+```jinja2
+{# Debug mode conditional output #}
+{% if debug_mode | default(false) %}
+  "debug": {
+    "template": "{{ template_name }}",
+    "variables": {{ template_variables | tojson }},
+    "timestamp": "{{ now() }}"
+  },
+{% endif %}
+
+{# Graceful error handling #}
+{% set config_error = false %}
+{% if not languages %}
+  {% set config_error = true %}
+  "error": "No languages specified in configuration",
+{% endif %}
+```
+
+#### Validation and Testing
+- Include validation logic in templates where appropriate
+- Test templates with various input combinations
+- Document expected input formats and constraints
+
+### Security Considerations
+
+#### Input Sanitization
+- Escape user-provided content appropriately
+- Validate file paths and names
+- Avoid dynamic code execution
+
+```jinja2
+{# Safe file path handling #}
+"configPath": "{{ config_path | replace('..', '') | trim }}",
+
+{# Content escaping for JSON #}
+"description": {{ user_description | tojson }},
+
+{# Safe string interpolation #}
+{% set safe_name = repo_name | regex_replace('[^a-zA-Z0-9._-]', '') %}
+"name": "{{ safe_name }}",
+```
+
+#### Template Injection Prevention
+- Never use user input directly in template logic
+- Validate all dynamic template paths
+- Use allow-lists for template selection
+
+### Integration Standards
+
+#### Cross-Template Consistency
+- Use shared template functions for common operations
+- Maintain consistent variable naming across templates
+- Follow established patterns from other MyRepos templates
+
+#### Generator Integration
+- Document required variables from generator.py
+- Follow established calling conventions
+- Maintain backward compatibility where possible
+
+```jinja2
+{# Standard MyRepos template variables #}
+{# Required: repo_name, languages, types, ci_platform #}
+{# Optional: deployment_platform, detected_languages #}
+
+{# Template header documenting dependencies #}
+{#
+  Dependencies:
+  - repo_name (string): Repository name
+  - languages (list): Detected programming languages  
+  - types (list): Repository types (lib, app, etc.)
+  - ci_platform (string): CI/CD platform (github, azuredevops, etc.)
+#}
+```
+
+## Quality Assurance Standards
+
+### Template Validation
+- Test all conditional branches
+- Verify output with various language combinations
+- Validate JSON/YAML output syntax
+- Check for proper indentation and formatting
+
+### Documentation Requirements
+- Document all template variables and their types
+- Provide usage examples for complex templates
+- Explain integration points with the generator system
+- Include troubleshooting guidance for common issues
+
+### Maintenance Guidelines
+- Keep templates synchronized with schema changes
+- Update templates when new languages are added
+- Maintain compatibility with existing configurations
+- Follow semantic versioning for breaking template changes
+
+This comprehensive instruction system ensures that all Jinja2 templates in the MyRepos project maintain high quality, consistency, and reliability while providing the flexibility needed for diverse development environments.
 - Add descriptive headers explaining template purpose
 - Document complex logic or non-obvious template operations
 - Include examples for complex template patterns
