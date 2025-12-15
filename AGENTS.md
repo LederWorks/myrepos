@@ -522,6 +522,33 @@ This document provides comprehensive guidelines for Python development in {{ rep
 - Added `j2` language pattern to detection logic in `scripts/workspace/generator.py`
 - Enhanced repository type detection with template-specific logic
 
+### TypeScript Instruction Template Enhancement ✅ [NEW]
+
+**Enhancement**: Implemented comprehensive TypeScript instruction template for Node.js and frontend development:
+
+**Implementation Details**:
+- Created `templates/.github/instructions/typescript.instructions.md.j2` with complete TypeScript development guidelines
+- Added TypeScript detection patterns: `['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/package.json', '**/tsconfig.json']`
+- Integrated React component patterns, service layer architecture, and comprehensive testing standards
+
+**Template Features**:
+- **Architecture Guidelines**: Project structure, component organization, service layer patterns
+- **Implementation Standards**: TypeScript configuration, React patterns, API client implementation
+- **Quality Assurance**: Jest testing setup, ESLint/Prettier configuration, code coverage requirements
+- **Development Workflow**: Build processes, hot-reload development, production optimization
+
+**Generated Content**:
+- TypeScript-specific development patterns and best practices
+- React component templates with proper typing
+- Service layer implementation with dependency injection
+- Comprehensive testing strategies for TypeScript projects
+- Build configuration and deployment guidelines
+
+**Schema Updates**:
+- Added `typescript` to supported languages enum in `schemas/repository.yaml`
+- Enhanced language detection logic with comprehensive JavaScript/TypeScript file patterns
+- Integrated Node.js ecosystem tooling detection (package.json, tsconfig.json)
+
 ## Resolved Issues
 
 ### Template Implementation Success ✅

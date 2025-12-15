@@ -23,6 +23,7 @@ properties:
         - terraform
         - python
         - go
+        - typescript
         - shell
         - powershell
         - sql

@@ -937,14 +937,15 @@ class WorkspaceGenerator:
                 'purpose': 'Go development guidelines, project structure, testing standards, dependency management'
             },
             'typescript.instructions.md': {
-                'patterns': ['frontend/**/*.ts', 'frontend/**/*.tsx', 'frontend/**/*.json', 'frontend/**/*.js', 'frontend/**/*.jsx'],
+                'patterns': ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/package.json', '**/tsconfig.json', '**/webpack.config.js', '**/vite.config.js', '**/next.config.js'],
                 'display_name': '⚛️ TypeScript Instructions',
                 'purpose': 'TypeScript/JavaScript development, component architecture, build configuration, package management'
             },
             'github.instructions.md': {
                 'patterns': ['.github/**/*.yml', '.github/**/*.yaml', '.github/**/*.md', '**/workflow/**/*', '.github/ISSUE_TEMPLATE/*', '.github/PULL_REQUEST_TEMPLATE/*'],
                 'display_name': '🔄 GitHub Instructions',
-                'purpose': 'GitHub Actions workflows, repository configuration, issue templates, security practices'
+                'purpose': 'GitHub Actions workflows, repository configuration, issue templates, security practices',
+                'platform_trigger': 'github'
             },
             'scripts.instructions.md': {
                 'patterns': ['scripts/**/*.ps1', 'scripts/**/*.sh', 'scripts/**/*.sql'],

@@ -103,18 +103,18 @@ recommended_extensions:
   - "usernamehw.errorlens"
   - "streetsidesoftware.code-spell-checker"
   - "ms-vscode-remote.remote-containers"
-{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+{% if 'frontend' in types %}
   - "dsznajder.es7-react-js-snippets"
   - "burkeholland.simple-react-snippets"
   - "steoates.autoimport-es6-ts"
   - "xabikos.ReactSnippets"
 {% endif %}
-{% if 'node' in repository.frameworks or 'backend' in repository.types %}
+{% if 'backend' in types %}
   - "ms-vscode.vscode-node-azure-pack"
   - "christian-kohler.npm-intellisense"
   - "eg2.vscode-npm-script"
 {% endif %}
-{% if 'testing' in repository.features %}
+{% if 'testing' in types %}
   - "orta.vscode-jest"
   - "kavod-io.vscode-jest-test-adapter"
 {% endif %}
@@ -165,7 +165,7 @@ tasks:
     problemMatcher:
       - "$tsc"
       
-{% if 'testing' in repository.features %}
+{% if 'testing' in types %}
   - label: "Jest: Run Tests"
     type: "npm"
     script: "test"
@@ -235,7 +235,7 @@ tasks:
       focus: false
       panel: "shared"
 
-{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+{% if 'frontend' in types %}
   - label: "React: Start Dev Server"
     type: "npm"
     script: "dev"
@@ -259,7 +259,7 @@ tasks:
       panel: "shared"
 {% endif %}
 
-{% if 'node' in repository.frameworks or 'backend' in repository.types %}
+{% if 'backend' in types %}
   - label: "Node: Start Server"
     type: "npm"
     script: "start"
@@ -284,7 +284,7 @@ tasks:
 {% endif %}
 
 launch_configurations:
-  - name: "Launch {{ repository.name | title }}"
+  - name: "Launch App"
     type: "node"
     request: "launch"
     program: "${workspaceFolder}/dist/index.js"
@@ -294,7 +294,7 @@ launch_configurations:
       NODE_ENV: "development"
     console: "integratedTerminal"
     
-  - name: "Attach to {{ repository.name | title }}"
+  - name: "Attach to Process"
     type: "node"
     request: "attach"
     port: 9229
@@ -303,7 +303,7 @@ launch_configurations:
     skipFiles:
       - "<node_internals>/**"
       
-{% if 'testing' in repository.features %}
+{% if 'testing' in types %}
   - name: "Jest Tests"
     type: "node"
     request: "launch"
@@ -317,7 +317,7 @@ launch_configurations:
       - "<node_internals>/**"
 {% endif %}
 
-{% if 'react' in repository.frameworks or 'frontend' in repository.types %}
+{% if 'frontend' in types %}
   - name: "Launch Chrome"
     type: "chrome"
     request: "launch"
