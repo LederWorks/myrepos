@@ -583,6 +583,17 @@ languages:
 
 For complete implementation details, formatting standards, and troubleshooting guides, see [Jinja2 Instructions](.github/instructions/jinja2.instructions.md).
 
+### Terraform Template Syntax Fix ✅ [NEW]
+
+**Resolved Issue**: Fixed Jinja2 template syntax error in `terraform.instructions.md.j2`:
+
+**Problem**: Template generation failed with error `expected token 'end of statement block', got 'contains'`
+- **Root Cause**: Incorrect Jinja2 syntax `{% if repository.languages contains 'terraform' %}`
+- **Solution**: Fixed to proper Jinja2 syntax `{% if 'terraform' in repository.languages %}`
+- **Impact**: Terraform instruction files now generate successfully for all Terraform-based repositories
+
+**Validation**: Successfully tested on `terraform-provider-siros` repository with complete instruction file generation including the conditional Infrastructure as Code Best Practices section.
+
 ## Change Coordination Requirements
 
 ### Cross-Component Impact Assessment

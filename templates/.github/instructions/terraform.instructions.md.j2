@@ -79,7 +79,7 @@ This document outlines comprehensive guidelines for Terraform module development
 - Validate security-related inputs (email formats, resource names, etc.)
 - Document security implications in variable descriptions
 
-{% if repository.languages contains 'terraform' %}
+{% if 'terraform' in repository.languages %}
 ## Infrastructure as Code Best Practices
 
 - Follow HashiCorp's Terraform best practices for {{ repository.name }}
